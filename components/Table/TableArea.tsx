@@ -1,22 +1,98 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
-import { Download } from "lucide-react";
+import { Download, Search } from "lucide-react";
+import { columns } from "./columns";
+import { orders } from "@/data/orders";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "../ui/input";
 import Pagination from "../pagination/Pagination";
+import { OrderType } from "@/types/orderType";
+import { useOrderStore } from "@/hooks/useOrderStore";
 
-const TableArea = () => {
+export interface PaginationType {
+  pageIndex: number;
+  pageSize: number;
+}
+
+const TableArea = ({orders}:{orders:OrderType[]}) => {
+  const { allOrders, loadAllOrders} = useOrderStore();
   const tabs = [
-    { value: "all", label: "All Orders", count: 88 },
-    { value: "pending", label: "Pending", count: 22 },
-    { value: "shipped", label: "Shipped", count: 22 },
-    { value: "delivered", label: "Delivered", count: 22 },
-    { value: "cancelled", label: "Cancelled", count: 22 },
+    { value: "all", label: "All Orders", count: allOrders.length },
+    {
+      value: "pending",
+      label: "Pending",
+      count: allOrders.filter((f) => f.status == "pending").length,
+    },
+    {
+      value: "shipped",
+      label: "Shipped",
+      count: allOrders.filter((f) => f.status == "shipped").length,
+    },
+    {
+      value: "delivered",
+      label: "Delivered",
+      count: allOrders.filter((f) => f.status == "delivered").length,
+    },
+    {
+      value: "cancelled",
+      label: "Cancelled",
+      count: allOrders.filter((f) => f.status == "cancelled").length,
+    },
   ];
 
   const [activeTab, setActiveTab] = useState("all");
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pagination, setPagination] = useState<PaginationType>({
+    pageIndex: 0,
+    pageSize: 8,
+  });
+
+  useEffect(() => {
+    loadAllOrders();
+  },[])
+
+  const filteredData = useMemo(() => {
+    if (activeTab === "all") return allOrders;
+    return allOrders.filter((data) => data.status.toLowerCase() === activeTab);
+  }, [activeTab,allOrders]);
+
+  const table = useReactTable({
+    data: filteredData,
+    columns: columns,
+    getCoreRowModel: getCoreRowModel(),
+    onPaginationChange: setPagination,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      pagination,
+      columnFilters,
+    },
+  });
+
+  useEffect(() => {
+    table.getColumn("customerName")?.setFilterValue(searchQuery);
+  }, [searchQuery, table]);
 
   return (
     <Card className="m-6 shadow-none">
@@ -70,24 +146,81 @@ const TableArea = () => {
               </select>
             </div>
 
+            {/* SearchBar */}
+            <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray flex md:w-2/5 w-full rounded-md justify-around relative  p-2">
+              <Input
+                placeholder="Search..."
+                className="h-10 border-none px-4 text-lg font-semibold rounded-full focus:outline-none focus:ring-0 shadow-none focus:border-none focus-visible:outline-none focus-visible:ring-0 !important"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchQuery}
+              />
+              <div className="dark:bg-light-text-secondary/[0.6] absolute bottom-1 right-1 rounded-md bg-dark-dark-gray p-2">
+                <Button className="h-8 border-none shadow-none">
+                  <Search size={48} strokeWidth={4} className="text-white" />
+                </Button>
+              </div>
+            </div>
             {/* Button for Download */}
             <Button className="flex items-center gap-2 max-lg:w-full max-sm:mb-4 bg-light-primary hover:bg-light-button-hover text-black">
-              <Download className="size-4" />
-              <span>Download as CSV</span>
+              <Download className="size-4 text-white" />
+              <span className="text-white">Download as CSV</span>
             </Button>
           </div>
 
           {/* Tabs Content */}
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="w-full mt-9">
-              {activeTab && (<span>{tab.value}</span>)}
+              {activeTab === tab.value && (
+                // table
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => {
+                            return (
+                              <TableHead key={header.id}>
+                                {header.isPlaceholder
+                                  ? null
+                                  : flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext()
+                                    )}
+                              </TableHead>
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={table.getAllColumns.length} className="h-24 text-center">
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </TabsContent>
           ))}
         </Tabs>
       </div>
-      <Pagination />
+      <Pagination table={table} pagination={pagination} setPagination={setPagination} />
     </Card>
   );
 };
 
-export default TableArea;                                                                                       
+export default TableArea;

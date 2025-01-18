@@ -7,12 +7,20 @@ import { Switch } from "./ui/switch";
 import { useTheme } from "next-themes";
 import { log } from "console";
 import { Input } from "./ui/input";
-import { Search } from "lucide-react";
+import { Moon, Search, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 
 const Header = () => {
     const {theme,setTheme} = useTheme("light");
     console.log(theme)
+
+    const toggleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light";
+        setTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+        document.documentElement.setAttribute("data-theme", newTheme);
+      };
+    
   return (
     <header className="flex justify-between  py-4 px-2 gap-2 md:gap-0 md:px-4  items-center bg-background">
       <h1 className="md:text-3xl text-2xl font-bold hidden md:block">ShipTrack</h1>
@@ -30,7 +38,25 @@ const Header = () => {
         <span className="text-light-primary">|</span>
         <Link href="/report"><span className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text-primary dark:hover:text-dark-text-primary transition-all duration-300 ">REPORT</span></Link> */}
       </div>
-      <Switch className="bg-red-300" onClick={() => setTheme(theme === "light" ? "dark" : "light") } />
+      <div className="flex items-center md:mr-6 ">
+      {/* Render Moon when in light mode, Sun when in dark mode */}
+      {theme === "light" ? (
+        <Moon
+          className="cursor-pointer text-black"
+          fill="black"
+          size={24}
+          onClick={toggleTheme}
+        />
+      ) : (
+        <Sun
+          className="cursor-pointer  "
+          color="yellow"
+          fill="yellow"
+          size={24}
+          onClick={toggleTheme}
+        />
+      )}
+    </div>
     </header>
   );
 };

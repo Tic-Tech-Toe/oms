@@ -1,160 +1,254 @@
-export type Order = {
-    id: string;                     
-    customerId: string; 
-    orderDate: string;
-    status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-    totalAmount: number;          
-    paymentStatus: "pending" | "paid" | "failed" | "refunded"; 
-    shippingAddress: string;        
-    billingAddress: string;   
-    items: OrderItem[]; 
-    paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery"; 
-    trackingNumber?: string;       
-    shippingDate?: string;        
-    estimatedDeliveryDate?: string;
-    deliveredDate?: string;        
-    cancelationDate?: string;      
-    createdAt: string;             
-    updatedAt: string;            
-  };
+import { OrderType } from "@/types/orderType";
+import { mockItemsData } from "./item";
+import { mockCustomers } from "./customers";
 
-  // Mock order data
-export const orders: Order[] = [
+// Helper function to get item details by itemId
+export function getItemDetailsById(itemId: string) {
+  return mockItemsData.find(item => item.itemId === itemId);
+}
+
+export const orders: OrderType[] = [
     {
-      id: "ord001",
-      customerId: "1",
-      orderDate: "2025-01-01",
-      status: "pending",
-      totalAmount: 35,
-      paymentStatus: "pending",
-      shippingAddress: "123, Main Street, City A",
-      billingAddress: "123, Main Street, City A",
+      id: '12345',
+      orderDate: '2023-01-12',
+      status: 'shipped',
+      totalAmount: 150.75,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[0].shippingAddress,
+      billingAddress: mockCustomers[0].billingAddress,
       items: [
-        {
-          productId: "1", // Burger Boxes
-          quantity: 2,
-          price: 10,
-          total: 20,
-          name: "Burger Boxes",
-          sku: "BB001",
-          category: "Packaging",
-        },
-        {
-          productId: "2", // Clampshell Boxes
-          quantity: 1,
-          price: 15,
-          total: 15,
-          name: "Clampshell Boxes",
-          sku: "CSB001",
-          category: "Packaging",
-        },
-      ],
-      paymentMethod: "credit card",
-      trackingNumber: "TRK123456789",
-      shippingDate: "2025-01-03",
-      estimatedDeliveryDate: "2025-01-10",
-      createdAt: "2025-01-01T10:00:00Z",
-      updatedAt: "2025-01-01T10:00:00Z",
+        { itemId: 'item001', quantity: 2 },
+        { itemId: 'item002', quantity: 1 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+      
+        if (itemDetails) {
+          return { 
+            ...itemDetails, 
+            quantity: item.quantity, 
+            total: itemDetails.price * item.quantity 
+          };
+        } else {
+          // Handle the case where item details are not found
+          return {
+            itemId: item.itemId,
+            quantity: item.quantity,
+            price: 0,
+            total: 0,
+            name: 'Unknown Item', // Default values
+          };
+        }
+      }),
+      customer: mockCustomers[0],
+      paymentMethod: 'credit card',
+      trackingNumber: 'TRK123456',
+      shippingDate: '2023-01-13',
+      estimatedDeliveryDate: '2023-01-20',
+      createdAt: '2023-01-01',
+      updatedAt: '2023-01-12',
     },
     {
-      id: "ord002",
-      customerId: "2",
-      orderDate: "2025-01-02",
-      status: "shipped",
-      totalAmount: 20,
-      paymentStatus: "paid",
-      shippingAddress: "456, Secondary Road, City B",
-      billingAddress: "456, Secondary Road, City B",
+      id: '12346',
+      orderDate: '2023-01-15',
+      status: 'pending',
+      totalAmount: 75.00,
+      paymentStatus: 'pending',
+      shippingAddress: mockCustomers[1].shippingAddress,
+      billingAddress: mockCustomers[1].billingAddress,
       items: [
-        {
-          productId: "3", // Plastic Containers
-          quantity: 4,
-          price: 5,
-          total: 20,
-          name: "Plastic Containers",
-          sku: "PC001",
-          category: "Containers",
-        },
-      ],
-      paymentMethod: "UPI",
-      trackingNumber: "TRK987654321",
-      shippingDate: "2025-01-04",
-      estimatedDeliveryDate: "2025-01-12",
-      createdAt: "2025-01-02T09:00:00Z",
-      updatedAt: "2025-01-02T09:00:00Z",
+        { itemId: 'item003', quantity: 1 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[1],
+      paymentMethod: 'UPI',
+      trackingNumber: '',
+      shippingDate: '',
+      estimatedDeliveryDate: '',
+      createdAt: '2023-01-05',
+      updatedAt: '2023-01-15',
     },
     {
-      id: "ord003",
-      customerId: "3",
-      orderDate: "2025-01-03",
-      status: "delivered",
-      totalAmount: 45,
-      paymentStatus: "paid",
-      shippingAddress: "789, Tertiary Lane, City C",
-      billingAddress: "789, Tertiary Lane, City C",
+      id: '12347',
+      orderDate: '2023-02-01',
+      status: 'pending',
+      totalAmount: 200.50,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[2].shippingAddress,
+      billingAddress: mockCustomers[2].billingAddress,
       items: [
-        {
-          productId: "1", // Burger Boxes
-          quantity: 3,
-          price: 10,
-          total: 30,
-          name: "Burger Boxes",
-          sku: "BB001",
-          category: "Packaging",
-        },
-        {
-          productId: "2", // Clampshell Boxes
-          quantity: 1,
-          price: 15,
-          total: 15,
-          name: "Clampshell Boxes",
-          sku: "CSB001",
-          category: "Packaging",
-        },
-      ],
-      paymentMethod: "cash on delivery",
-      trackingNumber: "TRK456789012",
-      shippingDate: "2025-01-05",
-      deliveredDate: "2025-01-07",
-      createdAt: "2025-01-03T11:30:00Z",
-      updatedAt: "2025-01-07T14:00:00Z",
+        { itemId: 'item004', quantity: 3 },
+        { itemId: 'item005', quantity: 1 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[2],
+      paymentMethod: 'bank transfer',
+      trackingNumber: '',
+      shippingDate: '',
+      estimatedDeliveryDate: '2023-02-10',
+      createdAt: '2023-01-30',
+      updatedAt: '2023-02-01',
     },
     {
-      id: "ord004",
-      customerId: "4",
-      orderDate: "2025-01-05",
-      status: "processing",
-      totalAmount: 25,
-      paymentStatus: "failed",
-      shippingAddress: "101, Quaternary Blvd, City D",
-      billingAddress: "101, Quaternary Blvd, City D",
+      id: '12348',
+      orderDate: '2023-02-05',
+      status: 'shipped',
+      totalAmount: 180.99,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[3].shippingAddress,
+      billingAddress: mockCustomers[3].billingAddress,
       items: [
-        {
-          productId: "3", // Plastic Containers
-          quantity: 5,
-          price: 5,
-          total: 25,
-          name: "Plastic Containers",
-          sku: "PC001",
-          category: "Containers",
-        },
-      ],
-      paymentMethod: "bank transfer",
-      trackingNumber: "TRK1122334455",
-      shippingDate: "2025-01-06",
-      estimatedDeliveryDate: "2025-01-13",
-      createdAt: "2025-01-05T08:00:00Z",
-      updatedAt: "2025-01-05T08:30:00Z",
+        { itemId: 'item001', quantity: 5 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[3],
+      paymentMethod: 'debit card',
+      trackingNumber: 'TRK654321',
+      shippingDate: '2023-02-06',
+      estimatedDeliveryDate: '2023-02-14',
+      createdAt: '2023-01-28',
+      updatedAt: '2023-02-05',
     },
+    {
+      id: '12349',
+      orderDate: '2023-02-07',
+      status: 'delivered',
+      totalAmount: 99.99,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[4].shippingAddress,
+      billingAddress: mockCustomers[4].billingAddress,
+      items: [
+        { itemId: 'item002', quantity: 2 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[4],
+      paymentMethod: 'debit card',
+      trackingNumber: 'TRK789012',
+      shippingDate: '2023-02-08',
+      estimatedDeliveryDate: '2023-02-12',
+      createdAt: '2023-01-30',
+      updatedAt: '2023-02-07',
+    },
+    {
+      id: '12350',
+      orderDate: '2023-02-10',
+      status: 'processing',
+      totalAmount: 110.00,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[5].shippingAddress,
+      billingAddress: mockCustomers[5].billingAddress,
+      items: [
+        { itemId: 'item003', quantity: 3 },
+        { itemId: 'item004', quantity: 1 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[5],
+      paymentMethod: 'credit card',
+      trackingNumber: 'TRK111223',
+      shippingDate: '2023-02-12',
+      estimatedDeliveryDate: '2023-02-18',
+      createdAt: '2023-02-01',
+      updatedAt: '2023-02-10',
+    },
+    {
+      id: '12351',
+      orderDate: '2023-02-15',
+      status: 'shipped',
+      totalAmount: 230.99,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[6].shippingAddress,
+      billingAddress: mockCustomers[6].billingAddress,
+      items: [
+        { itemId: 'item005', quantity: 2 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[6],
+      paymentMethod: 'UPI',
+      trackingNumber: 'TRK998877',
+      shippingDate: '2023-02-16',
+      estimatedDeliveryDate: '2023-02-20',
+      createdAt: '2023-02-10',
+      updatedAt: '2023-02-15',
+    },
+    {
+      id: '12352',
+      orderDate: '2023-02-18',
+      status: 'cancelled',
+      totalAmount: 50.00,
+      paymentStatus: 'failed',
+      shippingAddress: mockCustomers[7].shippingAddress,
+      billingAddress: mockCustomers[7].billingAddress,
+      items: [
+        { itemId: 'item001', quantity: 1 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[7],
+      paymentMethod: 'bank transfer',
+      trackingNumber: '',
+      shippingDate: '',
+      estimatedDeliveryDate: '',
+      createdAt: '2023-02-12',
+      updatedAt: '2023-02-18',
+    },
+    {
+      id: '12353',
+      orderDate: '2023-02-20',
+      status: 'shipped',
+      totalAmount: 145.50,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[8].shippingAddress,
+      billingAddress: mockCustomers[8].billingAddress,
+      items: [
+        { itemId: 'item002', quantity: 3 },
+        { itemId: 'item003', quantity: 1 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[8],
+      paymentMethod: 'debit card',
+      trackingNumber: 'TRK223344',
+      shippingDate: '2023-02-21',
+      estimatedDeliveryDate: '2023-02-25',
+      createdAt: '2023-02-15',
+      updatedAt: '2023-02-20',
+    },
+    {
+      id: '12354',
+      orderDate: '2023-02-22',
+      status: 'processing',
+      totalAmount: 320.00,
+      paymentStatus: 'paid',
+      shippingAddress: mockCustomers[9].shippingAddress,
+      billingAddress: mockCustomers[9].billingAddress,
+      items: [
+        { itemId: 'item004', quantity: 2 },
+        { itemId: 'item005', quantity: 2 },
+      ].map(item => {
+        const itemDetails = getItemDetailsById(item.itemId);
+        return { ...itemDetails, quantity: item.quantity, total: itemDetails.price * item.quantity };
+      }),
+      customer: mockCustomers[9],
+      paymentMethod: 'credit card',
+      trackingNumber: 'TRK556677',
+      shippingDate: '2023-02-23',
+      estimatedDeliveryDate: '2023-02-28',
+      createdAt: '2023-02-16',
+      updatedAt: '2023-02-22',
+    },
+    // Add more entries here as needed
   ];
-  
-  export type OrderItem = {
-    productId: string;             
-    quantity: number;              
-    price: number;                 
-    total: number;                 
-    name: string;                 
-    sku?: string;                   
-    category?: string;              
-  };
   

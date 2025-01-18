@@ -1,14 +1,20 @@
 import { z } from 'zod';
 
-
 export const AddOrderSchema = z.object({
-    custName: z.string().min(6,{message: 'Name is required'}).max(50, {message:"Name cannot exceed 50 charaters"}),
-    whatsappNo: z
+  customerName: z
     .string()
-    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }) 
-    .length(10, { message: "Phone number must be exactly 10 digits" }),
-    pickOrder: z
-    .string()
-    .min(1, { message: "You must pick an order" }) 
-    .refine((val) => val !== "", { message: "Pick an order from the list" }),
-})
+    .min(1, { message: 'Name is required' }),
+  orderDate: z
+    .date({required_error:"Please select date"})
+    .refine((date) => !!date,"Date is required"),
+  items: z
+    .array(
+      z.object({
+        itemId: z.string(),
+        quantity: z
+          .number()
+          .min(1, { message: "Quantity should be at least 1" }),
+      })
+    )
+    .min(1, { message: "Order must have at least one item" }), 
+});
