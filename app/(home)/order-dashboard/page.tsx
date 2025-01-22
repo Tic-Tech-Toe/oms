@@ -1,50 +1,58 @@
+"use client"
+import React, { useEffect } from 'react';
 import StatCards from '@/components/StatCards';
 import TableArea from '@/components/Table/TableArea';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { orders } from '@/data/orders';
-import React from 'react'
+import { useOrderStore } from '@/hooks/useOrderStore'; // Access orders from the store
+import EditOrderDialog from '@/components/EditOrderDialog'; 
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
-const AddOrder = () => {
-  
-  
+const OrderDashboard = () => {
+  const { allOrders, loadAllOrders, openEditDialog, addOrder } = useOrderStore(); // Access orders from the store
+
+  // Load orders initially
+  useEffect(() => {
+    loadAllOrders();
+  }, [loadAllOrders]);
+
+  // Function to add a new order
+  const handleAddOrder = async () => {
+    const newOrder = {
+      id: "new-order-id", // Dynamically generate order ID
+      orderDate: new Date().toISOString(),
+      status: "pending",
+      totalAmount: 100, // Example total
+      paymentStatus: "pending",
+      items: [], // Example items, you can replace with real data
+      customer: { name: "New Customer", whatsappNumber: "1234567890" },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Add order to the store
+    await addOrder(newOrder);
+  };
+
   return (
     <>
-    <h1 className='text-3xl font-bold px-4 py-2'>Order Dashboard</h1>
-    <StatCards />
-    <TableArea orders={orders} />
-    <div className='px-4'>
-      <div></div>
-      <div>
+      <h1 className="text-3xl font-bold px-4 py-2">Order Dashboard</h1>
 
-      </div>
-    {/* <Table>
-      <TableCaption>A list of your recent orders.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px]">Order No.</TableHead>
-          <TableHead>Date Received</TableHead>
-          <TableHead>Customer Name</TableHead>
-          <TableHead>WhatsApp No.</TableHead>
-          <TableHead>Order Status</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {orders.map(({orderNo, dateReceived,custName,whatsappNo,orderStatus}) => (
-          <TableRow key={orderNo}>
-            <TableCell className="font-medium">{orderNo}</TableCell>
-            <TableCell>{dateReceived}</TableCell>
-            <TableCell>{custName}</TableCell>
-            <TableCell>{whatsappNo}</TableCell>
-            <TableCell>{orderStatus}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      
-    </Table> */}
-    </div>
+      {/* Stat Cards - Displays summary statistics about orders */}
+      <StatCards />
+
+      {/* Table Area - Pass the orders from the store */}
+      <TableArea orders={allOrders} />
+
+      {/* Conditionally render Edit Order Dialog */}
+      {openEditDialog && <EditOrderDialog />}
+
+      {/* Button to add a new order */}
+      <Button onClick={handleAddOrder}>
+        <Plus className="text-xl mr-2" />
+        Add New Order
+      </Button>
     </>
-    
-  )
-}
+  );
+};
 
-export default AddOrder
+export default OrderDashboard;

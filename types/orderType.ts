@@ -14,6 +14,7 @@ export type ItemType = {
     total?: number;             // Total cost for this item (quantity * price)
     sku?: string;              // Optional SKU for the order item
     category?: string;         // Optional category for the order item
+    itemName: string;
   };
 
   export type OrderType = {

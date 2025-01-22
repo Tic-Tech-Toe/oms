@@ -5,8 +5,8 @@ import { Card } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Download, Search } from "lucide-react";
-import { columns } from "./columns";
-import { orders } from "@/data/orders";
+import { columns } from "./columns"; // Assuming this is the columns definition file
+import { orders } from "@/data/orders"; // Assuming this is the order data
 import {
   ColumnDef,
   flexRender,
@@ -22,40 +22,40 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"; // Assuming table components are imported here
 import { Input } from "../ui/input";
 import Pagination from "../pagination/Pagination";
 import { OrderType } from "@/types/orderType";
-import { useOrderStore } from "@/hooks/useOrderStore";
+import { useOrderStore } from "@/hooks/useOrderStore"; // Assuming a custom store to manage orders
 
 export interface PaginationType {
   pageIndex: number;
   pageSize: number;
 }
 
-const TableArea = ({orders}:{orders:OrderType[]}) => {
-  const { allOrders, loadAllOrders} = useOrderStore();
+const TableArea = ({ orders }: { orders: OrderType[] }) => {
+  const { allOrders, loadAllOrders } = useOrderStore(); // Assuming this hook loads orders
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
     {
       value: "pending",
       label: "Pending",
-      count: allOrders.filter((f) => f.status == "pending").length,
+      count: allOrders.filter((f) => f.status === "pending").length,
     },
     {
       value: "shipped",
       label: "Shipped",
-      count: allOrders.filter((f) => f.status == "shipped").length,
+      count: allOrders.filter((f) => f.status === "shipped").length,
     },
     {
       value: "delivered",
       label: "Delivered",
-      count: allOrders.filter((f) => f.status == "delivered").length,
+      count: allOrders.filter((f) => f.status === "delivered").length,
     },
     {
       value: "cancelled",
       label: "Cancelled",
-      count: allOrders.filter((f) => f.status == "cancelled").length,
+      count: allOrders.filter((f) => f.status === "cancelled").length,
     },
   ];
 
@@ -69,12 +69,12 @@ const TableArea = ({orders}:{orders:OrderType[]}) => {
 
   useEffect(() => {
     loadAllOrders();
-  },[])
+  }, []);
 
   const filteredData = useMemo(() => {
     if (activeTab === "all") return allOrders;
     return allOrders.filter((data) => data.status.toLowerCase() === activeTab);
-  }, [activeTab,allOrders]);
+  }, [activeTab, allOrders]);
 
   const table = useReactTable({
     data: filteredData,
@@ -171,7 +171,6 @@ const TableArea = ({orders}:{orders:OrderType[]}) => {
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="w-full mt-9">
               {activeTab === tab.value && (
-                // table
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>

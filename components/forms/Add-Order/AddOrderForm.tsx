@@ -70,6 +70,7 @@ const AddOrderForm = <T extends FieldValues>({
       title: "Order added successfully",
       description: "Your order has been added to the list.",
     });
+    form.reset();
   };
 
   // Prevent rendering the form before client-side mount to avoid hydration error

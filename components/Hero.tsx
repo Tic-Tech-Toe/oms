@@ -9,12 +9,13 @@ import TableArea from './Table/TableArea'
 import OrderDialog from './OrderDialog'
 import { orders } from '@/data/orders'
 import { OrderType } from '@/types/orderType'
+import { useOrderStore } from '@/hooks/useOrderStore'
 
 const Hero = () => {
-
-  const [order, setOrder] = useState<OrderType[]>(orders);
-  const addNewOrder = (newOrder: OrderType) => {
-    setOrder((prevOrders) => [...prevOrders, newOrder]); // Add the new order to the orders array
+  const { allOrders, addOrder } = useOrderStore();
+  // const [order, setOrder] = useState<OrderType[]>(orders);
+  const addNewOrder = (newOrder) => {
+    addOrder(newOrder); // This will update the global store with the new order
   };
   return (
     <section className='w-full'>
@@ -26,7 +27,7 @@ const Hero = () => {
             <OrderDialog  />
         </div>
         <div>
-            <TableArea orders={order} />
+            <TableArea orders={allOrders} />
             <div></div>
         </div>
     </section>

@@ -1,3 +1,5 @@
+// app/components/OrderDialog.tsx
+
 "use client";
 
 import React, { useState } from "react";
@@ -42,7 +44,7 @@ const OrderDialog = () => {
     },
   });
 
-  const { addOrder } = useOrderStore();
+  const { addOrder } = useOrderStore(); // Access addOrder from store
   const { toast } = useToast();
   const [open, setOpen] = useState(true);
 
@@ -50,9 +52,9 @@ const OrderDialog = () => {
     console.log("Inside form submission");
     console.log(data);
 
+    // Transform the items data into the required format
     const transformedItems: OrderItem[] = data.items.map((item) => {
       const productData = mockItemsData.find((product) => product.itemId === item.itemId);
-
       if (!productData) {
         return {
           itemId: item.itemId,
@@ -61,6 +63,7 @@ const OrderDialog = () => {
           total: 0,
           sku: "Unknown",
           category: "Unknown",
+          itemName: "unknown",
         };
       }
 
@@ -71,14 +74,16 @@ const OrderDialog = () => {
         total: productData.price * item.quantity,
         sku: productData.sku,
         category: productData.category,
+        itemName: productData.name,
       };
     });
 
+    // Create a new order object
     const newOrder: OrderType = {
       id: "Test-ord-001",
       orderDate: data.orderDate.toDateString(),
       status: status,
-      totalAmount: 444,
+      totalAmount: 444, // For simplicity, you might want to calculate this dynamically
       items: transformedItems,
       customer: {
         name: data.customerName,
@@ -88,29 +93,28 @@ const OrderDialog = () => {
       updatedAt: data.orderDate.toDateString(),
     };
 
+    // Add the new order to the store
     const result = await addOrder(newOrder);
 
-    if (result) {
+    if (result.success) {
       toast({
         title: "Order Added!",
-        description: `The order has been placed for ${data.customerName} successfully`,
+        description: `The order has been placed for ${data.customerName} successfully.`,
       });
 
-      console.log(sendToWhatsapp);
+      // Handle WhatsApp sending logic if the checkbox is checked
       if (sendToWhatsapp) {
-        // Prepare message body
         const messageBody = [
           data.customerName,
-          "123456", // Example order ID
-          data.orderDate,
-          transformedItems.map(item => `${item.quantity} ${item.sku}`).join(", "),
+          newOrder.id,
+          data.orderDate.toDateString(),
+          transformedItems.map((item) => `- ${item.quantity} × ${item.itemName}`).join(", "),
         ];
-      
-        // Log the message body to verify the structure
+
         console.log("Message body:", messageBody);
-      
-        // Ensure that messageBody is an array and has the expected content
-        if (messageBody.some(item => !item)) {
+
+        // Check for missing details in messageBody
+        if (messageBody.some((item) => !item)) {
           toast({
             title: "Error",
             description: "The message body is missing some details.",
@@ -118,23 +122,22 @@ const OrderDialog = () => {
           });
           return;
         }
-      
+
         try {
-          // Send the WhatsApp message
-          const whatsappResponse = await fetch('/api/send-whatsapp', {
-            method: 'POST',
+          const whatsappResponse = await fetch("/api/order-received", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              phoneNumber: whatsappNum, // Ensure this is the correct number format, with country code
+              phoneNumber: whatsappNum,
               messageBody,
             }),
           });
-      
+
           const whatsappResult = await whatsappResponse.json();
           console.log(whatsappResult);
-      
+
           if (whatsappResult.success) {
             toast({
               title: "Message Sent!",
@@ -148,7 +151,6 @@ const OrderDialog = () => {
             });
           }
         } catch (error) {
-          // Catch any network or other errors that might occur
           console.error("Error sending WhatsApp message:", error);
           toast({
             title: "Error",
@@ -157,7 +159,6 @@ const OrderDialog = () => {
           });
         }
       }
-      
     }
 
     handleDialogClose();
@@ -170,7 +171,7 @@ const OrderDialog = () => {
   };
 
   const handleDialogOpen = () => {
-    setOpen(true); // Open the dialog
+    setOpen(true);
   };
 
   const handleSendToWhatsapp = (e: React.ChangeEvent<HTMLInputElement>) => {

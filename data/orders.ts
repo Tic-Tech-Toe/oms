@@ -11,7 +11,7 @@ export const orders: OrderType[] = [
     {
       id: '12345',
       orderDate: '2023-01-12',
-      status: 'shipped',
+      status: 'processing',
       totalAmount: 150.75,
       paymentStatus: 'paid',
       shippingAddress: mockCustomers[0].shippingAddress,

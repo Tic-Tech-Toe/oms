@@ -2,8 +2,8 @@ import { CustomerType } from "@/types/orderType";
 
 export const mockCustomers: CustomerType[] = [
     {
-      name: "Rajesh Kumar",
-      whatsappNumber: "9876543210",
+      name: "Rishi Kumar",
+      whatsappNumber: "9635901369",
       shippingAddress: "123 Rajouri Garden, New Delhi, India",
       billingAddress: "123 Rajouri Garden, New Delhi, India",
       email: "rajesh.kumar@email.com",
@@ -11,8 +11,8 @@ export const mockCustomers: CustomerType[] = [
       alternatePhoneNumber: "9876543211",
     },
     {
-      name: "Priya Sharma",
-      whatsappNumber: "9123456789",
+      name: "Kaushal Agarwal",
+      whatsappNumber: "9748412275",
       shippingAddress: "45 Malad East, Mumbai, Maharashtra, India",
       billingAddress: "45 Malad East, Mumbai, Maharashtra, India",
       email: "priya.sharma@email.com",
@@ -20,8 +20,8 @@ export const mockCustomers: CustomerType[] = [
       alternatePhoneNumber: "9123456790",
     },
     {
-      name: "Anil Verma",
-      whatsappNumber: "8822334455",
+      name: "Sumangal",
+      whatsappNumber: "8981873533",
       shippingAddress: "56 Banjara Hills, Hyderabad, Telangana, India",
       billingAddress: "56 Banjara Hills, Hyderabad, Telangana, India",
       email: "anil.verma@email.com",
