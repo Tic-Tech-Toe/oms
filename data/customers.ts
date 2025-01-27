@@ -20,8 +20,8 @@ export const mockCustomers: CustomerType[] = [
       alternatePhoneNumber: "9123456790",
     },
     {
-      name: "Sumangal",
-      whatsappNumber: "8981873533",
+      name: "Mangal",
+      whatsappNumber: "8981873532",
       shippingAddress: "56 Banjara Hills, Hyderabad, Telangana, India",
       billingAddress: "56 Banjara Hills, Hyderabad, Telangana, India",
       email: "anil.verma@email.com",

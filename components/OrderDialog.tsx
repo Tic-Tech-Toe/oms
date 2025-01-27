@@ -46,7 +46,7 @@ const OrderDialog = () => {
 
   const { addOrder } = useOrderStore(); // Access addOrder from store
   const { toast } = useToast();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     console.log("Inside form submission");
@@ -181,7 +181,7 @@ const OrderDialog = () => {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button className="text-lg font-semibold text-light-primary border-2 border-light-primary hover:border-light-button-hover h-12 px-6 py-2 rounded-md hover:scale-110">
+        <Button className="text-sm font-semibold text-light-primary border-2 border-light-primary hover:border-light-button-hover px-6 py-2 rounded-md ">
           <Plus className="text-xl mr-2" />
           Add Order
         </Button>

@@ -134,9 +134,9 @@ const PickOrderField = () => {
 
             {/* Suggestions dropdown */}
             {productSuggestions.length > 0 && (
-              <div className="absolute w-full mt-1 bg-white z-10 shadow-lg border rounded-md">
+              <div className="absolute w-full mt-1 bg-light-background dark:bg-dark-dark-gray z-10 shadow-lg border rounded-md">
                 {productSuggestions.map((product) => (
-                  <div key={product.itemId} className="p-2 cursor-pointer hover:bg-gray-100">
+                  <div key={product.itemId} className="p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-background">
                     <div className="flex items-center justify-between px-4 gap-1">
                       <Image
                         src={product.itemImage || '/fallback-image.png'} // Fallback image
@@ -149,7 +149,7 @@ const PickOrderField = () => {
                       <div className="flex ml-8">
                         <Minus
                           size={16}
-                          className="bg-gray-200 hover:bg-red-300 rounded-full p-0.5 mr-4"
+                          className="bg-gray-200 dark:bg-gray-900 hover:border hover:border-red-400 rounded-full p-0.5 mr-4"
                           onClick={() => handleDecrease(product.name)}
                         />
                         <input
@@ -160,7 +160,7 @@ const PickOrderField = () => {
                         />
                         <Plus
                           size={16}
-                          className="bg-gray-200 hover:bg-green-300 rounded-full p-0.5 ml-4"
+                          className="bg-gray-200 dark:bg-gray-800 dark:hover:bg-green-600 hover:bg-green-600 rounded-full p-0.5 ml-4"
                           onClick={() => handleIncrease(product.name)}
                         />
                         <input

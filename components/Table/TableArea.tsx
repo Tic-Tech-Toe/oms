@@ -5,8 +5,7 @@ import { Card } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Download, Search } from "lucide-react";
-import { columns } from "./columns"; // Assuming this is the columns definition file
-import { orders } from "@/data/orders"; // Assuming this is the order data
+import { columns } from "./columns";
 import {
   ColumnDef,
   flexRender,
@@ -27,6 +26,7 @@ import { Input } from "../ui/input";
 import Pagination from "../pagination/Pagination";
 import { OrderType } from "@/types/orderType";
 import { useOrderStore } from "@/hooks/useOrderStore"; // Assuming a custom store to manage orders
+import OrderDialog from "../OrderDialog";
 
 export interface PaginationType {
   pageIndex: number;
@@ -147,7 +147,7 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
             </div>
 
             {/* SearchBar */}
-            <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray flex md:w-2/5 w-full rounded-md justify-around relative  p-2">
+            {/* <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray flex md:w-2/5 w-full rounded-md justify-around relative  p-2">
               <Input
                 placeholder="Search..."
                 className="h-10 border-none px-4 text-lg font-semibold rounded-full focus:outline-none focus:ring-0 shadow-none focus:border-none focus-visible:outline-none focus-visible:ring-0 !important"
@@ -159,12 +159,17 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
                   <Search size={48} strokeWidth={4} className="text-white" />
                 </Button>
               </div>
-            </div>
+            </div> */}
+            
             {/* Button for Download */}
-            <Button className="flex items-center gap-2 max-lg:w-full max-sm:mb-4 bg-light-primary hover:bg-light-button-hover text-black">
+            <div className="flex items-center gap-2">
+            <OrderDialog />
+            <Button className="flex items-center gap-2 max-lg:w-full max-sm:mb-4 bg-light-primary hover:bg-light-button-hover">
               <Download className="size-4 text-white" />
               <span className="text-white">Download as CSV</span>
             </Button>
+            </div>
+            
           </div>
 
           {/* Tabs Content */}

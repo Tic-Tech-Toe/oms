@@ -47,10 +47,10 @@ const OrderDashboard = () => {
       {openEditDialog && <EditOrderDialog />}
 
       {/* Button to add a new order */}
-      <Button onClick={handleAddOrder}>
+      {/* <Button onClick={handleAddOrder}>
         <Plus className="text-xl mr-2" />
         Add New Order
-      </Button>
+      </Button> */}
     </>
   );
 };

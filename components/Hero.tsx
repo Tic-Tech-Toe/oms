@@ -15,16 +15,16 @@ const Hero = () => {
   const { allOrders, addOrder } = useOrderStore();
   // const [order, setOrder] = useState<OrderType[]>(orders);
   const addNewOrder = (newOrder) => {
-    addOrder(newOrder); // This will update the global store with the new order
+    addOrder(newOrder); 
   };
   return (
     <section className='w-full'>
-        <h1 className='text-4xl font-bold text-light-text-primary dark:text-dark-text-primary text-center mt-6'>Welcome to <span>ShipTrack</span> 🚚🛤️</h1>
-        <h2 className='text-light-text-secondary dark:text-dark-text-secondary text-center text-lg pt-2'>Track and manage orders with precision and ease. 📦🔍</h2>
+        <h1 className='text-4xl font-bold text-light-text-primary dark:text-dark-text-primary text-center mt-6'>Welcome to <span>ShipTrack</span> </h1>
+        <h2 className='text-light-text-secondary dark:text-dark-text-secondary text-center text-lg pt-2'>Track and manage orders with precision and ease. </h2>
         <div className='flex md:flex-row flex-col w-full  justify-center gap-4 pt-4'>
-            <Link href="/order-dashboard" className='text-lg text-center font-semibold text-light-primary border-2 border-light-primary hover:border-light-button-hover h-12 px-6 py-2 rounded-md hover:scale-110'>View Dashboard</Link>
+            <Link href="/order-dashboard" className='text-lg text-center font-semibold text-light-primary border-2 border-light-primary hover:border-light-button-hover h-12 px-6 py-2 rounded-md transition-all duration-300'>View Dashboard</Link>
             {/* <Link href="/add-order" className='text-lg font-semibold h-12 px-6 py-2 rounded-md hover:scale-110 bg-dark-primary text-white border-2 border-light-primary'></Link> */}
-            <OrderDialog  />
+            {/* <OrderDialog  /> */}
         </div>
         <div>
             <TableArea orders={allOrders} />
