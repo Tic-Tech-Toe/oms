@@ -7,6 +7,8 @@ import { Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useOrderStore } from "@/hooks/useOrderStore";
 import Link from "next/link";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Label } from "./ui/label";
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -35,13 +37,16 @@ const Header = () => {
   };
 
   return (
-    <header className="flex justify-between py-4 px-2 gap-2 md:gap-0 md:px-4 items-center bg-background">
+    <header className="flex justify-between py-4 px-2 gap-2 md:gap-0 md:px-24 items-center bg-transparent">
+      <div>
       <Link href={"/"}><h1 className="md:text-3xl text-2xl font-bold hidden md:block">ShipTrack</h1></Link>
+      </div>
+      
       
       
       {/* Search Bar */}
       <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray flex md:w-2/5 w-full rounded-full justify-around relative p-2">
-        <Input
+        {/* <Input
           placeholder="Search by customer name or order id..."
           className="h-10 border-none px-4 text-lg font-semibold rounded-full focus:outline-none focus:ring-0 shadow-none focus:border-none focus-visible:outline-none focus-visible:ring-0 !important"
           value={searchQuery}
@@ -51,16 +56,55 @@ const Header = () => {
           <Button className="h-8 border-none shadow-none" onClick={handleSearch}>
             <Search size={48} className="text-white" />
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Theme Toggle Button */}
-      <div className="flex items-center md:mr-6">
+      <div className="flex items-center md:mr-6 gap-4">
         {theme === "light" ? (
-          <Moon className="cursor-pointer text-black" fill="black" size={24} onClick={toggleTheme} />
+          <Moon className="cursor-pointer text-white" fill="white" size={24} onClick={toggleTheme} />
         ) : (
-          <Sun className="cursor-pointer" color="yellow" fill="yellow" size={24} onClick={toggleTheme} />
+          <Sun className="cursor-pointer" color="black" fill="black" size={24} onClick={toggleTheme} />
         )}
+        <Dialog>
+          <DialogTrigger asChild>
+          <Button className="bg-dark-primary text-white hover:scale-x-110 shadow-none transition-all duration-400">Login</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Login</DialogTitle>
+          <DialogDescription>
+            Login to access.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="username" className="text-right">
+              Username
+            </Label>
+            <Input
+              id="username"
+              defaultValue="@rishi"
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="username" className="text-right">
+              Password
+            </Label>
+            <Input
+              id="password"
+              defaultValue=""
+              className="col-span-3"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" className="bg-transparent border-2 border-dark-primary" variant="outline" >Login</Button>
+        </DialogFooter>
+      </DialogContent>
+        </Dialog>
+      
       </div>
     </header>
   );
