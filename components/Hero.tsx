@@ -22,12 +22,12 @@ const Hero = () => {
     addOrder(newOrder);
   };
   return (
-    <section className="w-full flex md:flex-row flex-col mt-8 px-10 py-4 gap-6">
-      <div className="md:flex-1">
-        <h1 className="text-7xl font-bold md:w-4/5">
+    <section className="w-full flex md:flex-row flex-col mt-8 md:px-10  py-4 gap-6">
+      <div className="md:flex-1 px-6 md:px-0">
+        <h1 className="md:text-7xl text-5xl font-bold md:w-4/5">
           Seamless Order & Inventory Management for Growing Businesses
         </h1>
-        <h2 className="text-lg mt-6 md:w-4/5 font-semibold dark:text-dark-text-secondary text-dark-text-secondary ">
+        <h2 className="text-lg mt-6 md:w-4/5 font-semibold dark:text-dark-text-secondary text-dark-dark-gray">
           Manage orders, track shipments, and streamline inventory—all in one
           powerful dashboard.
         </h2>
@@ -39,7 +39,7 @@ const Hero = () => {
           </span>
         </Button>
       </div>
-      <div className="md:flex-1 rounded-3xl  relative">
+      <div className="md:flex-1 rounded-3xl  relative md:mt-0 mt-6 py-4">
       <Safari
         url="shiptrack.com"
         className="size-full"

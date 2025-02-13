@@ -39,13 +39,13 @@ const Header = () => {
   return (
     <header className="flex justify-between py-4 px-2 gap-2 md:gap-0 md:px-24 items-center bg-transparent">
       <div>
-      <Link href={"/"}><h1 className="md:text-3xl text-2xl font-bold hidden md:block">ShipTrack</h1></Link>
+      <Link href={"/"}><h1 className="md:text-3xl text-2xl font-bold ">ShipTrack</h1></Link>
       </div>
       
       
       
       {/* Search Bar */}
-      <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray flex md:w-2/5 w-full rounded-full justify-around relative p-2">
+      <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray md:flex md:w-2/5 w-full rounded-full justify-around relative p-2 hidden">
         {/* <Input
           placeholder="Search by customer name or order id..."
           className="h-10 border-none px-4 text-lg font-semibold rounded-full focus:outline-none focus:ring-0 shadow-none focus:border-none focus-visible:outline-none focus-visible:ring-0 !important"
@@ -68,7 +68,7 @@ const Header = () => {
         )}
         <Dialog>
           <DialogTrigger asChild>
-          <Button className="bg-dark-primary text-white hover:scale-x-110 shadow-none transition-all duration-400">Login</Button>
+          <Button className="bg-dark-primary/[0.8] text-white hover:scale-x-110 shadow-none transition-all duration-400">Login</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -100,7 +100,7 @@ const Header = () => {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" className="bg-transparent border-2 border-dark-primary" variant="outline" >Login</Button>
+          <Button type="submit" className="bg-transparent border-2 w-full border-dark-primary" variant="outline" >Login</Button>
         </DialogFooter>
       </DialogContent>
         </Dialog>
