@@ -18,11 +18,11 @@ const OrderActions = ({row}: {row: Row<OrderType>}) => {
     ];
 
     async function handleClickedItem(item: string) {
-        console.log(`Item clicked: ${item}`); // Debugging: Log the clicked item
+        console.log(`Item clicked: ${item}`); 
         if (item === "Edit") {
             console.log('Opening edit dialog...');
-            setSelectedOrder(row.original); // Set selected order
-            setOpenEditDialog(true); // Open the edit dialog
+            setSelectedOrder(row.original); 
+            setOpenEditDialog(true);
             console.log(openEditDialog,row.original)
         }
     }

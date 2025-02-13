@@ -4,10 +4,8 @@ import StatCards from '@/components/StatCards';
 import TableArea from '@/components/Table/TableArea';
 import { useOrderStore } from '@/hooks/useOrderStore'; // Access orders from the store
 import EditOrderDialog from '@/components/EditOrderDialog'; 
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 
-const OrderDashboard = () => {
+const Overview = () => {
   const { allOrders, loadAllOrders, openEditDialog, addOrder } = useOrderStore(); // Access orders from the store
 
   // Load orders initially
@@ -34,7 +32,7 @@ const OrderDashboard = () => {
   };
 
   return (
-    <>
+    <div>
       <h1 className="text-3xl font-bold px-4 py-2">Order Dashboard</h1>
 
       {/* Stat Cards - Displays summary statistics about orders */}
@@ -51,8 +49,8 @@ const OrderDashboard = () => {
         <Plus className="text-xl mr-2" />
         Add New Order
       </Button> */}
-    </>
+    </div>
   );
 };
 
-export default OrderDashboard;
+export default Overview;

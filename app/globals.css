@@ -61,7 +61,40 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
   }
 }
+
+.aurora{
+  /* background-color: red; */
+  position: absolute;
+  width: 200%;
+  height: calc(100vh);
+  display: block;
+  top: -70%;
+  left: -10%;
+  z-index: -1;
+  opacity: 30%;
+  transform: rotate(-12deg);
+  background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #00ff6a, #007bff, #7300ff);
+  background-size: 300% 300%;
+  animation: auroraAnimation 30s infinite linear, colorShift 20s infinite alternate ease-in-out;
+  filter:blur(100px)
+  /* transition: background 4s ease-in-out; */
+}
+
+@keyframes auroraAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes colorShift {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+
+
+
 

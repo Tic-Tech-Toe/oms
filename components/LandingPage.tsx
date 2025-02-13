@@ -1,10 +1,8 @@
-import Features from "@/components/Features";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import Image from "next/image";
+import React from 'react'
+import Header from './Header'
+import Hero from './Hero'
 
-export default function Home() {
-
+const LandingPage = () => {
   return (
     <div className="relative w-screen h-screen overflow-x-hidden">
       <Header />
@@ -12,5 +10,7 @@ export default function Home() {
       {/* <Features /> */}
       <div className="aurora dark:opacity-80"></div>
     </div>
-  );
+  )
 }
+
+export default LandingPage
