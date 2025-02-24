@@ -3,7 +3,7 @@ import React from 'react'
 
 const People = () => {
   return (
-    <div className='p-4 h-[100dvh]'>
+    <div className='p-4 h-[100dvh] md:mt-20'>
       <h1 className='md:text-3xl text-2xl font-bold '>People</h1>
       <div className='bg-light-light-gray dark:bg-dark-background rounded-2xl mt-6 px-4'>
         <div>

@@ -9,9 +9,9 @@ import { useOrderStore } from "@/hooks/useOrderStore";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Label } from "./ui/label";
+import ThemeSwitch from "./ThemeSwitch";
 
 const Header = () => {
-  const { theme, setTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState(""); // State to manage the search query
   const allOrders = useOrderStore((state) => state.allOrders); // Get orders from the store
 
@@ -21,20 +21,14 @@ const Header = () => {
 
     const filteredOrders = allOrders.filter(
       (order) =>
-        order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || // Search by customer name
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) // Search by order ID
+        order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.id.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    console.log("Filtered Orders:", filteredOrders); // Display filtered orders in the console or render them
-    // You can now pass the filteredOrders to a component or render them directly
+    console.log("Filtered Orders:", filteredOrders);
   };
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-  };
+  
 
   return (
     <header className="flex justify-between py-4 px-2 gap-2 md:gap-0 md:px-24 items-center bg-transparent">
@@ -60,12 +54,7 @@ const Header = () => {
       </div>
 
       {/* Theme Toggle Button */}
-      <div className="flex items-center md:mr-6 gap-4">
-        {theme === "light" ? (
-          <Moon className="cursor-pointer text-white" fill="white" size={24} onClick={toggleTheme} />
-        ) : (
-          <Sun className="cursor-pointer" color="black" fill="black" size={24} onClick={toggleTheme} />
-        )}
+      <ThemeSwitch />
         <Dialog>
           <DialogTrigger asChild>
           <Button className="bg-dark-primary/[0.8] text-white hover:scale-x-110 shadow-none transition-all duration-400">Login</Button>
@@ -100,12 +89,12 @@ const Header = () => {
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" className="bg-transparent border-2 w-full border-dark-primary" variant="outline" >Login</Button>
+          <Link href={"/orders"} className="bg-transparent border-2 w-full border-dark-primary"  >Login</Link>
         </DialogFooter>
       </DialogContent>
         </Dialog>
       
-      </div>
+      
     </header>
   );
 };

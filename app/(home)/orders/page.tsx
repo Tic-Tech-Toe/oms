@@ -32,14 +32,17 @@ const Overview = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold px-4 py-2">Order Dashboard</h1>
+    <div className='md:mt-20'>
+      <div>
+        <h1 className="text-3xl font-bold px-4 py-2">Order Dashboard</h1>
+      </div>
+      
 
       {/* Stat Cards - Displays summary statistics about orders */}
       <StatCards />
 
       {/* Table Area - Pass the orders from the store */}
-      <TableArea orders={allOrders} />
+      <TableArea />
 
       {/* Conditionally render Edit Order Dialog */}
       {openEditDialog && <EditOrderDialog />}
