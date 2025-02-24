@@ -83,14 +83,15 @@ const OrderDialog = () => {
       id: "Test-ord-001",
       orderDate: data.orderDate.toDateString(),
       status: status,
+      paymentStatus:'pending',
       totalAmount: 444, // For simplicity, you might want to calculate this dynamically
       items: transformedItems,
       customer: {
         name: data.customerName,
         whatsappNumber: whatsappNum,
       },
-      createdAt: data.orderDate.toDateString(),
-      updatedAt: data.orderDate.toDateString(),
+      createdAt: data.orderDate.toISOString(),
+      updatedAt: data.orderDate.toISOString(),
     };
 
     // Add the new order to the store

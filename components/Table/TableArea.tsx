@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
-import { Download, Search } from "lucide-react";
+import { Download, Receipt, ReceiptText, Search } from "lucide-react";
 import { columns } from "./columns";
 import {
   ColumnDef,
@@ -33,8 +33,9 @@ export interface PaginationType {
   pageSize: number;
 }
 
-const TableArea = ({ orders }: { orders: OrderType[] }) => {
-  const { allOrders, loadAllOrders } = useOrderStore(); // Assuming this hook loads orders
+const TableArea = () => {
+  const { allOrders, loadAllOrders } = useOrderStore();
+  console.log(allOrders);
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
     {
@@ -76,9 +77,12 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
     return allOrders.filter((data) => data.status.toLowerCase() === activeTab);
   }, [activeTab, allOrders]);
 
+  const memoizedColumns = useMemo(() => columns, []);
+  const memoizedData = useMemo(() => filteredData, [filteredData]);
+  
   const table = useReactTable({
-    data: filteredData,
-    columns: columns,
+    data: memoizedData,
+    columns: memoizedColumns,
     getCoreRowModel: getCoreRowModel(),
     onPaginationChange: setPagination,
     onColumnFiltersChange: setColumnFilters,
@@ -95,55 +99,41 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
   }, [searchQuery, table]);
 
   return (
-    <Card className="m-6 shadow-none">
-      <div className="p-8">
+    <Card className="md:m-6 shadow-none">
+      <div className="md:p-8">
         <Tabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value)}
           className="mb-6 w-full"
         >
           {/* Desktop Tabs List */}
-          <div className="flex items-center justify-between mb-4 max-md:flex-col max-lg:gap-2 max-sm:items-start">
-            <div className="hidden md:flex flex-wrap gap-4">
-              <TabsList className="h-10">
+          <div className="flex items-center justify-between mb-4 mt-2 max-md:flex-col max-lg:gap-2 max-sm:items-start">
+            <div className="flex px-1 md:px-0 gap-4">
+              <TabsList className="h-10 rounded-xl md:rounded-md">
                 {tabs.map((tab) => (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className={`flex items-center gap-4 h-8 rounded-md transition-all ${
+                    className={`flex items-center md:gap-4 gap-2 h-8 md:rounded-md rounded-xl transition-all ${
                       activeTab === tab.value
                         ? "bg-light-primary text-white"
                         : "text-gray-600"
                     }`}
                   >
-                    <span>{tab.label}</span>
+                    <span className="text-xs">{tab.label}</span>
+                    {/* <ReceiptText className="md:hidden"/> */}
                     <span
                       className={`size-5 rounded-full ${
                         activeTab === tab.value
                           ? "text-dark-primary"
                           : "text-gray-500"
-                      } text-xs flex items-center justify-center`}
+                      } text-xs  items-center justify-center hidden md:flex`}
                     >
                       {tab.count}
                     </span>
                   </TabsTrigger>
                 ))}
               </TabsList>
-            </div>
-
-            {/* Mobile Dropdown */}
-            <div className="md:hidden w-full ">
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full bg-light-background text-dark-dark-gray dark:bg-dark-dark-gray dark:text-light-light-gray border rounded-md p-2"
-              >
-                {tabs.map((tab) => (
-                  <option key={tab.value} value={tab.value}>
-                    {tab.label} ({tab.count})
-                  </option>
-                ))}
-              </select>
             </div>
 
             {/* SearchBar */}
@@ -160,23 +150,26 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
                 </Button>
               </div>
             </div> */}
-            
+
             {/* Button for Download */}
-            <div className="flex items-center gap-2">
-            <OrderDialog />
-            <Button className="flex items-center gap-2 max-lg:w-full max-sm:mb-4 bg-light-primary hover:bg-light-button-hover">
-              <Download className="size-4 text-white" />
-              <span className="text-white">Download as CSV</span>
-            </Button>
+            <div className="flex items-center justify-center md:justify-end w-full gap-2 px-2 md:px-0">
+              <Button className="flex items-center gap-2 max-lg:w-full  bg-light-primary hover:bg-light-button-hover">
+                <Download className="size-4 text-white" />
+                <span className="text-white">Download as CSV</span>
+              </Button>
+              <OrderDialog />
             </div>
-            
           </div>
 
           {/* Tabs Content */}
           {tabs.map((tab) => (
-            <TabsContent key={tab.value} value={tab.value} className="w-full mt-9">
+            <TabsContent
+              key={tab.value}
+              value={tab.value}
+              className="w-full mt-9"
+            >
               {activeTab === tab.value && (
-                <div className="rounded-md border">
+                <div className="md:rounded-md rounded-none border-none  md:border">
                   <Table>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
@@ -199,17 +192,26 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
                     <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
-                          <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                          >
                             {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
                               </TableCell>
                             ))}
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={table.getAllColumns.length} className="h-24 text-center">
+                          <TableCell
+                            colSpan={table.getAllColumns.length}
+                            className="h-24 text-center"
+                          >
                             No results.
                           </TableCell>
                         </TableRow>
@@ -222,7 +224,12 @@ const TableArea = ({ orders }: { orders: OrderType[] }) => {
           ))}
         </Tabs>
       </div>
-      <Pagination table={table} pagination={pagination} setPagination={setPagination} />
+      <Pagination
+        table={table}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
+      {/* <h1>Hi</h1> */}
     </Card>
   );
 };

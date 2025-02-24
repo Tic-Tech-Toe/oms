@@ -20,58 +20,57 @@ const Sidebar = React.memo(() => {
     {
       name: "dashboard",
       icon: LayoutGrid,
-      path: "/overview",
+      path: "/orders",
     },
     {
       name: "people",
       icon: UserRound,
-      path: "/overview/people",
+      path: "/orders/people",
     },
     {
       name: "inventory",
       icon: Layers,
-      path: "/overview/inventory",
+      path: "/orders/inventory",
     },
-    {
-      name: "search",
-      icon: Search
-    }
   ];
 
   return (
     <div
-      className={`bg-dark-background h-screen  flex-col justify-between  transition-all duration-300 hidden md:flex ${
-        isCollapsed ? "md:w-20" : "md:w-1/5"
+      className={`dark:bg-dark-background bg-light-light-gray h-screen  flex-col justify-between hidden md:flex 
       }`}
     >
       <div className="flex justify-between items-center p-4">
-        <h1 className="font-bold text-3xl text-light-light-gray">
+        <h1 className="font-bold text-3xl ">
           {isCollapsed ? "ST" : "Shiptrack"}
         </h1>
         <ChevronsLeftRight
-          className="text-light-light-gray cursor-pointer"
+          className="cursor-col-resize"
           onClick={() => setIsCollapsed(!isCollapsed)}
         />
       </div>
 
-      <div className={`flex flex-col gap-2 rounded-xl px-2 ${ isCollapsed && 'items-center mb-48'} transition-all duration-500`}>
+      <div
+        className={`flex flex-col gap-2 rounded-xl px-2 ${
+          isCollapsed && "items-center mb-48"
+        } transition-all duration-500`}
+      >
         {menuItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <div
               key={item.name}
               onClick={() => router.push(item.path)}
-              className={`group flex items-center gap-4 cursor-pointer py-4 px-4 transition-colors duration-300 ${
+              className={`group flex items-center gap-4 cursor-pointer py-4 px-4  ${
                 isActive
                   ? "bg-dark-primary rounded-xl text-white"
-                  : "text-light-light-gray hover:text-dark-primary"
+                  : " hover:text-dark-primary"
               }`}
             >
               <item.icon
-                className={`transition-colors duration-300 ${
+                className={` ${
                   isActive
                     ? "text-primary"
-                    : "text-white group-hover:text-dark-primary"
+                    : " group-hover:text-dark-primary"
                 }`}
               />
               {!isCollapsed && (
@@ -83,18 +82,21 @@ const Sidebar = React.memo(() => {
       </div>
 
       {/* Profile */}
-      <div className={`py-4 flex gap-2 ${isCollapsed ? 'justify-center':'items-center px-4'} `}>
+      <div
+        className={`py-4 flex gap-2 ${
+          isCollapsed ? "justify-center" : "items-center px-4"
+        } `}
+      >
         <div className="w-12 h-12 rounded-2xl bg-indigo-900" />
         {!isCollapsed && (
           <div>
-            <h1 className="font-bold text-lg text-white">Rishi</h1>
-            <span className="text-sm font-semibold text-gray-400">
+            <h1 className="font-bold text-lg ">Rishi</h1>
+            <span className="text-sm font-semibold dark:text-gray-400 text-gray-800">
               rishi96350@outlook.com
             </span>
           </div>
         )}
-        {!isCollapsed && (<ChevronsUpDown className="text-white" />)}
-        
+        {!isCollapsed && <ChevronsUpDown />}
       </div>
     </div>
   );
