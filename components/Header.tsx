@@ -54,7 +54,10 @@ const Header = () => {
       </div>
 
       {/* Theme Toggle Button */}
+      <div className="flex items-center gap-2">
+
       <ThemeSwitch />
+      
         <Dialog>
           <DialogTrigger asChild>
           <Button className="bg-dark-primary/[0.8] text-white hover:scale-x-110 shadow-none transition-all duration-400">Login</Button>
@@ -94,7 +97,7 @@ const Header = () => {
       </DialogContent>
         </Dialog>
       
-      
+        </div>
     </header>
   );
 };
