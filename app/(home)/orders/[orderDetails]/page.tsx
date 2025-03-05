@@ -5,28 +5,34 @@ import { OrderType } from "@/types/orderType";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { getPaymentStatusBadgeClass, getStatusBadgeClass } from "@/components/Table/columns";
-import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowDown01, Edit } from "lucide-react";
-import { log } from "console";
+import { ArrowDown,  Edit } from "lucide-react";
 import OrderDetailComponent from "@/components/OrderDetailComponent";
 import FooterComponent from "@/components/FooterComponent";
 import OrderPaymentDetailComponent from "@/components/OrderPaymentDetailComponent";
+import { getBadgeClass } from "@/components/Table/columns";
+import OrderCustomerRel from "@/components/OrderCustomerRel";
+import { useOrderStore } from "@/hooks/useOrderStore"; // ✅ Import Zustand Store
+
 
 
 
 const OrderDetails = () => {
-  const [order, setOrder] = useState<OrderType | null>(null);
-  const router = useRouter();
+  const { allOrders, loadAllOrders } = useOrderStore();
+const router = useRouter();
+const [order, setOrder] = useState<OrderType | null>(null);;
 
-  useEffect(() => {
-    const storedOrder = localStorage.getItem("selectedOrder");
-    if (storedOrder) {
-      const parsedOrder = JSON.parse(storedOrder);
-      console.log(parsedOrder);
-      setOrder(parsedOrder);
-    }
-  }, []);
+useEffect(() => {
+  loadAllOrders(); // ✅ Ensure orders are always fresh
+}, []);
+
+useEffect(() => {
+  const storedOrder = localStorage.getItem("selectedOrder");
+  if (storedOrder) {
+    const parsedOrder = JSON.parse(storedOrder);
+    const latestOrder = allOrders.find(o => o.id === parsedOrder.id) || parsedOrder;
+    setOrder(latestOrder);
+  }
+}, [allOrders]);
 
   if (!order) return <p>Loading...</p>;
 
@@ -35,8 +41,8 @@ const OrderDetails = () => {
       heading: "Order Summary",
       badge: (
         <Badge
-          className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getStatusBadgeClass(
-            order.status || ""
+          className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getBadgeClass(
+            order.status || "", "order"
           )}`}
         >
           {order.status}
@@ -46,6 +52,8 @@ const OrderDetails = () => {
       footer: (
         <FooterComponent
           text="Review items"
+          order={order}
+          status={order.status}
           buttonOne="Fulfill Item"
           buttonTwo="Update order"
         />
@@ -55,8 +63,8 @@ const OrderDetails = () => {
       heading: "Payment Summary",
       badge: (
         <Badge
-          className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getPaymentStatusBadgeClass(
-            order.paymentStatus || ""
+          className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getBadgeClass(
+            order.paymentStatus || "","payment"
           )}`}
         >
           {order.paymentStatus}
@@ -65,8 +73,10 @@ const OrderDetails = () => {
       component: <OrderPaymentDetailComponent order={order} />,
       footer: (
         <FooterComponent
+        order={order}
+        status={order.paymentStatus}
           text="Review order and set payment status"
-          buttonOne="Send invoice"
+          buttonOne="Send Payment Reminder"
           buttonTwo="Collect payment"
         />
       ),
@@ -89,17 +99,19 @@ const OrderDetails = () => {
         </Link>
         /#{order.id}
       </span>
+      
       <div className="w-full h-10  rounded-xl mt-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-4 ">
             <span className="text-2xl font-bold">Order ID: {order.id}</span>
             <Badge
-              className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getPaymentStatusBadgeClass(
-                order.paymentStatus || ""
+              className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getBadgeClass(
+                order.paymentStatus || "","payment"
               )}`}
             >
               Payment {order.paymentStatus}
             </Badge>
+            <span>reward:{order.customer.rewardPoint}</span>
           </div>
           <span className="text-sm font-semibold">{order.orderDate}</span>
         </div>
@@ -137,8 +149,8 @@ const OrderDetails = () => {
         </div>
 
         <div className="w-full md:w-1/3">
-          <div className="p-4 border rounded-md bg-light-gray dark:bg-gray-800">
-            
+          <div className="p-4 border rounded-2xl shadow-xl">
+            <OrderCustomerRel customer={order.customer} />
           </div>
         </div>
       </div>

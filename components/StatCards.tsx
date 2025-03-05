@@ -1,6 +1,8 @@
 import { CheckCircle, DollarSign, IndianRupee, Recycle } from 'lucide-react';
 import React, { ReactNode } from 'react'
 import { Card } from './ui/card';
+import { OrderType } from '@/types/orderType';
+import { useCurrency } from '@/hooks/useCurrency';
 
 
 type SingleCard = {
@@ -25,21 +27,22 @@ const SingleStatCard = ({SingleCard}:{SingleCard: SingleCard}) => {
     )
 }
 
-const StatCards = () => {
+const StatCards = ({allOrders}:{allOrders:OrderType[]}) => {
+    const orderInProgress = allOrders.filter(order => order.status === "shipped" || order.status === "processing").length;
     const stats: SingleCard[] = [
         {
             title: "Total Sales",
-            value: "₹ 1,20,55,000",
+            value:  useCurrency((allOrders.reduce((sum, order) => sum + order.totalAmount, 0))),
             icon: <IndianRupee />
         },
         {
             title: "Order in progress",
-            value: "22",
+            value: orderInProgress.toString(),
             icon: <Recycle />
         },
         {
             title: "Completed Orders",
-            value: "32",
+            value: (allOrders.length-orderInProgress).toString(),
             icon: <CheckCircle />
         }
     ]

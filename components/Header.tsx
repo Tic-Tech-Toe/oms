@@ -39,7 +39,7 @@ const Header = () => {
       
       
       {/* Search Bar */}
-      <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray md:flex md:w-2/5 w-full rounded-full justify-around relative p-2 hidden">
+      <div className="bg-light-light-gray font-semibold py-4 dark:bg-dark-dark-gray md:flex md:w-2/5 w-full rounded-full justify-around relative p-2 hidden">
         {/* <Input
           placeholder="Search by customer name or order id..."
           className="h-10 border-none px-4 text-lg font-semibold rounded-full focus:outline-none focus:ring-0 shadow-none focus:border-none focus-visible:outline-none focus-visible:ring-0 !important"
@@ -92,7 +92,7 @@ const Header = () => {
           </div>
         </div>
         <DialogFooter>
-          <Link href={"/orders"} className="bg-transparent border-2 w-full border-dark-primary"  >Login</Link>
+          <Link href={"/orders"} className=" hover:bg-dark-button-hover py-2 rounded-xl w-full bg-dark-primary text-center text-lg font-semibold">Login</Link>
         </DialogFooter>
       </DialogContent>
         </Dialog>
