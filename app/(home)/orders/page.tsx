@@ -18,7 +18,7 @@ const Overview = () => {
     const newOrder = {
       id: "new-order-id", // Dynamically generate order ID
       orderDate: new Date().toISOString(),
-      status: "pending",
+      status: "processing",
       totalAmount: 100, // Example total
       paymentStatus: "pending",
       items: [], // Example items, you can replace with real data

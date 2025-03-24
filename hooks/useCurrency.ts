@@ -1,5 +1,5 @@
 
-export const useCurrency = function(num:{num:any}){
+export const useCurrency = function(num:any){
     return (new Intl.NumberFormat("en-IN",{
         style: "currency",
     currency: "INR",

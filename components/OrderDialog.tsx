@@ -80,15 +80,16 @@ const OrderDialog = () => {
 
     // Create a new order object
     const newOrder: OrderType = {
-      id: "Test-ord-001",
+      id: "Dy-001",
       orderDate: data.orderDate.toDateString(),
-      status: status,
+      status: 'processing',
       paymentStatus:'pending',
       totalAmount: 444, // For simplicity, you might want to calculate this dynamically
       items: transformedItems,
       customer: {
         name: data.customerName,
         whatsappNumber: whatsappNum,
+        rewardPoint:0,
       },
       createdAt: data.orderDate.toISOString(),
       updatedAt: data.orderDate.toISOString(),

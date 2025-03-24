@@ -34,7 +34,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
         setTimeout(() => resolve(orders), 100) // Simulating API fetch
       );
   
-      console.log("✅ Orders Fetched:", fetchedOrders);
+      // console.log("✅ Orders Fetched:", fetchedOrders);
       set({ allOrders: fetchedOrders });
     } catch (error) {
       console.error("❌ Error fetching orders:", error);
@@ -47,7 +47,14 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   addOrder: async (newOrder) => {
     try {
       console.log("Adding order:", newOrder);
-      set((state) => ({ allOrders: [...state.allOrders, newOrder] }));
+      // set((state) => ({ allOrders: [...state.allOrders, newOrder] }));
+      set((state) => {
+        console.log("Before adding:", state.allOrders);
+        const updatedOrders = [...state.allOrders, newOrder];
+        console.log("After adding:", updatedOrders);
+        return { allOrders: updatedOrders };
+      });
+      
       return { success: true };
     } catch (error) {
       console.error("Error adding order:", error);

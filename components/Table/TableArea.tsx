@@ -36,10 +36,15 @@ export interface PaginationType {
 const TableArea = () => {
   const { loadAllOrders, allOrders } = useOrderStore();
   // const loadOrders = useCallback(loadAllOrders, []);
-useEffect(() => {
-  loadAllOrders();
-}, [allOrders]);
-  // console.log(allOrders);
+  const loadOrders = useCallback(() => {
+    loadAllOrders();
+  }, []);
+  
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]); 
+
+  console.log(allOrders);
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
     {

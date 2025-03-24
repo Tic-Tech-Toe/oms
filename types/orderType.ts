@@ -29,7 +29,7 @@ export type OrderType = {
   items: OrderItem[]; // List of items in the order (linked to ItemType)
   customer: CustomerType; // Customer information
   paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery"; // Payment method
-  payment: PaymentType; // ✅ Linking payment details inside Order
+  payment?: PaymentType; // ✅ Linking payment details inside Order
   trackingNumber?: string; // Tracking number for shipped orders
   shippingDate?: string; // Date when the order was shipped
   estimatedDeliveryDate?: string; // Estimated delivery date
