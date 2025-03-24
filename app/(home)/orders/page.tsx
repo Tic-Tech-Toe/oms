@@ -11,7 +11,7 @@ const Overview = () => {
   // Load orders initially
   useEffect(() => {
     loadAllOrders();
-  }, [loadAllOrders]);
+  }, []);
 
   // Function to add a new order
   const handleAddOrder = async () => {
@@ -39,7 +39,7 @@ const Overview = () => {
       
 
       {/* Stat Cards - Displays summary statistics about orders */}
-      <StatCards />
+      <StatCards allOrders={allOrders} />
 
       {/* Table Area - Pass the orders from the store */}
       <TableArea />

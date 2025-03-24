@@ -1,3 +1,4 @@
+import { useCurrency } from "@/hooks/useCurrency";
 import { OrderType } from "@/types/orderType";
 import React from "react";
 
@@ -47,7 +48,8 @@ const OrderPaymentDetailComponent = ({ order }: { order: OrderType }) => {
 
       <div className="h-[2px] dark:bg-gray-600 bg-gray-300 mt-4 mx-auto rounded-full" />
       <span className="text-xs font-bold inline-flex w-full justify-between mt-4 text-gray-500 dark:text-gray-300">
-        Paid by customer<span>&#x20B9;{100}</span>
+        Paid by customer
+        <span>{useCurrency(order.payment.totalPaid)}</span>
       </span>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
@@ -34,8 +34,12 @@ export interface PaginationType {
 }
 
 const TableArea = () => {
-  const { allOrders, loadAllOrders } = useOrderStore();
-  console.log(allOrders);
+  const { loadAllOrders, allOrders } = useOrderStore();
+  // const loadOrders = useCallback(loadAllOrders, []);
+useEffect(() => {
+  loadAllOrders();
+}, [allOrders]);
+  // console.log(allOrders);
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
     {
@@ -70,7 +74,7 @@ const TableArea = () => {
 
   useEffect(() => {
     loadAllOrders();
-  }, []);
+  }, [loadAllOrders]);
 
   const filteredData = useMemo(() => {
     if (activeTab === "all") return allOrders;

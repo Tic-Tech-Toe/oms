@@ -26,24 +26,23 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   setOpenEditDialog: (open) => set({ openEditDialog: open }),
 
   loadAllOrders: async () => {
-    if (get().isLoading || get().allOrders.length > 0) return; // Prevent redundant fetching
-    
     set({ isLoading: true });
     console.log("Fetching orders...");
-
+  
     try {
-      const fetchedOrders = await new Promise<OrderType[]>((resolve) => 
-        setTimeout(() => resolve(orders), 1200) // Simulating API fetch
+      const fetchedOrders = await new Promise<OrderType[]>((resolve) =>
+        setTimeout(() => resolve(orders), 100) // Simulating API fetch
       );
-
-      console.log("Fetched orders:", fetchedOrders);
+  
+      console.log("✅ Orders Fetched:", fetchedOrders);
       set({ allOrders: fetchedOrders });
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("❌ Error fetching orders:", error);
     } finally {
       set({ isLoading: false });
     }
   },
+  
 
   addOrder: async (newOrder) => {
     try {
@@ -57,10 +56,19 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   },
 
   updateOrder: (orderId, updatedFields) => {
-    set((state) => ({
-      allOrders: state.allOrders.map((order) =>
+    set((state) => {
+      const updatedOrders = state.allOrders.map((order) =>
         order.id === orderId ? { ...order, ...updatedFields } : order
-      ),
-    }));
+      );
+
+      if (!updatedOrders.some(order => order.id === orderId)) {
+        console.error(`🚨 Order ID ${orderId} not found in allOrders.`);
+        return state; // No update applied
+      }
+  
+      console.log("🔄 Updated Orders in Zustand Store:", updatedOrders);
+      return { allOrders: updatedOrders };
+    });
   },
+  
 }));
