@@ -18,7 +18,7 @@ import { Safari } from "./magicui/safari";
 const Hero = () => {
   const { allOrders, addOrder } = useOrderStore();
   // const [order, setOrder] = useState<OrderType[]>(orders);
-  const addNewOrder = (newOrder) => {
+  const addNewOrder = (newOrder:OrderType) => {
     addOrder(newOrder);
   };
   return (

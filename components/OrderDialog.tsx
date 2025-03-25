@@ -200,7 +200,7 @@ const OrderDialog = () => {
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 max-sm:gap-0">
               <CustomerNameField />
-              <WhatsAppNumberField whatsappNum={whatsappNum} setWhatsappNum={setWhatsappNum} />
+              <WhatsAppNumberField  setWhatsappNum={setWhatsappNum} />
             </div>
             <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 max-sm:gap-0">
               <OrderStatus status={status} setStatus={setStatus} />

@@ -29,7 +29,7 @@ const EditOrderDialog = () => {
 
   // Function to handle API call when order status is 'delivered'
   const sendOrderDeliveredMessageHandler = async () => {
-    const { phoneNumber, id, customer, totalAmount } = edits;
+    const { id, customer, totalAmount } = edits;
   
     if (!customer || !customer.whatsappNumber || !id || !totalAmount || !customer.name) {
       console.error('Missing required fields for order delivery message');
@@ -69,7 +69,7 @@ const EditOrderDialog = () => {
 
   // Function to handle API call when order status is 'shipped' (out for delivery)
   const sendOutForDeliveryMessageHandler = async () => {
-    const { phoneNumber, customer, totalAmount } = edits;
+    const { customer, totalAmount } = edits;
 
     if (!customer || !customer.whatsappNumber || !totalAmount || !customer.name) {
       console.error('Missing required fields for out for delivery message');
@@ -105,7 +105,7 @@ const EditOrderDialog = () => {
 
   // Function to handle API call when order status is 'processing'
   const sendOrderProcessingMessageHandler = async () => {
-    const { phoneNumber, id, customer, orderDate } = edits;
+    const { id, customer, orderDate } = edits;
 
     if (!customer || !customer.whatsappNumber || !id || !orderDate || !customer.name) {
       console.error('Missing required fields for order processing message');

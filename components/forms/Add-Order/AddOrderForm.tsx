@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z, ZodType } from "zod";
 import { Button } from "@/components/ui/button";

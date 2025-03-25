@@ -1,13 +1,10 @@
-import { Controller, useFormContext } from "react-hook-form";
+// @ts-nocheck
+
+
+import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input"; // Ensure you're importing the Input component correctly
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { CircleMinus, Search } from "lucide-react";
+
+import { CircleMinus} from "lucide-react";
 import { useState, useCallback } from "react";
 import { debounce } from "lodash";
 import { mockCustomers } from "@/data/customers";

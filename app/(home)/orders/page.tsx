@@ -11,12 +11,12 @@ const Overview = () => {
   // Load orders initially
   useEffect(() => {
     loadAllOrders();
-  }, []);
+  }, [loadAllOrders]);
 
   // Function to add a new order
   const handleAddOrder = async () => {
     const newOrder = {
-      id: "new-order-id", // Dynamically generate order ID
+      id: "new-order-id-test-1", // Dynamically generate order ID
       orderDate: new Date().toISOString(),
       status: "processing",
       totalAmount: 100, // Example total

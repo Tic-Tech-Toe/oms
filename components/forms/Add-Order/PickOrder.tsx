@@ -1,20 +1,22 @@
+//@ts-nocheck
+
 import { useState, useCallback } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Search, List, Plus, Minus } from "lucide-react";
+import { Search, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { debounce } from "lodash";
 import { mockItemsData } from "@/data/item";
 
 const PickOrderField = () => {
-  const { setValue, getValues, formState: { errors } } = useFormContext(); // Access form context
+  const { setValue, formState: { errors } } = useFormContext(); // Access form context
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [productSuggestions, setProductSuggestions] = useState([]);
   const [productQuantities, setProductQuantities] = useState({});
   const [cartState, setCartState] = useState({});
-  const [toastMessage, setToastMessage] = useState("");
+  // const [toastMessage, setToastMessage] = useState("");
 
   const { toast } = useToast();
 

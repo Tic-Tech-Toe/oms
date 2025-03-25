@@ -11,19 +11,19 @@ import FooterComponent from "@/components/FooterComponent";
 import OrderPaymentDetailComponent from "@/components/OrderPaymentDetailComponent";
 import { getBadgeClass } from "@/components/Table/columns";
 import OrderCustomerRel from "@/components/OrderCustomerRel";
-import { useOrderStore } from "@/hooks/useOrderStore"; // ✅ Import Zustand Store
+import { useOrderStore } from "@/hooks/useOrderStore" // ✅ Import Zustand Store
 
 
 
 
 const OrderDetails = () => {
-  const { allOrders, loadAllOrders } = useOrderStore();
+  const { allOrders} = useOrderStore();
 const router = useRouter();
 const [order, setOrder] = useState<OrderType | null>(null);;
 
-useEffect(() => {
-  loadAllOrders(); // ✅ Ensure orders are always fresh
-}, []);
+// useEffect(() => {
+//   loadAllOrders(); 
+// }, [loadAllOrders]);
 
 useEffect(() => {
   const storedOrder = localStorage.getItem("selectedOrder");
@@ -83,7 +83,7 @@ useEffect(() => {
     },
   ];
 
-  const handleNavigation = (e) => {
+  const handleNavigation = (e:any) => {
     e.preventDefault();
     router.back(); // Go back without re-rendering
   };

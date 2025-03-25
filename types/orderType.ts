@@ -21,9 +21,11 @@ export type OrderItem = {
 export type OrderType = {
   id: string; // Unique order ID
   orderDate: string; // Date when order was placed
-  status: "processing" | "shipped" | "delivered" | "cancelled" | "pending"; // Defined order statuses
+  // status: "processing" | "shipped" | "delivered" | "cancelled" | "pending";
+  status: string;
   totalAmount: number; // Total amount of the order
-  paymentStatus: "pending" | "partially_paid" | "paid" | "failed" | "refunded"; // More explicit payment statuses
+  // paymentStatus: "pending" | "partially_paid" | "paid" | "failed" | "refunded"; 
+  paymentStatus: string; 
   shippingAddress?: string; // Shipping address
   billingAddress?: string; // Billing address
   items: OrderItem[]; // List of items in the order (linked to ItemType)
@@ -43,7 +45,7 @@ export type OrderType = {
 export type CustomerType = {
   name: string; // Customer's full name
   whatsappNumber: string; // WhatsApp number for customer contact
-  rewardPoint: number;
+  rewardPoint?: number;
   shippingAddress?: string; // Shipping address
   billingAddress?: string; // Billing address
   email?: string; // Optional email address

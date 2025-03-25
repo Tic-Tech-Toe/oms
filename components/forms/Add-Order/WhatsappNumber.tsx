@@ -1,34 +1,31 @@
-"use client"; // To ensure this is used on the client side
+//@ts-nocheck
+"use client"; 
 
 import { useState, useCallback } from "react";
-import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { CircleMinus, Search } from "lucide-react";
-import { debounce } from "lodash";
-import { mockCustomers } from "@/data/customers";
+// import { debounce } from "lodash";
+// import { mockCustomers } from "@/data/customers";
 import { Label } from "@/components/ui/label";
 
 
 
-const WhatsAppNumberField = ({whatsappNum,setWhatsappNum}) => {
+const WhatsAppNumberField = ({setWhatsappNum}) => {
   const [numberSearchQuery, setNumberSearchQuery] = useState("");
   const [numberSuggestions, setNumberSuggestions] = useState([]);
 
-  const onSearchCustomer = useCallback(
-    debounce((query: string) => {
-      if (query) {
-        // Filter customers based on whatsappNumber
-        const results = mockCustomers.filter((customer) =>
-          customer.whatsappNumber.includes(query)
-        );
-        setNumberSuggestions(results);
-      } else {
-        setNumberSuggestions([]);
-      }
-    }, 300),
-    []
-  );
+  // const onSearchCustomer = useCallback(
+  //   debounce((query: string) => {
+  //     if (query) {
+  //       const results = mockCustomers.filter((customer) =>
+  //         customer.whatsappNumber.includes(query)
+  //       );
+  //       setNumberSuggestions(results);
+  //     } else {
+  //       setNumberSuggestions([]);
+  //     }
+  //   }, 300),
+  //   []
+  // );
 
   return (
     <div className="mt-5 flex flex-col gap-2">

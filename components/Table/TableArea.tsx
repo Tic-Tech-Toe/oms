@@ -36,13 +36,13 @@ export interface PaginationType {
 const TableArea = () => {
   const { loadAllOrders, allOrders } = useOrderStore();
   // const loadOrders = useCallback(loadAllOrders, []);
-  const loadOrders = useCallback(() => {
-    loadAllOrders();
-  }, []);
+  // const loadOrders = useCallback(() => {
+  //   loadAllOrders();
+  // }, []);
   
   useEffect(() => {
-    loadOrders();
-  }, [loadOrders]); 
+    loadAllOrders();
+  }, [loadAllOrders]); 
 
   console.log(allOrders);
   const tabs = [
@@ -94,7 +94,7 @@ const TableArea = () => {
     columns: memoizedColumns,
     getCoreRowModel: getCoreRowModel(),
     onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
+    // onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {

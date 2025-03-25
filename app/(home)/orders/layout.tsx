@@ -2,9 +2,9 @@
 
 import MainHead from '@/components/MainHead'
 import Sidebar from '@/components/Sidebar'
-import ThemeSwitch from '@/components/ThemeSwitch'
+// import ThemeSwitch from '@/components/ThemeSwitch'
 import Topbar from '@/components/Topbar'
-import React, { useState } from 'react'
+import React from 'react'
 
 const Layout = ({children}:{children:React.ReactNode}) => {
     

@@ -1,6 +1,5 @@
 import { OrderType } from '@/types/orderType';
-import { Copy, Delete, Edit, EllipsisVertical, Icon, MessageSquareShare } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { Copy, Delete, Edit, EllipsisVertical, MessageSquareShare } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
 import { Row } from '@tanstack/react-table';

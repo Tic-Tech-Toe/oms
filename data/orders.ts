@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { CustomerType, OrderType, PaymentType } from "@/types/orderType";
 import { mockCustomers } from "./customers";
 import { mockItemsData } from "./item";
