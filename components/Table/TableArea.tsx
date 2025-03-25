@@ -103,12 +103,11 @@ const TableArea = () => {
     state: {
       pagination,
       columnFilters,
+      sorting
     },
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
+    
   });
 
   useEffect(() => {
