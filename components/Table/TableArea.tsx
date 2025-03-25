@@ -8,9 +8,11 @@ import { Download, Receipt, ReceiptText, Search } from "lucide-react";
 import { columns } from "./columns";
 import {
   ColumnDef,
+  SortingState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -35,6 +37,7 @@ export interface PaginationType {
 
 const TableArea = () => {
   const { loadAllOrders, allOrders } = useOrderStore();
+  const [sorting, setSorting] = React.useState<SortingState>([])
   // const loadOrders = useCallback(loadAllOrders, []);
   // const loadOrders = useCallback(() => {
   //   loadAllOrders();
@@ -100,6 +103,11 @@ const TableArea = () => {
     state: {
       pagination,
       columnFilters,
+    },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
     },
   });
 

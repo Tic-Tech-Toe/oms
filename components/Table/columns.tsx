@@ -7,6 +7,8 @@ import OrderActions from "../order/OrderActions";
 import { OrderType } from "@/types/orderType";
 import { useRouter } from "next/navigation";
 import StatusActions from "./StatusActions";
+import { Button } from "../ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 
 
@@ -119,12 +121,22 @@ export const columns: ColumnDef<OrderType>[] = [
     ),
   },
   {
-    header: "Order Date",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+
+        >
+          Order Date
+          <ArrowUpDown className="h-2 w-2" />
+        </Button>
+      )},
     accessorKey: "orderDate",
     cell: ({ row }) => {
       const orderDate = row.original.orderDate;
       const formatDate = orderDate ? format(new Date(orderDate), "dd/MM/yy") : "N/A";
-      return <span>{formatDate}</span>;
+      return <span className="text-center ml-4">{formatDate}</span>;
     },
   },
   {
