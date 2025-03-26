@@ -138,7 +138,7 @@ const OrderDialog = () => {
           });
 
           const whatsappResult = await whatsappResponse.json();
-          console.log(whatsappResult);
+          // console.log(whatsappResult);
 
           if (whatsappResult.success) {
             toast({
