@@ -1,20 +1,26 @@
 "use client";
 
+import { useAuth } from "@/app/context/AuthContext";
 import {
   ChevronsLeftRight,
   ChevronsUpDown,
   Layers,
   LayoutGrid,
+  LogOut,
   Search,
   UserRound,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import React, { useState } from "react";
+import { Dropdown } from "react-day-picker";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 const Sidebar = React.memo(() => {
   const router = useRouter();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const { user, logout } = useAuth();
 
   const menuItems = [
     {
@@ -88,15 +94,25 @@ const Sidebar = React.memo(() => {
         } `}
       >
         <div className="w-12 h-12 rounded-2xl bg-indigo-900" />
-        {!isCollapsed && (
+        {!isCollapsed && user && (
           <div>
-            <h1 className="font-bold text-lg ">Rishi</h1>
+            <h1 className="font-bold text-lg ">{user.displayName}</h1>
             <span className="text-sm font-semibold dark:text-gray-400 text-gray-800">
-              rishi96350@outlook.com
+              {user.email}
             </span>
           </div>
         )}
-        {!isCollapsed && <ChevronsUpDown />}
+        {!isCollapsed && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <ChevronsUpDown />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="p-2 flex items-center gap-2 cursor-pointer">
+              <LogOut onClick={() => logout()} />
+                <span>Logout</span>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );

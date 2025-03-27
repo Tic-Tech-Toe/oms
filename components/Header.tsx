@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-import { useAuthStore } from "@/hooks/useAuthStore";
+// import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
@@ -11,16 +11,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription }
 import { MagicCard } from "./magicui/magic-card";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react"; // Import loading icon
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/app/context/AuthContext";
+import { auth } from "@/app/config/firebase";
 
 const Header = () => {
-  const { isAuthenticated, login, logout } = useAuthStore();
+  const { user, login, logout } = useAuth(); // ✅ Get user, login, logout from context
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // 🔥 Loading state
+  const [loading, setLoading] = useState(false);
 
-  const theme = useTheme();
+  const theme = String(useTheme());
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -28,16 +30,18 @@ const Header = () => {
       setError("Please enter both email and password.");
       return;
     }
+
     setError("");
-    setLoading(true); // Start loading
+    setLoading(true);
 
     try {
       await login(email, password);
-      console.log("Login successful! ✅");
-      router.push("/orders"); // Redirect after login
+      console.log("Login successful! ✅", auth.currentUser); // ✅ Print user info in console
+      router.push("/orders"); // ✅ Redirect after login
     } catch (err) {
       setError("Login failed. Please check your credentials.");
-      setLoading(false); // Stop loading on error
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,7 +54,7 @@ const Header = () => {
       <div className="flex items-center gap-2">
         <ThemeSwitch />
 
-        {isAuthenticated ? (
+        {user ? ( // ✅ Show Logout button if user is logged in
           <Button className="bg-red-500 text-white hover:scale-110 transition-all duration-400" onClick={logout}>
             Logout
           </Button>
@@ -96,7 +100,7 @@ const Header = () => {
                     <Button 
                       className="w-full bg-light-primary flex items-center justify-center gap-2"
                       onClick={handleLogin}
-                      disabled={loading} // 🔥 Disable button while loading
+                      disabled={loading}
                     >
                       {loading ? (
                         <>

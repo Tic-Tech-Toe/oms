@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {ThemeProvider as NextThemeProvider} from 'next-themes'
-import { useAuthStore } from "@/hooks/useAuthStore";
-import { useEffect } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

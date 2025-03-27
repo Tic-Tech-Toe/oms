@@ -1,5 +1,6 @@
 "use client"
 
+import { AuthProvider } from '@/app/context/AuthContext'
 import MainHead from '@/components/MainHead'
 import Sidebar from '@/components/Sidebar'
 // import ThemeSwitch from '@/components/ThemeSwitch'
@@ -10,6 +11,7 @@ const Layout = ({children}:{children:React.ReactNode}) => {
     
   return (
     <div className='dark:bg-dark-dark-gray bg-light-background flex md:flex-row flex-col relative'>
+
         <Sidebar />
         {/* <div><ThemeSwitch /></div> */}
         <Topbar />
