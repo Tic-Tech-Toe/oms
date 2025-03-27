@@ -42,45 +42,45 @@ import { doc, getDoc, collection, query, where, getDocs } from "firebase/firesto
 //   }
 // }
 
-async function getWhatsAppSecretByEmail(): Promise<string | null> {
-  try {
-    console.log("Checking authentication state...");
-    console.log("Auth instance:", auth);
+// async function getWhatsAppSecretByEmail(): Promise<string | null> {
+//   try {
+//     console.log("Checking authentication state...");
+//     console.log("Auth instance:", auth);
 
-    const user = auth.currentUser;
-    console.log("Current user:", user);
+//     const user = auth.currentUser;
+//     console.log("Current user:", user);
 
-    if (!user) {
-      console.error("No authenticated user found.");
-      return null;
-    }
+//     if (!user) {
+//       console.error("No authenticated user found.");
+//       return null;
+//     }
 
-    const email = user.email;
-    console.log("Authenticated user's email:", email);
+//     const email = user.email;
+//     console.log("Authenticated user's email:", email);
 
-    if (!email) {
-      console.error("User email not found.");
-      return null;
-    }
+//     if (!email) {
+//       console.error("User email not found.");
+//       return null;
+//     }
 
-    // Query Firestore for user document
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("email", "==", email));
-    const querySnapshot = await getDocs(q);
+//     // Query Firestore for user document
+//     const usersRef = collection(db, "users");
+//     const q = query(usersRef, where("email", "==", email));
+//     const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0];
-      console.log("Firestore user document:", userDoc.data());
-      return userDoc.data().whatsappSecret || null;
-    } else {
-      console.error("User document not found in Firestore.");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching WhatsApp secret:", error);
-    return null;
-  }
-}
+//     if (!querySnapshot.empty) {
+//       const userDoc = querySnapshot.docs[0];
+//       console.log("Firestore user document:", userDoc.data());
+//       return userDoc.data().whatsappSecret || null;
+//     } else {
+//       console.error("User document not found in Firestore.");
+//       return null;
+//     }
+//   } catch (error) {
+//     console.error("Error fetching WhatsApp secret:", error);
+//     return null;
+//   }
+// }
 
 
 // Function to send a WhatsApp message using a template
@@ -92,15 +92,15 @@ export async function sendMessage(
   const url = "https://graph.facebook.com/v21.0/506114192590854/messages";
 
   // Step 1: Fetch the WhatsApp API secret from Firestore
-  const whatsappSecret = await getWhatsAppSecretByEmail();
-  console.log(whatsappSecret)
-  if (!whatsappSecret) {
-    return {
-      success: false,
-      message: "WhatsApp API secret not found.",
-      status: 401,
-    };
-  }
+  // const whatsappSecret = await getWhatsAppSecretByEmail();
+  // console.log(whatsappSecret)
+  // if (!whatsappSecret) {
+  //   return {
+  //     success: false,
+  //     message: "WhatsApp API secret not found.",
+  //     status: 401,
+  //   };
+  // }
 
   // Construct the message payload
   const data = JSON.stringify({
