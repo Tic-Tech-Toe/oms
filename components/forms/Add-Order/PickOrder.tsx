@@ -1,124 +1,84 @@
-//@ts-nocheck
+"use client"
 
-import { useState, useCallback } from "react";
+//@ts-nocheck
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Search, Plus, Minus } from "lucide-react";
+import { Search, Plus, Minus, ShoppingBag, X, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { debounce } from "lodash";
 import { mockItemsData } from "@/data/item";
 
 const PickOrderField = () => {
-  const { setValue, formState: { errors } } = useFormContext(); // Access form context
+  const { setValue, formState: { errors } } = useFormContext();
   const [productSearchQuery, setProductSearchQuery] = useState("");
-  const [productSuggestions, setProductSuggestions] = useState([]);
+  const [productSuggestions, setProductSuggestions] = useState(mockItemsData);
   const [productQuantities, setProductQuantities] = useState({});
   const [cartState, setCartState] = useState({});
-  // const [toastMessage, setToastMessage] = useState("");
-
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { toast } = useToast();
+  const inputRef = useRef(null);
 
   // Debounced function to handle product search
   const onSearchProduct = useCallback(
     debounce((query) => {
-      if (query) {
+      if (query.trim() === "") {
+        setProductSuggestions(mockItemsData); // Show all products when input is empty
+      } else {
         const results = mockItemsData.filter((product) =>
           product.name.toLowerCase().includes(query.toLowerCase())
         );
         setProductSuggestions(results);
-      } else {
-        setProductSuggestions([]);
       }
     }, 300),
     []
   );
 
-  // Function to handle increase in product quantity
-  const handleIncrease = (productName) => {
-    setProductQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [productName]: (prevQuantities[productName] || 0) + 1,
-    }));
+  // Function to clear input field
+  const clearSearch = () => {
+    setProductSearchQuery("");
+    setProductSuggestions(mockItemsData);
   };
 
-  // Function to handle decrease in product quantity
-  const handleDecrease = (productName) => {
-    setProductQuantities((prevQuantities) => {
-      const currentQuantity = prevQuantities[productName] || 0;
-      if (currentQuantity > 0) {
-        return {
-          ...prevQuantities,
-          [productName]: currentQuantity - 1,
-        };
+  // Function to toggle dropdown visibility
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
+
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (inputRef.current && !inputRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
       }
-      return prevQuantities; // Don't allow negative quantities
-    });
-  };
-
-  // Function to handle direct quantity input
-  const handleQuantityChange = (productName, value) => {
-    const parsedValue = parseInt(value, 10);
-    if (!isNaN(parsedValue) && parsedValue >= 0) {
-      setProductQuantities((prevQuantities) => ({
-        ...prevQuantities,
-        [productName]: parsedValue,
-      }));
-    } else if (value === "") {
-      setProductQuantities((prevQuantities) => ({
-        ...prevQuantities,
-        [productName]: 0,
-      }));
-    }
-  };
-
-  // Function to handle when product checkbox is selected
-  const handleCheckboxChange = (product, checked) => {
-    setCartState((prevCartState) => {
-      const newCartState = { ...prevCartState };
-
-      // If the product is checked, add it to the cart state
-      if (checked) {
-        newCartState[product.itemId] = {
-          itemId: product.itemId,  // Store itemId
-          quantity: productQuantities[product.name] || 1,  // Store quantity
-          price: product.price,  // Store price
-          sku: product.sku,      // Store SKU if available
-          category: product.category,  // Store category if available
-        };
-
-        // Toast notification for added item
-        toast({
-          title: `${product.name} added to the cart`,
-          description: `You added ${productQuantities[product.name] || 1} of ${product.name} to your cart.`,
-        });
-      } else {
-        // If the product is unchecked, remove it from the cart state
-        delete newCartState[product.itemId];
-        toast({
-          title: `${product.name} removed from cart`,
-          description: `You removed ${product.name} from your cart.`,
-        });
-      }
-
-      // Update the form state (items) with the new cart state
-      setValue(
-        "items",
-        Object.values(newCartState)
-      );
-      console.log("Cart State Updated: ", newCartState);
-      return newCartState;
-    });
-  };
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <FormField name="pickOrder" render={({ field }) => (
-      <FormItem className="flex w-full flex-col gap-2.5">
-        <FormLabel className="text-base">Pick Order</FormLabel>
+      <FormItem className="flex w-full flex-col mt-5">
+        <FormLabel className="text-slate-600">
+          <div className="flex justify-between items-center">
+            <span>Pick Order</span>
+            <div className="relative">
+              <ShoppingBag />
+              {Object.keys(cartState).length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {Object.keys(cartState).length}
+                </span>
+              )}
+            </div>
+          </div>
+        </FormLabel>
         <FormControl>
-          <div className="relative">
-            <div className="text-base p-2 rounded-md border outline-none flex placeholder-gray-500 items-center gap-2">
+          <div className="relative" ref={inputRef}>
+            <div className="text-base p-2 rounded-md border outline-none flex items-center gap-2">
               <Search size={24} className="transform scale-x-[-1] text-gray-500" />
               <Input
                 {...field}
@@ -127,21 +87,31 @@ const PickOrderField = () => {
                 onChange={(e) => {
                   const value = e.target.value;
                   setProductSearchQuery(value);
-                  onSearchProduct(value); // Trigger debounced search
+                  onSearchProduct(value);
+                  setIsDropdownOpen(true); // Open dropdown when typing
                 }}
-                className="text-base min-h-12 rounded-1.5 border outline-none"
+                onFocus={() => setIsDropdownOpen(true)} // Open dropdown when input is focused
+                className="text-base min-h-12 rounded-1.5 border outline-none flex-1"
                 placeholder="Start typing to search product"
               />
+              {productSearchQuery && (
+                <button onClick={clearSearch} className="text-gray-500 hover:text-gray-800">
+                  <X size={20} />
+                </button>
+              )}
+              <button onClick={toggleDropdown} className="text-gray-500 hover:text-gray-800">
+                <ChevronDown size={20} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
             </div>
 
             {/* Suggestions dropdown */}
-            {productSuggestions.length > 0 && (
-              <div className="absolute w-full mt-1 bg-light-background dark:bg-dark-dark-gray z-10 shadow-lg border rounded-md">
+            {isDropdownOpen && productSuggestions.length > 0 && (
+              <div className="absolute w-full mt-1 bg-white z-10 shadow-lg border rounded-md">
                 {productSuggestions.map((product) => (
-                  <div key={product.itemId} className="p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-background">
+                  <div key={product.itemId} className="p-2 cursor-pointer hover:bg-gray-100">
                     <div className="flex items-center justify-between px-4 gap-1">
                       <Image
-                        src={product.itemImage || '/fallback-image.png'} // Fallback image
+                        src={product.itemImage || '/fallback-image.png'}
                         alt={product.name}
                         width={24}
                         height={24}
@@ -151,24 +121,53 @@ const PickOrderField = () => {
                       <div className="flex ml-8">
                         <Minus
                           size={16}
-                          className="bg-gray-200 dark:bg-gray-900 hover:border hover:border-red-400 rounded-full p-0.5 mr-4"
-                          onClick={() => handleDecrease(product.name)}
+                          className="bg-gray-200 hover:border hover:border-red-400 rounded-full p-0.5 mr-4"
+                          onClick={() => setProductQuantities((prev) => ({
+                            ...prev, [product.name]: Math.max((prev[product.name] || 1) - 1, 0),
+                          }))}
                         />
                         <input
                           type="number"
                           value={productQuantities[product.name] || 1}
-                          onChange={(e) => handleQuantityChange(product.name, e.target.value)}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            setProductQuantities((prev) => ({
+                              ...prev,
+                              [product.name]: isNaN(value) || value < 0 ? 0 : value,
+                            }));
+                          }}
                           className="w-12 text-xs font-bold text-center border rounded-md"
                         />
                         <Plus
                           size={16}
-                          className="bg-gray-200 dark:bg-gray-800 dark:hover:bg-green-600 hover:bg-green-600 rounded-full p-0.5 ml-4"
-                          onClick={() => handleIncrease(product.name)}
+                          className="bg-gray-200 hover:bg-green-600 rounded-full p-0.5 ml-4"
+                          onClick={() => setProductQuantities((prev) => ({
+                            ...prev, [product.name]: (prev[product.name] || 0) + 1,
+                          }))}
                         />
                         <input
                           type="checkbox"
                           className="ml-4"
-                          onChange={(e) => handleCheckboxChange(product, e.target.checked)} // Passing the product directly
+                          onChange={(e) => {
+                            setCartState((prev) => {
+                              const newCart = { ...prev };
+                              if (e.target.checked) {
+                                newCart[product.itemId] = { 
+                                  itemId: product.itemId,
+                                  quantity: productQuantities[product.name] || 1,
+                                  price: product.price,
+                                  sku: product.sku,
+                                  category: product.category,
+                                };
+                                toast({ title: `${product.name} added to cart` });
+                              } else {
+                                delete newCart[product.itemId];
+                                toast({ title: `${product.name} removed from cart` });
+                              }
+                              setValue("items", Object.values(newCart));
+                              return newCart;
+                            });
+                          }}
                         />
                       </div>
                     </div>

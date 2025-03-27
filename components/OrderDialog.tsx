@@ -84,7 +84,7 @@ const OrderDialog = () => {
       orderDate: data.orderDate.toDateString(),
       status: 'processing',
       paymentStatus:'pending',
-      totalAmount: 444, // For simplicity, you might want to calculate this dynamically
+      totalAmount: 444, 
       items: transformedItems,
       customer: {
         name: data.customerName,
@@ -221,7 +221,7 @@ const OrderDialog = () => {
                     onChange={handleSendToWhatsapp}
                     className="mr-2"
                   />
-                  <span>Send to WhatsApp</span>
+                  <span className="text-center">Send to WhatsApp</span>
                 </div>
               </div>
 
