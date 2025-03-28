@@ -85,7 +85,7 @@ const ThemeSwitch = () => {
         ) : (
           <Sun className="cursor-pointer" color="white" fill="white" size={24} onClick={toggleTheme} />
         )}  */}
-      <Button variant="outline" className=" border-none shadow-md bg-transparent" onClick={() =>
+      <Button variant="outline" className=" shadow-md bg-transparent border-none" onClick={() =>
             theme === "dark" ? setTheme("light") : setTheme("dark")
           }>
         <m.svg
@@ -123,8 +123,8 @@ const ThemeSwitch = () => {
                     d: moonPath,
                     rotate: -360,
                     scale: 2,
-                    stroke: "var(--color-blue-400)",
-                    fill: "var(--color-blue-400)",
+                    stroke: "#3B82F6",
+                    fill: "#3B82F6",
                     fillOpacity: 0.35,
                     strokeOpacity: 1,
                     transition: { delay: 0.1 },
@@ -133,8 +133,8 @@ const ThemeSwitch = () => {
 
                     d: sunPath,
                     rotate: 0,
-                    stroke: "var(--color-yellow-600)",
-                    fill: "var(--color-yellow-600)",
+                    stroke: "#CA8A04",
+                    fill: "#CA8A0",
                     fillOpacity: 0.35,
                     strokeOpacity: 1,
                   }
