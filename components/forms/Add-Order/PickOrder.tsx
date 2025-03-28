@@ -1,6 +1,7 @@
+//@ts-nocheck
+
 "use client"
 
-//@ts-nocheck
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
