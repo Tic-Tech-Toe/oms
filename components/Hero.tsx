@@ -16,22 +16,36 @@ import Iphone15Pro from "./magicui/iphone-15-pro";
 import { Safari } from "./magicui/safari";
 
 const Hero = () => {
-  const { allOrders, addOrder } = useOrderStore();
-  // const [order, setOrder] = useState<OrderType[]>(orders);
-  const addNewOrder = (newOrder:OrderType) => {
-    addOrder(newOrder);
-  };
+  // const { allOrders, addOrder } = useOrderStore();
+  // // const [order, setOrder] = useState<OrderType[]>(orders);
+  // const addNewOrder = (newOrder:OrderType) => {
+  //   addOrder(newOrder);
+  // };
+
+  const handleClick = () => {
+    const message = encodeURIComponent("Hi Ship, I am interested, let us connect.");
+    const phoneNumber = "+919748412275"; // Replace with your WhatsApp number
+    const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // Open WhatsApp on mobile
+      window.location.href = `https://wa.me/${phoneNumber}?text=${message}`;
+    } else {
+      // Open WhatsApp Web on desktop
+      window.open(`https://web.whatsapp.com/send?phone=${phoneNumber}&text=${message}`, "_blank");
+    }
+  }
   return (
     <section className="w-full flex md:flex-row flex-col mt-8 md:px-10  py-4 gap-6">
       <div className="md:flex-1 px-6 md:px-0">
-        <h1 className="md:text-7xl text-5xl font-bold md:w-4/5">
+        <h1 className="md:text-7xl text-5xl font-bold md:w-4/5 ">
           Seamless Order & Inventory Management for Growing Businesses
         </h1>
         <h2 className="text-lg mt-6 md:w-4/5 font-semibold dark:text-dark-text-secondary text-dark-dark-gray">
           Manage orders, track shipments, and streamline inventory—all in one
           powerful dashboard.
         </h2>
-        <Button className="bg-light-primary rounded-full text-white mt-4 group">
+        <Button className="bg-light-primary rounded-full text-white mt-4 group" onClick={handleClick}>
           Book a call
           <span className="relative w-5 h-5">
             <ChevronRight className="absolute inset-0 transition-opacity duration-300 opacity-100 top-[2px] group-hover:opacity-0" />
@@ -49,6 +63,6 @@ const Hero = () => {
       </div>
     </section>
   );
-};
+  }
 
 export default Hero;

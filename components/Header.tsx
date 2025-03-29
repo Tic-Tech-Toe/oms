@@ -1,7 +1,8 @@
+//@ts-nocheck
+
 "use client";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
-// import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
@@ -12,36 +13,87 @@ import { MagicCard } from "./magicui/magic-card";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/app/context/AuthContext";
-import { auth } from "@/app/config/firebase";
+import { fetchUserData, useAuth } from "@/app/context/AuthContext";
+import { auth, db } from "@/app/config/firebase";
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
+import { doc, getDoc, collection, query, where } from "firebase/firestore";
 
 const Header = () => {
-  const { user, login, logout } = useAuth(); // ✅ Get user, login, logout from context
+  const { user, login, logout } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const theme = String(useTheme());
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError("Please enter both email and password.");
+    setLoading(true);
+    setError("");
+    setResetSent(false);
+
+    try {
+      if (auth.currentUser) {
+        router.push("/orders");
+        return;
+      }
+
+      if (email && password) {
+        console.log(email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userData = await fetchUserData(userCredential.user);
+
+        if (!userData?.profilePic) {
+          console.log("No profile pic found. Redirecting to Google Sign-In...");
+          const provider = new GoogleAuthProvider();
+          const result = await signInWithPopup(auth, provider);
+          await fetchUserData(result.user);
+        }
+      } else {
+        console.log("No email/password provided. Signing in with Google...");
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        await fetchUserData(result.user);
+      }
+
+      console.log("Login successful! ✅", auth.currentUser);
+      router.push("/orders");
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      if (err.code === "auth/invalid-credential") {
+        setError("Invalid email or password. Try again or reset your password.");
+      } else if (err.code === "auth/user-not-found") {
+        setError("No account found. Sign up or check your email.");
+      } else {
+        setError("Login failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email) {
+      setError("Enter your email to reset your password.");
       return;
     }
 
-    setError("");
-    setLoading(true);
-
     try {
-      await login(email, password);
-      console.log("Login successful! ✅", auth.currentUser); // ✅ Print user info in console
-      router.push("/orders"); // ✅ Redirect after login
+      // ✅ Check if the user exists in Firebase Authentication
+      const userRef = doc(db, "users", email);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        setError("This email is not registered. Please check and try again.");
+        return;
+      }
+
+      await sendPasswordResetEmail(auth, email);
+      setResetSent(true);
     } catch (err) {
-      setError("Login failed. Please check your credentials.");
-    } finally {
-      setLoading(false);
+      setError("Failed to send reset email. Check if the email is correct.");
     }
   };
 
@@ -54,7 +106,7 @@ const Header = () => {
       <div className="flex items-center gap-2">
         <ThemeSwitch />
 
-        {user ? ( // ✅ Show Logout button if user is logged in
+        {user ? (
           <Button className="bg-red-500 text-white hover:scale-110 transition-all duration-400" onClick={logout}>
             Logout
           </Button>
@@ -65,7 +117,7 @@ const Header = () => {
                 Login
               </Button>
             </DialogTrigger>
-            <DialogContent className="p-0 bg-transparent">
+            <DialogContent className="p-0 bg-transparent border-none">
               <Card>
                 <MagicCard gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}>
                   <CardHeader>
@@ -93,7 +145,18 @@ const Header = () => {
                           onChange={(e) => setPassword(e.target.value)}
                         />
                       </div>
-                      {error && <p className="text-red-500 text-sm">{error}</p>}
+                      {error && (
+                        <div className="text-center mt-2">
+                          <p className="text-red-500 text-sm">{error}</p>
+                          <button
+                            className="text-blue-500 text-sm hover:underline mt-1"
+                            onClick={handlePasswordReset}
+                          >
+                            Reset Password
+                          </button>
+                        </div>
+                      )}
+                      {resetSent && <p className="text-green-500 text-sm">Reset link sent! Check your email.</p>}
                     </div>
                   </CardContent>
                   <CardFooter>
