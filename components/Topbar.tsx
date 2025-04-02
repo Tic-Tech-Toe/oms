@@ -9,31 +9,23 @@ import {
   Layers,
   X,
   Search,
+  LogOut,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import React, { useState } from "react";
 import Link from "next/link";
 import SearchBar from "./SearchBar";
-
-// const SearchBar = () => {
-//   return (
-//     <div className="p-4">
-//       <input
-//         type="text"
-//         placeholder="Search..."
-//         className="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-dark-primary"
-//       />
-//     </div>
-//   );
-// };
+import ThemeSwitch from "./ThemeSwitch";
+import { useAuth } from "@/app/context/AuthContext"; // Import Auth Context
 
 const Topbar = () => {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchActive, setIsSearchActive] = useState(false); // NEW STATE
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const { user, logout } = useAuth(); // Get user data and logout function
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -70,23 +62,29 @@ const Topbar = () => {
         </Link>
 
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-indigo-800 rounded-lg" />
-          {theme === "light" ? (
-            <Moon
-              className="cursor-pointer text-dark-background"
-              fill="black"
-              size={24}
-              onClick={toggleTheme}
+          {user ? (
+            // ✅ Show Profile Picture if Logged In
+            <img
+              src={user.profilePic || "/default-profile.png"}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover border-2 border-gray-400"
             />
           ) : (
-            <Sun
-              className="cursor-pointer"
-              color="yellow"
-              fill="yellow"
-              size={24}
-              onClick={toggleTheme}
-            />
+            <UserRound className="text-gray-500" size={32} />
           )}
+
+          <ThemeSwitch />
+
+          {/* Logout Button - Only visible when logged in */}
+          {user && (
+            <button
+              onClick={logout}
+              className="p-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+            >
+              <LogOut className="text-red-500" size={24} />
+            </button>
+          )}
+
           <div className="block md:hidden">
             {isMenuOpen ? (
               <X
@@ -114,7 +112,7 @@ const Topbar = () => {
               <li
                 key={item.name}
                 onClick={() => {
-                  setIsSearchActive(false); // Close SearchBar if navigating
+                  setIsSearchActive(false);
                   router.push(item.path);
                 }}
                 className="flex flex-col items-center cursor-pointer group"

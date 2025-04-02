@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { debounce } from "lodash";
 import { mockItemsData } from "@/data/item";
+import ShoppingBagDialog from "@/components/ShoppingBagDialog";
 
 const PickOrderField = () => {
   const { setValue, formState: { errors } } = useFormContext();
@@ -67,14 +68,16 @@ const PickOrderField = () => {
         <FormLabel className="text-slate-600">
           <div className="flex justify-between items-center">
             <span>Pick Order</span>
-            <div className="relative">
+            {/* <div className="relative">
               <ShoppingBag />
               {Object.keys(cartState).length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                   {Object.keys(cartState).length}
                 </span>
               )}
-            </div>
+            </div> */}
+
+            <ShoppingBagDialog cartState={cartState} setCartState={setCartState} />
           </div>
         </FormLabel>
         <FormControl>
@@ -109,7 +112,7 @@ const PickOrderField = () => {
             {isDropdownOpen && productSuggestions.length > 0 && (
               <div className="absolute w-full mt-1 bg-white z-10 shadow-lg border rounded-md">
                 {productSuggestions.map((product) => (
-                  <div key={product.itemId} className="p-2 cursor-pointer hover:bg-gray-100">
+                  <div key={product.itemId} className="p-2 cursor-pointer dark:hover:bg-gray-700 hover:bg-gray-100 bg-background">
                     <div className="flex items-center justify-between px-4 gap-1">
                       <Image
                         src={product.itemImage || '/fallback-image.png'}
