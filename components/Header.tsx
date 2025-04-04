@@ -33,46 +33,20 @@ const Header = () => {
     setLoading(true);
     setError("");
     setResetSent(false);
-
+  
     try {
-      if (auth.currentUser) {
-        router.push("/orders");
-        return;
-      }
-
-      if (email && password) {
-        console.log(email, password);
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const userData = await fetchUserData(userCredential.user);
-
-        if (!userData?.profilePic) {
-          console.log("No profile pic found. Redirecting to Google Sign-In...");
-          const provider = new GoogleAuthProvider();
-          const result = await signInWithPopup(auth, provider);
-          await fetchUserData(result.user);
-        }
-      } else {
-        console.log("No email/password provided. Signing in with Google...");
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        await fetchUserData(result.user);
-      }
-
-      console.log("Login successful! ✅", auth.currentUser);
-      router.push("/orders");
-    } catch (err: any) {
-      console.error("Login failed:", err);
-      if (err.code === "auth/invalid-credential") {
-        setError("Invalid email or password. Try again or reset your password.");
-      } else if (err.code === "auth/user-not-found") {
-        setError("No account found. Sign up or check your email.");
-      } else {
-        setError("Login failed. Please try again.");
-      }
+      await login(email, password); // From useAuth()
+      router.replace("/orders");
+    } catch (err) {
+      setError("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
+  
+  
+  
 
   const handlePasswordReset = async () => {
     if (!email) {
@@ -100,7 +74,7 @@ const Header = () => {
   return (
     <header className="flex justify-between py-4 px-2 gap-2 md:gap-0 md:px-24 items-center bg-transparent">
       <Link href={"/"}>
-        <h1 className="md:text-3xl text-2xl font-bold">ShipTrack</h1>
+        <h1 className="md:text-3xl text-2xl  font-clash">ShipTrack</h1>
       </Link>
 
       <div className="flex items-center gap-2">

@@ -85,7 +85,7 @@ const ThemeSwitch = () => {
         ) : (
           <Sun className="cursor-pointer" color="white" fill="white" size={24} onClick={toggleTheme} />
         )}  */}
-      <Button variant="outline" className=" shadow-md bg-transparent border-none" onClick={() =>
+      <Button variant="default" className="shadow-none bg-transparent border-none" onClick={() =>
             theme === "dark" ? setTheme("light") : setTheme("dark")
           }>
         <m.svg

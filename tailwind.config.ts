@@ -11,6 +11,10 @@ export default {
   
   theme: {
     extend: {
+      fontFamily: {
+        satoshi: ['var(--font-satoshi)', 'sans-serif'],
+        clash: ['var(--font-clash-display)', 'sans-serif'],
+      },
       colors: {
         // Light Mode Colors
         light: {

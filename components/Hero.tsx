@@ -1,68 +1,79 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "./ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import { Table, TableCaption } from "./ui/table";
-import TableArea from "./Table/TableArea";
-import OrderDialog from "./OrderDialog";
-import { orders } from "@/data/orders";
-import { OrderType } from "@/types/orderType";
-import { useOrderStore } from "@/hooks/useOrderStore";
-import { SelectScrollUpButton } from "@radix-ui/react-select";
-import { ArrowRight, ChevronRight, MoveRight } from "lucide-react";
+import { ChevronRight, MoveRight } from "lucide-react";
 import Iphone15Pro from "./magicui/iphone-15-pro";
 import { Safari } from "./magicui/safari";
+import { InteractiveHoverButton } from "./magicui/interactive-hover-button";
 
 const Hero = () => {
-  // const { allOrders, addOrder } = useOrderStore();
-  // // const [order, setOrder] = useState<OrderType[]>(orders);
-  // const addNewOrder = (newOrder:OrderType) => {
-  //   addOrder(newOrder);
-  // };
+  const [showCTA, setShowCTA] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowCTA(true), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleClick = () => {
     const message = encodeURIComponent("Hi Ship, I am interested, let us connect.");
-    const phoneNumber = "+919748412275"; // Replace with your WhatsApp number
+    const phoneNumber = "+919748412275";
     const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
 
     if (isMobile) {
-      // Open WhatsApp on mobile
       window.location.href = `https://wa.me/${phoneNumber}?text=${message}`;
     } else {
-      // Open WhatsApp Web on desktop
       window.open(`https://web.whatsapp.com/send?phone=${phoneNumber}&text=${message}`, "_blank");
     }
-  }
+  };
+
   return (
-    <section className="w-full flex md:flex-row flex-col mt-8 md:px-10  py-4 gap-6">
+    <section  className="w-full flex md:flex-row flex-col mt-8 md:px-10 py-4 gap-6">
+      {/* Left Content Block */}
       <div className="md:flex-1 px-6 md:px-0">
-        <h1 className="md:text-7xl text-5xl font-bold md:w-4/5 ">
-          Seamless Order & Inventory Management for Growing Businesses
-        </h1>
-        <h2 className="text-lg mt-6 md:w-4/5 font-semibold dark:text-dark-text-secondary text-dark-dark-gray">
-          Manage orders, track shipments, and streamline inventory—all in one
-          powerful dashboard.
-        </h2>
-        <Button className="bg-light-primary rounded-full text-white mt-4 group" onClick={handleClick}>
-          Book a call
-          <span className="relative w-5 h-5">
-            <ChevronRight className="absolute inset-0 transition-opacity duration-300 opacity-100 top-[2px] group-hover:opacity-0" />
-            <MoveRight className="absolute inset-0 transition-opacity duration-500 opacity-0 group-hover:opacity-100 top-[2px]" />
-          </span>
-        </Button>
+        {/* Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="md:text-7xl text-5xl font-clash font-semibold md:w-4/5 leading-tight"
+        >
+          Manage Orders, Shipments & Inventory in One Click
+        </motion.h1>
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+          className="text-lg mt-6 md:w-4/5 font-medium dark:text-dark-text-secondary text-dark-dark-gray"
+        >
+          "No more order delays or inventory mishaps. Get a smart dashboard that keeps everything in check, so you can focus on growing your business."
+        </motion.h2>
+        {/* Delayed CTA Button */}
+        {showCTA && (
+  <div className="gradient-border mt-4 mx-auto ">
+    <InteractiveHoverButton className="gradient-border-inner  text-base md:text-lg " onClick={handleClick}>
+      Get a Demo
+    </InteractiveHoverButton>
+  </div>
+)}
+
+        {/* Subheading */}
+        
       </div>
-      <div className="md:flex-1 rounded-3xl  relative md:mt-0 mt-6 py-4">
-      <Safari
-        url="shiptrack.com"
-        className="size-full"
-        imageSrc="./webMock.jpg"
-      />
-      <Iphone15Pro className="size-[70%] absolute  bottom-0" src="./whatsappMock.jpg" stroke="2px"/>
-      </div>
+
+      {/* Right Side Mockups */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
+        className="md:flex-1 rounded-3xl relative md:mt-0 mt-6 py-4"
+      >
+        <Safari url="shiptrack.com" className="size-full" imageSrc="./webMock.jpg" />
+        <Iphone15Pro className="size-[70%] absolute bottom-0" src="./whatsappMock.jpg" stroke="2px" />
+      </motion.div>
     </section>
   );
-  }
+};
 
 export default Hero;
