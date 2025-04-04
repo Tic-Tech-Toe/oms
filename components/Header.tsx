@@ -33,7 +33,7 @@ const Header = () => {
     setLoading(true);
     setError("");
     setResetSent(false);
-
+  
     try {
       if (auth.currentUser) {
         router.push("/orders");
@@ -60,19 +60,16 @@ const Header = () => {
 
       console.log("Login successful! ✅", auth.currentUser);
       router.push("/orders");
-    } catch (err: any) {
-      console.error("Login failed:", err);
-      if (err.code === "auth/invalid-credential") {
-        setError("Invalid email or password. Try again or reset your password.");
-      } else if (err.code === "auth/user-not-found") {
-        setError("No account found. Sign up or check your email.");
-      } else {
-        setError("Login failed. Please try again.");
-      }
+    } catch (err) {
+      setError("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
+  
+  
+  
 
   const handlePasswordReset = async () => {
     if (!email) {
@@ -100,7 +97,7 @@ const Header = () => {
   return (
     <header className="flex justify-between py-4 px-2 gap-2 md:gap-0 md:px-24 items-center bg-transparent">
       <Link href={"/"}>
-        <h1 className="md:text-3xl text-2xl font-bold">ShipTrack</h1>
+        <h1 className="md:text-3xl text-2xl  font-clash">ShipTrack</h1>
       </Link>
 
       <div className="flex items-center gap-2">

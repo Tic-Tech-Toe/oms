@@ -83,6 +83,41 @@
   /* transition: background 4s ease-in-out; */
 }
 
+.gradient-border {
+  background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #00ff6a, #007bff, #7300ff);
+  background-size: 300% 300%;
+  animation: auroraAnimation 30s infinite linear, colorShift 20s infinite alternate ease-in-out;
+  padding: 2px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.gradient-border-inner {
+  @apply flex items-center justify-center font-semibold transition-all duration-300 px-6 py-3 rounded-full relative overflow-hidden;
+
+  /* Light mode default */
+  background-color: #F4F7FA;
+  color: black;
+}
+
+.dark .gradient-border-inner {
+  /* Dark mode override */
+  background-color: #1F1F1F;
+  color: #E0E0E0;
+}
+
+.gradient-border-inner svg {
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(-4px);
+  opacity: 0;
+}
+
+.gradient-border-inner:hover svg {
+  transform: translateX(0);
+  opacity: 1;
+}
+
 @keyframes auroraAnimation {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -93,8 +128,3 @@
   0% { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
 }
-
-
-
-
-

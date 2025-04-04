@@ -1,17 +1,20 @@
-
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
-import {ThemeProvider as NextThemeProvider} from 'next-themes'
+import { ThemeProvider as NextThemeProvider } from "next-themes";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// Satoshi Font (for body text)
+const satoshi = localFont({
+  src: "./fonts/SatoshiVariable.ttf", // path is relative to /app/layout.tsx
+  variable: "--font-satoshi",
+  weight: "100 200 300 400 500 600 700 800 900",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Clash Display (for headings/hero)
+const clashDisplay = localFont({
+  src: "./fonts/ClashDisplayVariable.ttf",
+  variable: "--font-clash-display",
+  weight: "200 300 400 500 600 700",
 });
 
 export const metadata: Metadata = {
@@ -24,15 +27,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
-      
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-light-light-gray dark:bg-dark-background`}
+        className={`${satoshi.variable} ${clashDisplay.variable} antialiased bg-light-light-gray dark:bg-dark-background`}
       >
         <NextThemeProvider attribute="class">
-        <main>{children}</main>
+          <main>{children}</main>
         </NextThemeProvider>
       </body>
     </html>
