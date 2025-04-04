@@ -35,8 +35,31 @@ const Header = () => {
     setResetSent(false);
   
     try {
-      await login(email, password); // From useAuth()
-      router.replace("/orders");
+      if (auth.currentUser) {
+        router.push("/orders");
+        return;
+      }
+
+      if (email && password) {
+        console.log(email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userData = await fetchUserData(userCredential.user);
+
+        if (!userData?.profilePic) {
+          console.log("No profile pic found. Redirecting to Google Sign-In...");
+          const provider = new GoogleAuthProvider();
+          const result = await signInWithPopup(auth, provider);
+          await fetchUserData(result.user);
+        }
+      } else {
+        console.log("No email/password provided. Signing in with Google...");
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        await fetchUserData(result.user);
+      }
+
+      console.log("Login successful! ✅", auth.currentUser);
+      router.push("/orders");
     } catch (err) {
       setError("Login failed. Please try again.");
     } finally {
