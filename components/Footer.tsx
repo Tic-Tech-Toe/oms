@@ -4,9 +4,9 @@
 import { motion } from "framer-motion";
 import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
 
-const Footer = () => {
+const Footer = ({ id }: { id?: string }) => {
   return (
-    <footer className="w-full bg-white dark:bg-black text-gray-800 dark:text-white px-6 md:px-20 py-12 border-t border-black/10 dark:border-white/10">
+    <footer className="w-full bg-white dark:bg-black text-gray-800 dark:text-white px-6 md:px-20 py-12 border-t border-black/10 dark:border-white/10" id={id}>
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Brand / About */}
         <motion.div

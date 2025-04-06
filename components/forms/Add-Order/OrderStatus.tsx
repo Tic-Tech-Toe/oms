@@ -9,16 +9,16 @@ const OrderStatus = ({status, setStatus}) => {
  
 
   return (
-    <div className="mt-5 flex flex-col gap-2 ">
-      <Label htmlFor="customer-name" className="text-slate-600">
+    <div className="flex flex-col gap-2 mt-5">
+      <Label htmlFor="order-status" className="text-slate-600">
         {`Order Status`}
       </Label>
       
         <Select value={status} onValueChange={(value) => setStatus(value)}>
-            <SelectTrigger>
+            <SelectTrigger className="rounded-xl h-12 px-4">
                 <SelectValue placeholder="Select order status" />
             </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                 {statuses.map((s) => (
                     <SelectItem key={s} value={s}>
                         {s}

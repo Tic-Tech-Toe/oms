@@ -2,7 +2,7 @@ export type ItemType = {
   itemId: string; // Unique identifier for the item
   name: string; // Item name
   price: number; // Price per unit of the item
-  itemImage: string; // URL or path to item image
+  itemImage?: string; // URL or path to item image
   sku?: string; // Optional SKU for the item
   category?: string; // Optional category (e.g., Electronics, Clothing)
 };

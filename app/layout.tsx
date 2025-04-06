@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { AuthProvider } from "./context/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 
 // Satoshi Font (for body text)
 const satoshi = localFont({
@@ -32,9 +34,13 @@ export default function RootLayout({
       <body
         className={`${satoshi.variable} ${clashDisplay.variable} antialiased bg-light-light-gray dark:bg-dark-background`}
       >
+        <AuthProvider>
+
         <NextThemeProvider attribute="class">
           <main>{children}</main>
         </NextThemeProvider>
+        </AuthProvider>
+        <Toaster />
       </body>
     </html>
   );

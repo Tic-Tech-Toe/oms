@@ -1,115 +1,134 @@
-// "use client";
+"use client";
 
-// import React, { useState, useEffect, useRef } from "react";
-// import { Button } from "@/components/ui/button";
-// import { Plus } from "lucide-react";
-// import { mockCustomers } from "@/data/customers";
-// import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { CustomerType } from "@/types/orderType";
+import { addCustomer, getCustomers } from "@/utils/getFirestoreCustomers";
+import { useToast } from "@/hooks/use-toast";
+import AddCustomerDialog from "@/components/AddCustomerDialog";
+import { auth } from "@/app/config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { mockCustomers } from "@/data/customers";
 
-// const People = () => {
-//   const [letter, setLetter] = useState("A");
-//   const [showHint, setShowHint] = useState(false);
-//   const [showAll, setShowAll] = useState(false); // Toggle for showing all contacts
-//   const letterContainerRef = useRef(null);
+export default function People() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [customers, setCustomers] = useState<CustomerType[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { toast } = useToast();
 
-//   useEffect(() => {
-//     const container = letterContainerRef.current;
+  // Listen to user auth state and set userId
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        console.warn("User not logged in.");
+      }
+    });
 
-//     const handleScroll = (e:any) => {
-//       e.preventDefault();
-//       if (e.deltaX > 0) {
-//         setShowAll(true);
-//       } else if (e.deltaX < 0) {
-//         setShowAll(false);
-//       }
-//       if (e.deltaY > 0) {
-//         setLetter((prev) => {
-//           const nextCharCode = prev.charCodeAt(0) + 1;
-//           return nextCharCode <= 90 ? String.fromCharCode(nextCharCode) : "Z";
-//         });
-//       } else if (e.deltaY < 0) {
-//         setLetter((prev) => {
-//           const prevCharCode = prev.charCodeAt(0) - 1;
-//           return prevCharCode >= 65 ? String.fromCharCode(prevCharCode) : "A";
-//         });
-//       }
-//     };
+    return () => unsubscribe();
+  }, []);
 
-//     if (container) {
-//       container.addEventListener("wheel", handleScroll, { passive: false });
-//     }
+  // Fetch customers when userId is available
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      if (!userId) return;
+      const data = await getCustomers(userId);
+      setCustomers(data);
+    };
+    fetchCustomers();
+  }, [userId]);
 
-//     return () => {
-//       if (container) {
-//         container.removeEventListener("wheel", handleScroll);
-//       }
-//     };
-//   }, []);
+  // Handle adding new customer
+  const handleAddCustomer = async (customerData: CustomerType) => {
+    if (!userId) return;
+    try {
+      await addCustomer(userId, customerData);
+      const updated = await getCustomers(userId);
+      setCustomers(updated);
+      toast({ title: "Customer added" });
+    } catch (err) {
+      console.error("Failed to add customer:", err);
+      toast({ title: "Something went wrong", variant: "destructive" });
+    }
+  };
 
-//   return (
-//     <div className="p-4 h-[100dvh] md:mt-20 flex flex-col overflow-y-auto">
-//       <h1 className="md:text-3xl text-2xl font-bold">People</h1>
+  console.log(userId,"....................")
 
-//       {/* Letter changing div */}
-//       <div
-//         ref={letterContainerRef}
-//         className="flex items-center justify-between  p-4 rounded-lg sticky top-20 "
-//         onMouseEnter={() => setShowHint(true)}
-//         onMouseLeave={() => setShowHint(false)}
-//       >
-//         <Dialog>
-//           <DialogTrigger asChild>
-//             <div className="h-20 w-20 aspect-square bg-purple-500 rounded-full flex items-center justify-center">
-//               <span className="text-3xl font-bold">
-//                 {showAll ? "All" : letter}
-//               </span>
-//             </div>
-//           </DialogTrigger>
-//           <DialogContent></DialogContent>
-//         </Dialog>
+  return (
+    <div className="min-h-screen p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">People</h1>
+            <p className="text-gray-500 text-sm">Your customer directory</p>
+          </div>
+          <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
+        </div>
 
-//         {/* Show hint when hovering */}
-//         {!showAll && showHint && (
-//           <span className="text-xs font-bold px-2 py-1 bg-gray-700 text-white rounded-md hidden md:block">
-//             Scroll to change letters
-//           </span>
-//         )}
+        {/* Customer Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {customers.map((cust, idx) => (
+    <div
+      key={idx}
+      className=" backdrop-blur-md border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow p-6 relative overflow-hidden group"
+    >
+      {/* Reward Badge */}
+      {/* {cust.rewardPoint && (
+        <div className="absolute top-4 right-4 bg-yellow-400 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+          ⭐ {cust.rewardPoint} pts
+        </div>
+      )} */}
 
-//         <Button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 hover:text-white rounded-xl dark:bg-transparent">
-//           <Plus size={16} /> Add contact
-//         </Button>
-//       </div>
+      {/* Customer Name */}
+      <h2 className="text-2xl font-bold  ">
+        {cust.name}
+      </h2>
 
-//       {/* People List */}
-//       <div className="mt-16 w-full border-2 p-2 min-h-[60%] rounded-xl overflow-y-auto grid md:grid-cols-3 auto-rows-min gap-4">
-//         {mockCustomers.filter((cust) => showAll || cust.name.startsWith(letter))
-//           .length === 0 ? (
-//           <h1 className="text-center col-span-3 text-gray-500">No Data</h1>
-//         ) : (
-//           mockCustomers
-//             .filter((cust) => showAll || cust.name.startsWith(letter))
-//             .map((cust, i) => (
-//               <div
-//                 key={cust.id || i} // Prefer using a unique `id`
-//                 className="py-2 px-4 transition-colors duration-300 rounded-xl gap-4 border-2 border-xl hover:bg-purple-600 cursor-pointer"
-//               >
-//                 <span>
-//                   {cust.name}
-//                   {i}
-//                 </span>
-//               </div>
-//             ))
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
+      {/* Info */}
+      <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
+        <p>Email: <span className="font-medium">{cust.email || "Not Provided"}</span></p>
+        <p>WhatsApp: <span className="font-medium">{cust.whatsappNumber}</span></p>
+        {cust.phoneNumber && (
+          <p>Phone: <span className="font-medium">{cust.phoneNumber}</span></p>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <a
+            href={`https://wa.me/91${cust.whatsappNumber}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-green-600 text-sm font-medium hover:underline transition"
+          >
+            💬 WhatsApp
+          </a>
+          {cust.phoneNumber && (
+            <a
+              href={`tel:${cust.phoneNumber}`}
+              className="inline-flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline transition"
+            >
+              📞 Call
+            </a>
+          )}
+        </div>
+        <button className="text-sm text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition">
+          ✏️ Edit
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
 
 
-const People = () => {
-  return(
-    <h1>Work in progress</h1>
-  )
+        {/* Empty State */}
+        {customers.length === 0 && (
+          <div className="text-center text-gray-400 mt-20 text-sm">
+            No customers yet.
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
-
-export default People;
