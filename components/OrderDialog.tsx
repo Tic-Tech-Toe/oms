@@ -26,8 +26,11 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OrderItem, OrderType } from "@/types/orderType";
 import { mockItemsData } from "@/data/item";
-import { useOrderStore } from "@/hooks/useOrderStore";
+// import { useOrderStore } from "@/hooks/useOrderStore";
 import { useToast } from "@/hooks/use-toast";
+// import { addOrder } from "@/utils/getFireStoreOrders";
+import { auth } from "@/app/config/firebase";
+import { useOrderStore } from "@/hooks/useOrderStore";
 
 type FormData = z.infer<typeof AddOrderSchema>;
 
@@ -35,6 +38,10 @@ const OrderDialog = () => {
   const [sendToWhatsapp, setSendToWhatsapp] = useState(false);
   const [whatsappNum, setWhatsappNum] = useState("");
   const [status, setStatus] = useState("pending");
+
+  const {addOrder} = useOrderStore();
+
+  const user = auth.currentUser;
 
   const methods = useForm<FormData>({
     resolver: zodResolver(AddOrderSchema),
@@ -44,138 +51,142 @@ const OrderDialog = () => {
     },
   });
 
-  const { addOrder } = useOrderStore(); // Access addOrder from store
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const onSubmit = async (data: FormData) => {
-    console.log("Inside form submission");
-    console.log(data);
+  // Inside onSubmit function
+const onSubmit = async (data: FormData) => {
+  console.log("Inside form submission");
+  console.log(data);
 
-    // Transform the items data into the required format
-    const transformedItems: OrderItem[] = data.items.map((item) => {
-      const productData = mockItemsData.find(
-        (product) => product.itemId === item.itemId
-      );
-      if (!productData) {
-        return {
-          itemId: item.itemId,
-          quantity: item.quantity,
-          price: 0,
-          total: 0,
-          sku: "Unknown",
-          category: "Unknown",
-          itemName: "unknown",
-        };
-      }
+  // Transform items
+  const transformedItems: OrderItem[] = data.items.map((item) => {
+    const productData = mockItemsData.find(
+      (product) => product.itemId === item.itemId
+    );
 
+    if (!productData) {
       return {
-        itemId: productData.itemId,
+        itemId: item.itemId,
         quantity: item.quantity,
-        price: productData.price,
-        total: productData.price * item.quantity,
-        sku: productData.sku,
-        category: productData.category,
-        itemName: productData.name,
+        price: 0,
+        total: 0,
+        sku: "Unknown",
+        category: "Unknown",
+        itemName: "unknown",
       };
-    });
-
-    // Create a new order object
-    const newOrder: OrderType = {
-      id: "Dy-001",
-      orderDate: data.orderDate.toDateString(),
-      status: "processing",
-      paymentStatus: "pending",
-      totalAmount: 444,
-      items: transformedItems,
-      customer: {
-        name: data.customerName,
-        whatsappNumber: whatsappNum,
-        rewardPoint: 0,
-      },
-      createdAt: data.orderDate.toISOString(),
-      updatedAt: data.orderDate.toISOString(),
-    };
-
-    // Add the new order to the store
-    const result = await addOrder(newOrder);
-
-    if (result.success) {
-      toast({
-        title: "Order Added!",
-        description: `The order has been placed for ${data.customerName} successfully.`,
-      });
-
-      // Handle WhatsApp sending logic if the checkbox is checked
-      if (sendToWhatsapp) {
-        const messageBody = [
-          data.customerName,
-          newOrder.id,
-          data.orderDate.toDateString(),
-          transformedItems
-            .map((item) => `- ${item.quantity} × ${item.itemName}`)
-            .join(", "),
-        ];
-
-        console.log("Message body:", messageBody);
-
-        // Check for missing details in messageBody
-        if (messageBody.some((item) => !item)) {
-          toast({
-            title: "Error",
-            description: "The message body is missing some details.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        try {
-          const whatsappResponse = await fetch("/api/order-received", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              phoneNumber: whatsappNum,
-              messageBody,
-            }),
-          });
-
-          const whatsappResult = await whatsappResponse.json();
-          // console.log(whatsappResult);
-
-          if (whatsappResult.success) {
-            toast({
-              title: "Message Sent!",
-              description: `Order details sent to ${data.customerName} on WhatsApp.`,
-            });
-          } else {
-            toast({
-              title: "Failed to Send Message",
-              description: whatsappResult.message || "Unknown error",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
-          console.error("Error sending WhatsApp message:", error);
-          toast({
-            title: "Error",
-            description:
-              "There was an error sending the message. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }
     }
 
-    handleDialogClose();
-    setOpen(false);
-    console.log(newOrder);
+    return {
+      itemId: productData.itemId,
+      quantity: item.quantity,
+      price: productData.price,
+      total: productData.price * item.quantity,
+      sku: productData.sku,
+      category: productData.category,
+      itemName: productData.name,
+    };
+  });
+
+  // ✅ Calculate total amount
+  const totalAmount = transformedItems.reduce(
+    (acc, item) => acc + item.total,
+    0
+  );
+
+  // ✅ Create newOrder with correct status & amount
+  const newOrder: OrderType = {
+    id: "Dy-001",
+    orderDate: data.orderDate.toDateString(),
+    status: status, // <- use actual status here
+    paymentStatus: "pending",
+    totalAmount: totalAmount,
+    items: transformedItems,
+    customer: {
+      name: data.customerName,
+      whatsappNumber: whatsappNum,
+      rewardPoint: 0,
+    },
+    createdAt: data.orderDate.toISOString(),
+    updatedAt: data.orderDate.toISOString(),
   };
 
-  const handleDialogClose = () => {
-    methods.reset();
-  };
+  // Save to Firestore
+  const result = await addOrder(user?.uid,newOrder);
+
+  if (result.success) {
+    toast({
+      title: "Order Added!",
+      description: `The order has been placed for ${data.customerName} successfully.`,
+    });
+
+    if (sendToWhatsapp) {
+      const messageBody = [
+        data.customerName,
+        newOrder.id,
+        data.orderDate.toDateString(),
+        transformedItems
+          .map((item) => `- ${item.quantity} × ${item.itemName}`)
+          .join(", "),
+      ];
+
+      if (messageBody.some((item) => !item)) {
+        toast({
+          title: "Error",
+          description: "The message body is missing some details.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        const whatsappResponse = await fetch("/api/order-received", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phoneNumber: whatsappNum,
+            messageBody,
+          }),
+        });
+
+        const whatsappResult = await whatsappResponse.json();
+
+        if (whatsappResult.success) {
+          toast({
+            title: "Message Sent!",
+            description: `Order details sent to ${data.customerName} on WhatsApp.`,
+          });
+        } else {
+          toast({
+            title: "Failed to Send Message",
+            description: whatsappResult.message || "Unknown error",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error sending WhatsApp message:", error);
+        toast({
+          title: "Error",
+          description: "There was an error sending the message. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  }
+
+  handleDialogClose();
+  setOpen(false);
+  console.log(newOrder);
+};
+
+// Inside handleDialogClose function
+const handleDialogClose = () => {
+  methods.reset();
+  setWhatsappNum("");
+  setSendToWhatsapp(false);
+  setStatus("pending");
+};
+
 
   const handleDialogOpen = () => {
     setOpen(true);

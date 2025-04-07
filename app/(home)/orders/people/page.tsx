@@ -67,7 +67,7 @@ export default function People() {
 
         {/* Customer Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-  {customers.map((cust, idx) => (
+  {mockCustomers.map((cust, idx) => (
     <div
       key={idx}
       className=" backdrop-blur-md border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow p-6 relative overflow-hidden group"

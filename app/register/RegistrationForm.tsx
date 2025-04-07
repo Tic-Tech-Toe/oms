@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,23 +13,16 @@ export default function RegisterForm() {
 
   const secret = params.get("secret");
   const [name, setName] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [company, setCompany] = useState("");
-  const [whatsappSecret, setWhatsappSecret] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!name || !whatsappSecret || !password || !confirmPassword) {
+    if (!name || !whatsappNumber || !company) {
       toast({
-        title: "Please fill all required fields",
+        title: "Please fill all fields",
         variant: "destructive",
       });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({ title: "Passwords do not match", variant: "destructive" });
       return;
     }
 
@@ -41,9 +34,8 @@ export default function RegisterForm() {
         body: JSON.stringify({
           secret,
           name,
+          whatsappNumber,
           company,
-          whatsappSecret,
-          password,
         }),
       });
 
@@ -53,7 +45,7 @@ export default function RegisterForm() {
           title: "Request sent!",
           description: "Waiting for admin approval ✅",
         });
-        router.push("/thank-you"); // optional
+        router.push("/thank-you");
       } else {
         toast({
           title: "Error",
@@ -93,49 +85,23 @@ export default function RegisterForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Company Name{" "}
-            <span className="text-xs text-muted-foreground">(optional)</span>
+            WhatsApp Number
           </label>
           <Input
-            placeholder="Company name"
+            placeholder="Enter your WhatsApp number"
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+            className="focus-visible:ring-2 focus-visible:ring-light-primary"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Company</label>
+          <Input
+            type="text"
+            placeholder="Your company or startup"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="focus-visible:ring-2 focus-visible:ring-light-primary"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            WhatsApp Secret
-          </label>
-          <Input
-            placeholder="Something only you remember"
-            value={whatsappSecret}
-            onChange={(e) => setWhatsappSecret(e.target.value)}
-            className="focus-visible:ring-2 focus-visible:ring-light-primary"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <Input
-            type="password"
-            placeholder="Create a password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="focus-visible:ring-2 focus-visible:ring-light-primary"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Confirm Password
-          </label>
-          <Input
-            type="password"
-            placeholder="Re-enter password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
             className="focus-visible:ring-2 focus-visible:ring-light-primary"
           />
         </div>

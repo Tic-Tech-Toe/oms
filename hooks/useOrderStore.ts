@@ -1,18 +1,20 @@
 import { create } from "zustand";
-import { orders } from "@/data/orders";
 import { OrderType } from "@/types/orderType";
+import { getOrders , addOrder as addOrderToFirestore } from "@/utils/getFireStoreOrders";
+// import { getOrders, addOrder as addOrderToFirestore } from 
+
 
 interface OrderAppState {
   allOrders: OrderType[];
   selectedOrder: OrderType | null;
   isLoading: boolean;
   openEditDialog: boolean;
-  
+
   setSelectedOrder: (order: OrderType | null) => void;
   setOpenEditDialog: (open: boolean) => void;
-  
-  loadAllOrders: () => Promise<void>;
-  addOrder: (newOrder: OrderType) => Promise<{ success: boolean }>;
+
+  loadAllOrders: (userId: string) => Promise<void>;
+  addOrder: (userId: string, newOrder: OrderType) => Promise<{ success: boolean }>;
   updateOrder: (orderId: string, updatedFields: Partial<OrderType>) => void;
 }
 
@@ -25,39 +27,27 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   setSelectedOrder: (order) => set({ selectedOrder: order }),
   setOpenEditDialog: (open) => set({ openEditDialog: open }),
 
-  loadAllOrders: async () => {
+  loadAllOrders: async (userId) => {
     set({ isLoading: true });
-    console.log("Fetching orders...");
-  
     try {
-      const fetchedOrders = await new Promise<OrderType[]>((resolve) =>
-        setTimeout(() => resolve(orders), 100) // Simulating API fetch
-      );
-  
-      // console.log("✅ Orders Fetched:", fetchedOrders);
-      set({ allOrders: fetchedOrders });
+      const orders = await getOrders(userId);
+      set({ allOrders: orders });
     } catch (error) {
-      console.error("❌ Error fetching orders:", error);
+      console.error("Error loading orders from Firestore:", error);
     } finally {
       set({ isLoading: false });
     }
   },
-  
 
-  addOrder: async (newOrder) => {
+  addOrder: async (userId, newOrder) => {
     try {
-      console.log("Adding order:", newOrder);
-      // set((state) => ({ allOrders: [...state.allOrders, newOrder] }));
-      set((state) => {
-        console.log("Before adding:", state.allOrders);
-        const updatedOrders = [...state.allOrders, newOrder];
-        console.log("After adding:", updatedOrders);
-        return { allOrders: updatedOrders };
-      });
-      
+      await addOrderToFirestore(userId, newOrder);
+      set((state) => ({
+        allOrders: [...state.allOrders, newOrder],
+      }));
       return { success: true };
     } catch (error) {
-      console.error("Error adding order:", error);
+      console.error("Error adding order to Firestore:", error);
       return { success: false };
     }
   },
@@ -67,15 +57,8 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
       const updatedOrders = state.allOrders.map((order) =>
         order.id === orderId ? { ...order, ...updatedFields } : order
       );
-
-      if (!updatedOrders.some(order => order.id === orderId)) {
-        console.error(`🚨 Order ID ${orderId} not found in allOrders.`);
-        return state; // No update applied
-      }
-  
-      console.log("🔄 Updated Orders in Zustand Store:", updatedOrders);
       return { allOrders: updatedOrders };
     });
+    // Optional: Also sync changes to Firestore if needed
   },
-  
 }));

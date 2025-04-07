@@ -35,19 +35,19 @@ export interface PaginationType {
   pageSize: number;
 }
 
-const TableArea = () => {
-  const { loadAllOrders, allOrders } = useOrderStore();
+const TableArea = ({allOrders}:{allOrders:[]}) => {
+  // const { loadAllOrders, allOrders } = useOrderStore();
   const [sorting, setSorting] = React.useState<SortingState>([])
-  // const loadOrders = useCallback(loadAllOrders, []);
-  // const loadOrders = useCallback(() => {
-  //   loadAllOrders();
-  // }, []);
+  // // const loadOrders = useCallback(loadAllOrders, []);
+  // // const loadOrders = useCallback(() => {
+  // //   loadAllOrders();
+  // // }, []);
   
-  useEffect(() => {
-    loadAllOrders();
-  }, [loadAllOrders]); 
+  // useEffect(() => {
+  //   loadAllOrders();
+  // }, [loadAllOrders]); 
 
-  console.log(allOrders);
+  // console.log(allOrders);
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
     {
@@ -80,9 +80,9 @@ const TableArea = () => {
     pageSize: 8,
   });
 
-  useEffect(() => {
-    loadAllOrders();
-  }, [loadAllOrders]);
+  // useEffect(() => {
+  //   loadAllOrders();
+  // }, [loadAllOrders]);
 
   const filteredData = useMemo(() => {
     if (activeTab === "all") return allOrders;

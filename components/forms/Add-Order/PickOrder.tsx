@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { debounce } from "lodash";
 import { mockItemsData } from "@/data/item";
 import ShoppingBagDialog from "@/components/ShoppingBagDialog";
+import { auth } from "@/app/config/firebase";
 
 const PickOrderField = () => {
   const { setValue, formState: { errors } } = useFormContext();
@@ -33,6 +34,8 @@ const PickOrderField = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { toast } = useToast();
   const inputRef = useRef(null);
+
+  const user=auth.currentUser
 
   const onSearchProduct = useCallback(
     debounce((query) => {
@@ -123,13 +126,13 @@ const PickOrderField = () => {
                       className="p-3 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-all"
                     >
                       <div className="flex items-center justify-between px-2 gap-2">
-                        <Image
+                        {/* <Image
                           src={product.itemImage || "/fallback-image.png"}
                           alt={product.name}
                           width={32}
                           height={32}
                           className="rounded-md"
-                        />
+                        /> */}
                         <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200 flex-1 ml-4">
                           {product.name}
                         </span>

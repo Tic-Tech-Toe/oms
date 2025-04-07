@@ -44,16 +44,16 @@ export default function Inventory() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {mockItemsData.map((item) => (
             <div
               key={item.itemId}
               className="rounded-3xl border dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all p-4"
             >
-              <img
+              {/* <img
                 src={item.itemImage}
                 alt={item.name}
                 className="w-full h-40 object-cover rounded-2xl mb-3"
-              />
+              /> */}
               <h2 className="text-2xl font-semibold">{item.name}</h2>
               <p className="text-gray-500 text-sm">₹{item.price}</p>
               {item.category && (

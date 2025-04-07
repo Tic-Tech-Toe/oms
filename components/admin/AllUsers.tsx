@@ -64,7 +64,7 @@ const AllUsers = () => {
               <div>
                 <h4 className="text-lg font-medium flex items-center gap-1">
                   {isAdmin && <span className="text-yellow-500">👑</span>}
-                  {user.displayName}
+                  {user.name}
                 </h4>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
