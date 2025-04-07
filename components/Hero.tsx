@@ -8,7 +8,7 @@ import Iphone15Pro from "./magicui/iphone-15-pro";
 import { Safari } from "./magicui/safari";
 import { InteractiveHoverButton } from "./magicui/interactive-hover-button";
 
-const Hero = () => {
+const Hero = ({id}:{id:string}) => {
   const [showCTA, setShowCTA] = useState(false);
 
   useEffect(() => {
@@ -29,9 +29,9 @@ const Hero = () => {
   };
 
   return (
-    <section  className="w-full flex md:flex-row flex-col mt-8 md:px-10 py-4 gap-6">
+    <section  className="w-full flex md:flex-row flex-col mt-10 md:px-10 py-4 gap-6" id={id}>
       {/* Left Content Block */}
-      <div className="md:flex-1 px-6 md:px-0">
+      <div className="md:flex-1 px-6 md:px-0 mt-10">
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
@@ -67,9 +67,10 @@ const Hero = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
-        className="md:flex-1 rounded-3xl relative md:mt-0 mt-6 py-4"
+        data-theme="dark"
+        className="md:flex-1 rounded-3xl relative md:mt-0 mt-6 py-4 dark"
       >
-        <Safari url="shiptrack.com" className="size-full" imageSrc="./webMock.jpg" />
+        <Safari url="shiptrack.com" className="size-full" imageSrc="./webMock.jpg"  />
         <Iphone15Pro className="size-[70%] absolute bottom-0" src="./whatsappMock.jpg" stroke="2px" />
       </motion.div>
     </section>

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ["lh3.googleusercontent.com"], // ✅ Allow Google profile pictures
+    domains: ["lh3.googleusercontent.com", "firebasestorage.googleapis.com"], 
   },
   matcher: ['/orders/:path*'],
 };

@@ -22,9 +22,9 @@ const features = [
   },
 ];
 
-const GenJaadu = () => {
+const GenJaadu = ({ id }: { id?: string }) => {
   return (
-    <section className="relative w-full py-20 px-6 md:px-20 bg-black text-white overflow-hidden">
+    <section className="relative w-full py-20 px-6 md:px-20 bg-black text-white overflow-hidden" id={id}>
       {/* Floating Icons */}
       <FloatingIcon xRange={15} yRange={10} delay={0} className="top-10 left-10">
         📦

@@ -32,9 +32,9 @@ const Overview = () => {
   };
 
   return (
-    <div className='md:mt-20'>
+    <div className=''>
       <div>
-        <h1 className="text-3xl font-bold px-4 py-2">Order Dashboard</h1>
+        <h1 className="text-3xl font-bold px-4 py-2 font-satoshi">Order Dashboard</h1>
       </div>
       
 

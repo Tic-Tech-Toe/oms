@@ -1,75 +1,40 @@
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { auth, db } from "@/app/config/firebase";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 
-// ✅ Define the shape of AuthContext
+import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
+} from "firebase/auth";
+import { auth } from "@/app/config/firebase";
+import { useRouter } from "next/navigation";
+
 interface AuthContextType {
-  user: Record<string, any> | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  user: User | null;
+  login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
+  loading: boolean;
 }
 
-// ✅ Create Context with a default value of `null`
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: async () => {},
+  logout: async () => {},
+  loading: true,
+});
 
-// ✅ Define Props for the Provider
-interface AuthProviderProps {
-  children: ReactNode;
-}
+export const useAuth = () => useContext(AuthContext);
 
-// ✅ Fetch user data from Firestore & update if needed
-export const fetchUserData = async (user: User) => {
-  try {
-    const userDocRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userDocRef);
-
-    let profilePic = user.photoURL || null; // From Firebase Auth
-
-    if (userSnap.exists()) {
-      const existingData = userSnap.data();
-      profilePic = existingData.profilePic || profilePic; // Prefer Firestore pic
-
-      // ✅ Only update Firestore if profilePic is missing or outdated
-      if (!existingData.profilePic || existingData.profilePic !== profilePic) {
-        await setDoc(userDocRef, { profilePic }, { merge: true });
-      }
-
-      return { ...existingData, profilePic };
-    } else {
-      console.log("New user detected. Creating profile...");
-      const newUserData = {
-        displayName: user.displayName || "",
-        email: user.email || "",
-        profilePic: profilePic || "default-avatar-url", // ✅ Fallback avatar
-      };
-      await setDoc(userDocRef, newUserData);
-      return newUserData;
-    }
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return null;
-  }
-};
-
-
-// ✅ AuthProvider Component
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<Record<string, any> | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const userData = await fetchUserData(currentUser);
-        if (userData) {
-          setUser({ uid: currentUser.uid, email: currentUser.email, ...userData });
-        }
-      } else {
-        setUser(null);
-      }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user || null);
       setLoading(false);
     });
 
@@ -77,38 +42,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userData = await fetchUserData(userCredential.user);
-
-      if (userData) {
-        setUser({ uid: userCredential.user.uid, email: userCredential.user.email, ...userData });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    }
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    setUser(userCredential.user);
+    return userCredential; // 👈 Must return this
   };
 
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
-    // Optional: Refresh the page (React Router should handle it automatically)
-    window.location.href = "/";
+    setLoading(true);
+    try {
+      await signOut(auth);
+      setUser(null);
+
+      // Also remove the session cookie on the backend
+      await fetch("/api/logout", { method: "POST" });
+      await router.push("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-// ✅ Custom hook to use authentication context
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };

@@ -1,28 +1,28 @@
-"use client"
+"use client";
 
-import { AuthProvider } from '@/app/context/AuthContext'
-import MainHead from '@/components/MainHead'
-import Sidebar from '@/components/Sidebar'
+import { AuthProvider } from "@/app/context/AuthContext";
+import MainHead from "@/components/MainHead";
+import Sidebar from "@/components/Sidebar";
 // import ThemeSwitch from '@/components/ThemeSwitch'
-import Topbar from '@/components/Topbar'
-import React from 'react'
+import Topbar from "@/components/Topbar";
+import React from "react";
 
-const Layout = ({children}:{children:React.ReactNode}) => {
-    
+const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className='dark:bg-dark-dark-gray bg-light-background flex md:flex-row flex-col relative'>
+    <div className="flex flex-col md:flex-row bg-light-background dark:bg-dark-dark-gray min-h-screen">
+      {/* Sidebar */}
+      <Sidebar />
 
-        <Sidebar />
-        {/* <div><ThemeSwitch /></div> */}
+      {/* Main Content Area */}
+      <div className="flex flex-col w-full h-screen">
         <Topbar />
-        {/* <h1 className='text-4xl dark:text-dark-text-primary text-light-text-primary'>Root</h1> */}
-        {/* <div></div> */}
-        <div className="overflow-y-auto h-screen w-full">
-        <MainHead />
-        {children}
+        <main className="flex-1 overflow-y-auto">
+          <MainHead />
+          {children}
+        </main>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

@@ -37,7 +37,7 @@ const WhatsAppNumberField = ({setWhatsappNum}) => {
           type="text"
           id="whatsapp-no"
           onChange={(num) => setWhatsappNum("91"+num.target.value)}
-          className="h-11 shadow-none"
+          className="h-11 shadow-none rounded-xl"
           placeholder="Enter number .."
         />
       </div>

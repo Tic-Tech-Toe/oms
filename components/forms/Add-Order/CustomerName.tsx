@@ -48,13 +48,13 @@ const CustomerNameField = () => {
         <Input
           type="text"
           id="customer-name"
-          className="h-11 shadow-none"
+          className="h-11 shadow-none rounded-xl"
           placeholder="Enter name .."
           {...register("customerName")}
         />
       </div>
       {nameSuggestions.length > 0 && (
-        <div className="absolute w-full mt-1 bg-white z-10 shadow-lg border rounded-md">
+        <div className="absolute w-full mt-1 bg-white z-10 shadow-lg border rounded-xl">
           {nameSuggestions.map((customer) => (
             <div
               key={customer.name}

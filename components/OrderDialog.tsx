@@ -54,7 +54,9 @@ const OrderDialog = () => {
 
     // Transform the items data into the required format
     const transformedItems: OrderItem[] = data.items.map((item) => {
-      const productData = mockItemsData.find((product) => product.itemId === item.itemId);
+      const productData = mockItemsData.find(
+        (product) => product.itemId === item.itemId
+      );
       if (!productData) {
         return {
           itemId: item.itemId,
@@ -82,14 +84,14 @@ const OrderDialog = () => {
     const newOrder: OrderType = {
       id: "Dy-001",
       orderDate: data.orderDate.toDateString(),
-      status: 'processing',
-      paymentStatus:'pending',
-      totalAmount: 444, 
+      status: "processing",
+      paymentStatus: "pending",
+      totalAmount: 444,
       items: transformedItems,
       customer: {
         name: data.customerName,
         whatsappNumber: whatsappNum,
-        rewardPoint:0,
+        rewardPoint: 0,
       },
       createdAt: data.orderDate.toISOString(),
       updatedAt: data.orderDate.toISOString(),
@@ -110,7 +112,9 @@ const OrderDialog = () => {
           data.customerName,
           newOrder.id,
           data.orderDate.toDateString(),
-          transformedItems.map((item) => `- ${item.quantity} × ${item.itemName}`).join(", "),
+          transformedItems
+            .map((item) => `- ${item.quantity} × ${item.itemName}`)
+            .join(", "),
         ];
 
         console.log("Message body:", messageBody);
@@ -156,7 +160,8 @@ const OrderDialog = () => {
           console.error("Error sending WhatsApp message:", error);
           toast({
             title: "Error",
-            description: "There was an error sending the message. Please try again.",
+            description:
+              "There was an error sending the message. Please try again.",
             variant: "destructive",
           });
         }
@@ -188,46 +193,128 @@ const OrderDialog = () => {
           Add Order
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-7 px-8 max-h-screen w-[90vw] sm:max-h[90vh] max-sm:w-full overflow-auto">
+      <DialogContent className="animate-in fade-in-0 zoom-in-95 p-7 px-8 w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto max-sm:w-full max-sm:max-h-[85vh] backdrop-blur-xl border border-zinc-300/20 dark:border-white/10 shadow-2xl rounded-xl transition-all duration-300">
         <DialogHeader>
-          <DialogTitle className="text-xl">Add Order</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-[20px] font-medium text-zinc-900 dark:text-zinc-100">
+            Add Order
+          </DialogTitle>
+          <DialogDescription className="text-sm text-zinc-500 dark:text-zinc-400">
             Fill the form to add a new order
           </DialogDescription>
         </DialogHeader>
         <Separator />
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 max-sm:gap-0">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-6">
               <CustomerNameField />
-              <WhatsAppNumberField  setWhatsappNum={setWhatsappNum} />
+              <WhatsAppNumberField setWhatsappNum={setWhatsappNum} />
             </div>
-            <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1 max-sm:gap-0">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-4">
               <OrderStatus status={status} setStatus={setStatus} />
               <OrderDate />
             </div>
             <PickOrderField />
 
-            <DialogFooter className="mt-11 mb-4 grid grid-cols-5 gap-2 h-14">
-              <Button className="col-span-1 bg-red-300 hover:bg-red-600 h-full text-3xl" variant={'secondary'} onClick={handleDialogClose}>
-                <X strokeWidth={3} fill="none" className=" h-14 w-14"/>
-              </Button>
+            <DialogFooter className="mt-10 mb-4 w-full">
+              {/* Mobile layout */}
+              <div className="sm:hidden flex flex-col gap-4 w-full">
+                <div className="flex justify-between items-center gap-4">
+                  {/* Cancel Button */}
+                  <Button
+                    type="button"
+                    onClick={handleDialogClose}
+                    className="h-12 w-1/2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-red-100 dark:hover:bg-red-900 transition-all duration-150 flex items-center justify-center"
+                    variant="ghost"
+                  >
+                    <X className="w-5 h-5" strokeWidth={2.5} />
+                  </Button>
 
-              <div className="rounded-md border-2 border-light-primary col-span-2 flex items-center justify-center">
-                <div>
-                  <input
-                    type="checkbox"
-                    checked={sendToWhatsapp}
-                    onChange={handleSendToWhatsapp}
-                    className="mr-2"
-                  />
-                  <span className="text-center">Send to WhatsApp</span>
+                  {/* WhatsApp Toggle */}
+                  <label className="w-1/2 flex items-center justify-center gap-3 h-12 px-2 border-2 rounded-xl transition-all duration-150 cursor-pointer hover:shadow-md border-light-primary dark:border-zinc-600">
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      WhatsApp
+                    </span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={sendToWhatsapp}
+                        onChange={handleSendToWhatsapp}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-10 h-5 flex items-center rounded-full p-1 duration-300 ease-in-out ${
+                          sendToWhatsapp
+                            ? "bg-green-500"
+                            : "bg-zinc-300 dark:bg-zinc-600"
+                        }`}
+                      >
+                        <div
+                          className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                            sendToWhatsapp ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </label>
                 </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="h-12 w-full rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold tracking-wide shadow-md transition-all"
+                >
+                  Add Order
+                </Button>
               </div>
 
-              <Button type="submit" className="col-span-2 h-full bg-dark-primary text-xl text-white shadow-none">
-                Add order
-              </Button>
+              {/* Desktop layout */}
+              <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+                {/* Cancel Button */}
+                <Button
+                  type="button"
+                  onClick={handleDialogClose}
+                  className="h-12 w-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-red-100 dark:hover:bg-red-900 transition-all duration-150 flex items-center justify-center"
+                  variant="ghost"
+                >
+                  <X className="w-5 h-5" strokeWidth={2.5} />
+                </Button>
+
+                {/* WhatsApp Toggle */}
+                <label className="w-full sm:flex-1 flex items-center justify-center gap-3 h-12 px-4 border-2 rounded-xl transition-all duration-150 cursor-pointer hover:shadow-md border-light-primary dark:border-zinc-600">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Send to WhatsApp
+                  </span>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={sendToWhatsapp}
+                      onChange={handleSendToWhatsapp}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-10 h-5 flex items-center rounded-full p-1 duration-300 ease-in-out ${
+                        sendToWhatsapp
+                          ? "bg-green-500"
+                          : "bg-zinc-300 dark:bg-zinc-600"
+                      }`}
+                    >
+                      <div
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                          sendToWhatsapp ? "translate-x-5" : ""
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </label>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="h-12 w-full sm:flex-[2] rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold tracking-wide shadow-md transition-all"
+                >
+                  Add Order
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </FormProvider>
