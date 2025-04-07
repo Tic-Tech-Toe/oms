@@ -28,7 +28,7 @@ import {
 import { auth } from "@/app/config/firebase";
 import { useAuth } from "@/app/context/AuthContext";
 import { fetchUserData } from "@/utils/fetchUseData";
-import {updateUserDetailsIfExists } from "@/utils/createupdateuser";
+// import {updateUserDetailsIfExists } from "@/utils/createupdateuser";
 import { MagicCard } from "./magicui/magic-card";
 import { FaGoogle } from "react-icons/fa";
 
