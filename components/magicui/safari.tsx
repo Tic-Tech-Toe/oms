@@ -1,4 +1,5 @@
-import { SVGProps } from "react";
+import Image from "next/image";
+import React, { SVGProps } from "react";
 
 type SafariMode = "default" | "simple";
 
@@ -138,15 +139,23 @@ export function Safari({
           </>
         ) : null}
         {imageSrc && (
-          <image
-            href={imageSrc}
-            width="1200"
-            height="700"
-            x="1"
-            y="52"
-            preserveAspectRatio="xMidYMid slice"
-            clipPath="url(#roundedBottom)"
-          />
+          <foreignObject x="1" y="52" width="1200" height="700" clipPath="url(#roundedBottom)">
+          {
+            React.createElement("div", {
+              xmlns: "http://www.w3.org/1999/xhtml",
+              style: { width: "100%", height: "100%" }
+            }, (
+              <Image
+                src={imageSrc}
+                alt="Mockup"
+                width={1200}
+                height={700}
+                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                loading="lazy"
+              />
+            ))
+          }
+        </foreignObject>
         )}
         {videoSrc && (
           <foreignObject

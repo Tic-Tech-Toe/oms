@@ -1,9 +1,9 @@
-import { OrderType } from '@/types/orderType'
+import { CustomerType, OrderType } from '@/types/orderType'
 import { ShoppingCart, User } from 'lucide-react'
 import React from 'react'
 import CountUp from 'react-countup';
 
-const OrderCustomerRel = ({customer}:{customer:any}) => {
+const OrderCustomerRel = ({customer}:{customer:CustomerType}) => {
     // const {customer}=order.customer
     // console.log(customer)
   return (
@@ -20,7 +20,7 @@ const OrderCustomerRel = ({customer}:{customer:any}) => {
                     <User size={14} /> <span className='text-sm text-gray-600 font-medium dark:text-gray-300'>{customer.name}</span>
                 </div>
                 <div className='flex gap-2 items-center'>
-                    <ShoppingCart size={14} /> <span className='text-sm text-gray-600 font-medium dark:text-gray-300'>{`6 Orders`}</span>
+                    {/* <ShoppingCart size={14} /> <span className='text-sm text-gray-600 font-medium dark:text-gray-300'>{`6 Orders`}</span> */}
                 </div>
             </div>
         </div>

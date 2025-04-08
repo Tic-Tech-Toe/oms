@@ -29,7 +29,7 @@ const OrderPaymentCollect = ({
     const totalAmount = order?.totalAmount ?? 0;
     const rewardPoints = redeemReward ? order?.customer?.rewardPoint ?? 0 : 0;
     const totalAfterDiscount = Math.max(totalAmount - rewardPoints, 0);
-    const totalPaid = order.payment?.totalPaid ?? 0;
+    const totalPaid = order.payment?.totalPaid || 0;
 
     return Math.max(totalAfterDiscount - totalPaid, 0);
   };
@@ -71,7 +71,7 @@ const OrderPaymentCollect = ({
 
     console.log(`✅ Order updated in Zustand Store! (New Reward: ${newRewardPoints})`);
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // await new Promise((resolve) => setTimeout(resolve, 100));
 
     console.log("🔹 After Update:", useOrderStore.getState().allOrders.find(o => o.id === order.id));
 
@@ -107,6 +107,7 @@ const OrderPaymentCollect = ({
             )}
             <div className="flex justify-between text-sm font-semibold">
               Paid by customer <span>{useCurrency(order.payment.totalPaid)}</span>
+              {/* Paid by customer <span>{useCurrency(order.payment.totalPaid)}</span> */}
             </div>
 
             <div className="h-[2px] mt-6 bg-gray-600 dark:bg-gray-300 rounded-full" />

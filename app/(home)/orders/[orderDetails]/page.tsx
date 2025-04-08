@@ -12,6 +12,7 @@ import OrderPaymentDetailComponent from "@/components/OrderPaymentDetailComponen
 import { getBadgeClass } from "@/components/Table/columns";
 import OrderCustomerRel from "@/components/OrderCustomerRel";
 import { useOrderStore } from "@/hooks/useOrderStore" // ✅ Import Zustand Store
+import OrderTimeline from "@/components/OrderTimeline";
 
 
 
@@ -54,7 +55,7 @@ useEffect(() => {
           text="Review items"
           order={order}
           status={order.status}
-          buttonOne="Fulfill Item"
+          buttonOne="Order processed"
           buttonTwo="Update order"
         />
       ),
@@ -88,7 +89,7 @@ useEffect(() => {
     router.back(); // Go back without re-rendering
   };
   return (
-    <div className="md:mt-20 px-4">
+    <div className=" px-4">
       <span className="px-2 md:py-0 py-1 font-bold font-mono text-sm text-gray-400">
         <Link
           href="/orders"
@@ -111,20 +112,20 @@ useEffect(() => {
             >
               Payment {order.paymentStatus}
             </Badge>
-            <span>reward:{order.customer.rewardPoint}</span>
+            {/* <span>reward:{order.customer.rewardPoint}</span> */}
           </div>
           <span className="text-sm font-semibold">{order.orderDate}</span>
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="flex gap-2   rounded">
+          {/* <div className="flex gap-2   rounded">
             <button className="flex items-center gap-1 px-2 py-1  text-sm bg-light-light-gray dark:bg-gray-800 rounded-md">
               <Edit size={16} /> Edit
             </button>
             <button className="flex items-center gap-1 px-2 py-1  text-sm bg-light-light-gray dark:bg-gray-800 rounded-md">
               More actions <ArrowDown size={16} />
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -151,6 +152,10 @@ useEffect(() => {
         <div className="w-full md:w-1/3">
           <div className="p-4 border rounded-2xl shadow-xl">
             <OrderCustomerRel customer={order.customer} />
+          </div>
+          <div className="p-4 border rounded-2xl shadow-xl mt-4">
+            <OrderTimeline timeline={order.timeline} />
+
           </div>
         </div>
       </div>

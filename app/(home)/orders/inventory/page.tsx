@@ -44,7 +44,7 @@ export default function Inventory() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockItemsData.map((item) => (
+          {items.map((item) => (
             <div
               key={item.itemId}
               className="rounded-3xl border dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all p-4"

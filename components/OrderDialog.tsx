@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 // import { addOrder } from "@/utils/getFireStoreOrders";
 import { auth } from "@/app/config/firebase";
 import { useOrderStore } from "@/hooks/useOrderStore";
+import { getCustomers } from "@/utils/getFirestoreCustomers";
 
 type FormData = z.infer<typeof AddOrderSchema>;
 
@@ -38,10 +39,22 @@ const OrderDialog = () => {
   const [sendToWhatsapp, setSendToWhatsapp] = useState(false);
   const [whatsappNum, setWhatsappNum] = useState("");
   const [status, setStatus] = useState("pending");
+  const [isNewCustomer, setIsNewCustomer] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  
 
   const {addOrder} = useOrderStore();
 
   const user = auth.currentUser;
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      if (!user?.uid) return;
+      const data = await getCustomers(user?.uid);
+      setCustomers(data);
+    };
+    fetchCustomers();
+  }, [user?.uid]);
 
   const methods = useForm<FormData>({
     resolver: zodResolver(AddOrderSchema),
@@ -56,8 +69,8 @@ const OrderDialog = () => {
 
   // Inside onSubmit function
 const onSubmit = async (data: FormData) => {
-  console.log("Inside form submission");
-  console.log(data);
+  // console.log("Inside form submission");
+  // console.log(data);
 
   // Transform items
   const transformedItems: OrderItem[] = data.items.map((item) => {
@@ -95,10 +108,26 @@ const onSubmit = async (data: FormData) => {
   );
 
   // ✅ Create newOrder with correct status & amount
+  // const newOrder: OrderType = {
+  //   id: "Dy-001",
+  //   orderDate: data.orderDate.toDateString(),
+  //   status: status, // <- use actual status here
+  //   paymentStatus: "pending",
+  //   totalAmount: totalAmount,
+  //   items: transformedItems,
+  //   customer: {
+  //     name: data.customerName,
+  //     whatsappNumber: whatsappNum,
+  //     rewardPoint: 0,
+  //   },
+  //   createdAt: data.orderDate.toISOString(),
+  //   updatedAt: data.orderDate.toISOString(),
+  // };
+
   const newOrder: OrderType = {
     id: "Dy-001",
     orderDate: data.orderDate.toDateString(),
-    status: status, // <- use actual status here
+    status: status,
     paymentStatus: "pending",
     totalAmount: totalAmount,
     items: transformedItems,
@@ -109,7 +138,26 @@ const onSubmit = async (data: FormData) => {
     },
     createdAt: data.orderDate.toISOString(),
     updatedAt: data.orderDate.toISOString(),
+  
+    // ✅ Add timeline
+    timeline: [
+      {
+        date: data.orderDate.toISOString(),
+        action: "Order placed",
+      },
+    ],
+  
+    // ✅ Add payment
+    payment: {
+      id: `pay-${new Date().getTime()}`,
+      orderId: "Dy-001",
+      customerId: user?.uid || "unknown",
+      // paymentMethod: data.paymentMethod || "cash on delivery",
+      totalPaid: 0,
+      partialPayments: [],
+    },
   };
+  
 
   // Save to Firestore
   const result = await addOrder(user?.uid,newOrder);
@@ -217,7 +265,8 @@ const handleDialogClose = () => {
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-6">
-              <CustomerNameField />
+              <CustomerNameField customers={customers}  isNewCustomer={isNewCustomer} setIsNewCustomer={setIsNewCustomer}
+               />
               <WhatsAppNumberField setWhatsappNum={setWhatsappNum} />
             </div>
             <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-4">

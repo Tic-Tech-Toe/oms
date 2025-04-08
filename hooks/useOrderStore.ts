@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { OrderType } from "@/types/orderType";
-import { getOrders , addOrder as addOrderToFirestore } from "@/utils/getFireStoreOrders";
+import { getOrders , addOrder as addOrderToFirestore, updateOrderInFirestore } from "@/utils/getFireStoreOrders";
 // import { getOrders, addOrder as addOrderToFirestore } from 
 
 
@@ -52,13 +52,40 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
     }
   },
 
-  updateOrder: (orderId, updatedFields) => {
+  // updateOrder: (orderId, updatedFields) => {
+  //   set((state) => {
+  //     const updatedOrders = state.allOrders.map((order) =>
+  //       order.id === orderId ? { ...order, ...updatedFields } : order
+  //     );
+  //     return { allOrders: updatedOrders };
+  //   });
+  //   // Optional: Also sync changes to Firestore if needed
+  // },
+
+  updateOrder: async (orderId, updatedFields) => {
     set((state) => {
-      const updatedOrders = state.allOrders.map((order) =>
-        order.id === orderId ? { ...order, ...updatedFields } : order
-      );
+      const updatedOrders = state.allOrders.map((order) => {
+        if (order.id !== orderId) return order;
+  
+        return {
+          ...order,
+          ...updatedFields,
+          payment: {
+            ...order.payment,
+            ...(updatedFields.payment || {}),
+          },
+          customer: {
+            ...order.customer,
+            ...(updatedFields.customer || {}),
+          },
+        };
+      });
+  
       return { allOrders: updatedOrders };
     });
-    // Optional: Also sync changes to Firestore if needed
-  },
+  
+    // 🔥 Persist to Firestore
+    const userId = updatedFields?.customer?.id || "default-user-id"; // pass real user ID
+    await updateOrderInFirestore(userId, orderId, updatedFields);
+  }
 }));

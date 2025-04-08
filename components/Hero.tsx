@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { ChevronRight, MoveRight } from "lucide-react";
@@ -9,12 +8,12 @@ import { Safari } from "./magicui/safari";
 import { InteractiveHoverButton } from "./magicui/interactive-hover-button";
 
 const Hero = ({id}:{id:string}) => {
-  const [showCTA, setShowCTA] = useState(false);
+  // const [showCTA, setShowCTA] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowCTA(true), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => setShowCTA(true), 2000);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   const handleClick = () => {
     const message = encodeURIComponent("Hi Ship, I am interested, let us connect.");
@@ -33,14 +32,12 @@ const Hero = ({id}:{id:string}) => {
       {/* Left Content Block */}
       <div className="md:flex-1 px-6 md:px-0 mt-10">
         {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+        <h1
+          
           className="md:text-7xl text-5xl font-clash font-semibold md:w-4/5 leading-tight"
         >
           Manage Orders, Shipments & Inventory in One Click
-        </motion.h1>
+        </h1>
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -50,13 +47,13 @@ const Hero = ({id}:{id:string}) => {
           "No more order delays or inventory mishaps. Get a smart dashboard that keeps everything in check, so you can focus on growing your business."
         </motion.h2>
         {/* Delayed CTA Button */}
-        {showCTA && (
+       
   <div className="gradient-border mt-4 mx-auto ">
     <InteractiveHoverButton className="gradient-border-inner  text-base md:text-lg " onClick={handleClick}>
       Get a Demo
     </InteractiveHoverButton>
   </div>
-)}
+
 
         {/* Subheading */}
         
@@ -66,12 +63,12 @@ const Hero = ({id}:{id:string}) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
+        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
         data-theme="dark"
         className="md:flex-1 rounded-3xl relative md:mt-0 mt-6 py-4 dark"
       >
-        <Safari url="shiptrack.com" className="size-full" imageSrc="./webMock.jpg"  />
-        <Iphone15Pro className="size-[70%] absolute bottom-0" src="./whatsappMock.jpg" stroke="2px" />
+        <Safari url="shiptrack.com" className="size-full" imageSrc="/webMock.jpg"  />
+        {/* <Iphone15Pro className="size-[70%] absolute bottom-0" src="/whatsappMock.jpg" stroke="2px" /> */}
       </motion.div>
     </section>
   );

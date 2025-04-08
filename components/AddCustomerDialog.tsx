@@ -19,8 +19,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Schema
 const AddCustomerSchema = z.object({
+  id:z.string(),
   name: z.string().min(1, "Full Name is required"),
   whatsappNumber: z.string().min(10, "WhatsApp number is required"),
+  rewardPoint:z.number(),
   email: z.string().email().optional(),
   phoneNumber: z.string().optional(),
   alternatePhoneNumber: z.string().optional(),
@@ -40,8 +42,10 @@ export default function AddCustomerDialog({
   const methods = useForm<FormData>({
     resolver: zodResolver(AddCustomerSchema),
     defaultValues: {
+      id: "pers1",
       name: "",
       whatsappNumber: "",
+      rewardPoint: 0,
       email: "",
       phoneNumber: "",
       alternatePhoneNumber: "",

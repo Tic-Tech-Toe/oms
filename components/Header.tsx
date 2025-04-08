@@ -37,7 +37,7 @@ const Header = () => {
   
   return (
     <header className="flex justify-between items-center py-4 px-4 md:px-24 w-full fixed top-0 z-50 backdrop-blur-md mb-6 bg-transparent border-b border-border">
-      <Link href="/" className="text-2xl md:text-3xl font-clash font-bold">
+      <Link href="/" className="text-2xl md:text-3xl font-clash font-bold text-light-primary">
         ShipTrack
       </Link>
 
@@ -50,15 +50,7 @@ const Header = () => {
 
       <div className="flex items-center gap-2">
         <ThemeSwitch />
-        {user ? (
-          <Button
-            variant="destructive"
-            onClick={logout}
-            className="text-white hover:scale-105 transition-transform"
-          >
-            Logout
-          </Button>
-        ): <LoginDialog />}
+        <LoginDialog />
       </div>
     </header>
   );

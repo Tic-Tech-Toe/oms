@@ -1,6 +1,6 @@
 import { db } from "@/app/config/firebase";
 import { OrderType } from "@/types/orderType";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, updateDoc } from "firebase/firestore";
 
 // 🔁 Get all orders for a user
 export const getOrders = async (userId: string): Promise<OrderType[]> => {
@@ -37,5 +37,15 @@ export const addOrder = async (
   } catch (error: any) {
     console.error("Error adding order:", error.message, error.code, error);
     throw error;
+  }
+};
+
+export const updateOrderInFirestore = async (userId: string, orderId: string, updatedFields: Partial<OrderType>) => {
+  const orderRef = doc(db, "users", userId, "orders", orderId);
+  try {
+    await updateDoc(orderRef, updatedFields);
+    console.log("✅ Order updated in Firestore");
+  } catch (error) {
+    console.error("🔥 Error updating order in Firestore:", error);
   }
 };

@@ -40,7 +40,7 @@ const LoginDialog = () => {
   const handleEmailLogin = async () => {
     try {
       setLoading(true);
-      setError("");
+      setError(""); 
       setResetSent(false);
 
       const userCred = await signInWithEmailAndPassword(auth, email, password);
