@@ -25,6 +25,7 @@ import { auth } from "@/app/config/firebase";
 import { useAuth } from "@/app/context/AuthContext";
 import { fetchUserData } from "@/utils/fetchUseData";
 import { MagicCard } from "./magicui/magic-card";
+import { useRouteChange } from "@/app/context/RouteChangeContext";
 
 const LoginDialog = () => {
   const { login } = useAuth();
@@ -37,10 +38,13 @@ const LoginDialog = () => {
   const [resetSent, setResetSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const { setRouteLoading } = useRouteChange();
+
   const handleEmailLogin = async () => {
     try {
-      setLoading(true);
-      setError(""); 
+      // setLoading(true);
+      setRouteLoading(true);
+      setError("");
       setResetSent(false);
 
       const userCred = await signInWithEmailAndPassword(auth, email, password);
@@ -65,7 +69,7 @@ const LoginDialog = () => {
       console.error(err);
       setError("Login failed. Check credentials.");
     } finally {
-      setLoading(false);
+      setRouteLoading(false);
     }
   };
 

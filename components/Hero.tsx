@@ -38,14 +38,14 @@ const Hero = ({id}:{id:string}) => {
         >
           Manage Orders, Shipments & Inventory in One Click
         </h1>
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+        <h2
+          // initial={{ opacity: 0, y: 30 }}
+          // animate={{ opacity: 1, y: 0 }}
+          // transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
           className="text-lg mt-6 md:w-4/5 font-medium dark:text-dark-text-secondary text-dark-dark-gray"
         >
           "No more order delays or inventory mishaps. Get a smart dashboard that keeps everything in check, so you can focus on growing your business."
-        </motion.h2>
+        </h2>
         {/* Delayed CTA Button */}
        
   <div className="gradient-border mt-4 mx-auto ">
@@ -60,16 +60,16 @@ const Hero = ({id}:{id:string}) => {
       </div>
 
       {/* Right Side Mockups */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+      <div
+        // initial={{ opacity: 0, scale: 0.9 }}
+        // animate={{ opacity: 1, scale: 1 }}
+        // transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
         data-theme="dark"
         className="md:flex-1 rounded-3xl relative md:mt-0 mt-6 py-4 dark"
       >
         <Safari url="shiptrack.com" className="size-full" imageSrc="/webMock.jpg"  />
         {/* <Iphone15Pro className="size-[70%] absolute bottom-0" src="/whatsappMock.jpg" stroke="2px" /> */}
-      </motion.div>
+      </div>
     </section>
   );
 };

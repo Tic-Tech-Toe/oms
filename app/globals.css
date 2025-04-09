@@ -204,3 +204,39 @@ html {
 .animate-spin-slow {
   animation: spin-slow 20s linear infinite;
 }
+
+
+
+@keyframes bounce-box {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-24px) rotate(-5deg);
+  }
+}
+
+@keyframes move-belt {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100px 0;
+  }
+}
+
+.animate-bounce-box {
+  animation: bounce-box 1.2s ease-in-out infinite;
+}
+
+.animate-move-belt {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #6b7280 0,
+    #6b7280 10px,
+    #9ca3af 10px,
+    #9ca3af 20px
+  );
+  background-size: 200% 100%;
+  animation: move-belt 1s linear infinite;
+}
