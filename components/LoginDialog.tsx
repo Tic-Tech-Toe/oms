@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/config/firebase";
 import { useAuth } from "@/app/context/AuthContext";
-import { fetchUserData } from "@/utils/fetchUseData";
+import { fetchUserData } from "@/utils/user/fetchUseData";
 import { MagicCard } from "./magicui/magic-card";
 import { useRouteChange } from "@/app/context/RouteChangeContext";
 
@@ -116,7 +116,7 @@ const LoginDialog = () => {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                  className="bg-white/10 border-white/20  placeholder:text-white/40"
                 />
               </div>
               <div className="space-y-2">
@@ -126,7 +126,7 @@ const LoginDialog = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                  className="bg-white/10 border-white/20  placeholder:text-white/40"
                 />
               </div>
 

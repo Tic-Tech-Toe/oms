@@ -1,5 +1,6 @@
 export type ItemType = {
   itemId: string; // Unique identifier for the item
+  quantity:number;
   name: string; // Item name
   price: number; // Price per unit of the item
   itemImage?: string; // URL or path to item image
@@ -25,6 +26,8 @@ export type OrderTimelineEntry = {
 
 export type OrderType = {
   id: string;
+  customerId: string;
+  customer?: CustomerType; // optional for full info in UI
   orderDate: string;
   status: string;
   totalAmount: number;
@@ -32,7 +35,6 @@ export type OrderType = {
   shippingAddress?: string;
   billingAddress?: string;
   items: OrderItem[];
-  customer: CustomerType;
   paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery";
   payment?: PaymentType;
   trackingNumber?: string;
@@ -42,8 +44,9 @@ export type OrderType = {
   cancelationDate?: string;
   createdAt: string;
   updatedAt: string;
-  timeline?: OrderTimelineEntry[]; 
+  timeline?: OrderTimelineEntry[];
 };
+
 
 export type PaymentType = {
   id: string;

@@ -1,90 +1,159 @@
 "use client";
 
-import { ItemType } from "@/types/orderType";
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ItemType } from "@/types/orderType";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
-type AddItemDialogProps = {
+// Schema
+const AddItemSchema = z.object({
+  name: z.string().min(1, "Item name is required"),
+  price: z.number().min(0.01, "Price must be greater than zero"),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
+  itemImage: z.string().optional(),
+  sku: z.string().optional(),
+  category: z.string().optional(),
+});
+
+type FormData = z.infer<typeof AddItemSchema>;
+
+export default function AddItemDialog({
+  onAdd,
+  onClose,
+}: {
   onAdd: (item: ItemType) => void;
   onClose: () => void;
-};
-
-const AddItemDialog: React.FC<AddItemDialogProps> = ({ onAdd, onClose }) => {
-  const [itemData, setItemData] = useState<ItemType>({
-    itemId: crypto.randomUUID(),
-    name: "",
-    price: 0,
-    itemImage: "",
-    sku: "",
-    category: "",
+}) {
+  const methods = useForm<FormData>({
+    resolver: zodResolver(AddItemSchema),
+    defaultValues: {
+      name: "",
+      price: 0,
+      quantity: 1,
+      itemImage: "",
+      sku: "",
+      category: "",
+    },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setItemData((prev) => ({
-      ...prev,
-      [name]: name === "price" ? parseFloat(value) : value,
-    }));
+  const { toast } = useToast(); // ✅ Use toast
+
+  const onSubmit = (data: FormData) => {
+    const itemWithId: ItemType = {
+      itemId: crypto.randomUUID(),
+      ...data,
+    };
+
+    onAdd(itemWithId);
+    toast({
+      title: "Item added",
+      description: `${data.name} added to inventory.`,
+    });
+    methods.reset(); // Clear form
+    onClose(); // ✅ Close dialog
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onAdd(itemData);
-    onClose();
-  };
+  useEffect(() => {
+    methods.reset(); // Reset form when dialog opens
+  }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl w-full max-w-md shadow-xl relative border border-zinc-200 dark:border-zinc-700">
-        <Button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-black dark:hover:text-white transition"
-        >
-          <X className="w-5 h-5" />
-        </Button>
-        <h2 className="text-2xl font-semibold mb-5">Add New Item</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            { label: "Item Name", name: "name", type: "text", required: true },
-            { label: "Price", name: "price", type: "number", required: true },
-            { label: "Image URL", name: "itemImage", type: "text" },
-            { label: "SKU", name: "sku", type: "text" },
-            { label: "Category", name: "category", type: "text" },
-          ].map(({ label, name, type, required }) => (
-            <div className="flex flex-col gap-1" key={name}>
-              <Label htmlFor={name} className="text-sm text-zinc-600 dark:text-zinc-300">
-                {label}
-              </Label>
-              <Input
-                id={name}
-                name={name}
-                type={type}
-                value={itemData[name as keyof ItemType] as string | number}
-                onChange={handleChange}
-                required={required}
-                placeholder={`Enter ${label.toLowerCase()}`}
-              />
-            </div>
-          ))}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="rounded-lg ring-1 ring-red-500 hover:ring-2"
-            >
-              Cancel
-            </Button>
-            <Button type="submit" className="rounded-lg bg-light-primary hover:bg-light-button-hover" variant="default">
-              Add Item
-            </Button>
-          </div>
-        </form>
-      </div>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="p-6 border border-zinc-300/20 dark:border-white/10 shadow-2xl rounded-xl max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent scrollbar-thumb-rounded-full">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">Add Item</DialogTitle>
+          <DialogDescription>
+            Enter item details to add it to inventory
+          </DialogDescription>
+        </DialogHeader>
+        <Separator className="my-3" />
+
+        <FormProvider {...methods}>
+          <form
+            onSubmit={methods.handleSubmit(onSubmit)}
+            className="space-y-4 mt-4"
+          >
+            <FloatingInput name="name" label="Item Name" required />
+            <FloatingInput name="price" label="Price" type="number" required />
+            <FloatingInput
+              name="quantity"
+              label="Quantity"
+              type="number"
+              required
+            />
+            <FloatingInput name="sku" label="SKU" />
+            <FloatingInput name="category" label="Category" />
+            <FloatingInput name="itemImage" label="Image URL" />
+
+            <DialogFooter className="mt-6 flex justify-between items-center">
+              <Button
+                type="button"
+                onClick={onClose}
+                variant="ghost"
+                className="h-10 text-zinc-500 hover:text-red-600"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+              <Button
+                type="submit"
+                className="h-10 px-6 bg-black text-white rounded-md hover:scale-[1.02]"
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FloatingInput({
+  label,
+  name,
+  type = "text",
+  required = false,
+}: {
+  label: string;
+  name: keyof FormData;
+  type?: string;
+  required?: boolean;
+}) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<FormData>();
+
+  return (
+    <div className="relative w-full flex flex-col gap-2">
+      <label htmlFor={name} className="text-slate-600 text-sm font-medium">
+        {label}
+      </label>
+      <input
+        {...register(name, { valueAsNumber: type === "number" })}
+        type={type}
+        placeholder={`Enter ${label.toLowerCase()}`}
+        required={required}
+        className="h-11 px-3 rounded-xl text-sm border shadow-none outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-black transition-all"
+      />
+      {errors[name] && (
+        <p className="text-xs text-red-500 mt-1">
+          {(errors[name]?.message as string) || ""}
+        </p>
+      )}
     </div>
   );
-};
-
-export default AddItemDialog;
+}

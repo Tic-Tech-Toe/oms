@@ -27,7 +27,7 @@ import {
 import { Input } from "../ui/input";
 import Pagination from "../pagination/Pagination";
 import { OrderType } from "@/types/orderType";
-import { useOrderStore } from "@/hooks/useOrderStore"; // Assuming a custom store to manage orders
+import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore"; // Assuming a custom store to manage orders
 import OrderDialog from "../OrderDialog";
 
 export interface PaginationType {
@@ -35,19 +35,9 @@ export interface PaginationType {
   pageSize: number;
 }
 
-const TableArea = ({allOrders}:{allOrders:[]}) => {
-  // const { loadAllOrders, allOrders } = useOrderStore();
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  // // const loadOrders = useCallback(loadAllOrders, []);
-  // // const loadOrders = useCallback(() => {
-  // //   loadAllOrders();
-  // // }, []);
-  
-  // useEffect(() => {
-  //   loadAllOrders();
-  // }, [loadAllOrders]); 
+const TableArea = ({ allOrders }: { allOrders: [] }) => {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  // console.log(allOrders);
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
     {
@@ -86,12 +76,12 @@ const TableArea = ({allOrders}:{allOrders:[]}) => {
 
   const filteredData = useMemo(() => {
     if (activeTab === "all") return allOrders;
-    return allOrders.filter((data) => data.status.toLowerCase() === activeTab);
+    return allOrders.filter((data) => data?.status.toLowerCase() === activeTab);
   }, [activeTab, allOrders]);
 
   const memoizedColumns = useMemo(() => columns, []);
   const memoizedData = useMemo(() => filteredData, [filteredData]);
-  
+
   const table = useReactTable({
     data: memoizedData,
     columns: memoizedColumns,
@@ -103,16 +93,15 @@ const TableArea = ({allOrders}:{allOrders:[]}) => {
     state: {
       pagination,
       columnFilters,
-      sorting
+      sorting,
     },
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    
   });
 
-  useEffect(() => {
-    table.getColumn("customerName")?.setFilterValue(searchQuery);
-  }, [searchQuery, table]);
+  // useEffect(() => {
+  //   table.getColumn("customerName")?.setFilterValue(searchQuery);
+  // }, [searchQuery, table]);
 
   return (
     <Card className="md:m-6 shadow-none">
@@ -125,12 +114,12 @@ const TableArea = ({allOrders}:{allOrders:[]}) => {
           {/* Desktop Tabs List */}
           <div className="flex items-center justify-between mb-4 mt-2 max-md:flex-col max-lg:gap-2 max-sm:items-start">
             <div className="flex px-1 md:px-0 gap-4">
-              <TabsList className="h-10 rounded-xl md:rounded-md">
+              <TabsList className="h-10 rounded-2xl md:rounded-xl">
                 {tabs.map((tab) => (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className={`flex items-center md:gap-4 gap-2 h-8 md:rounded-md rounded-xl transition-all ${
+                    className={`flex items-center md:gap-4 gap-2 h-8 md:rounded-xl rounded-xl transition-all ${
                       activeTab === tab.value
                         ? "bg-light-primary text-white"
                         : "text-gray-600"
@@ -152,27 +141,9 @@ const TableArea = ({allOrders}:{allOrders:[]}) => {
               </TabsList>
             </div>
 
-            {/* SearchBar */}
-            {/* <div className="bg-light-light-gray font-semibold dark:bg-dark-dark-gray flex md:w-2/5 w-full rounded-md justify-around relative  p-2">
-              <Input
-                placeholder="Search..."
-                className="h-10 border-none px-4 text-lg font-semibold rounded-full focus:outline-none focus:ring-0 shadow-none focus:border-none focus-visible:outline-none focus-visible:ring-0 !important"
-                onChange={(e) => setSearchQuery(e.target.value)}
-                value={searchQuery}
-              />
-              <div className="dark:bg-light-text-secondary/[0.6] absolute bottom-1 right-1 rounded-md bg-dark-dark-gray p-2">
-                <Button className="h-8 border-none shadow-none">
-                  <Search size={48} strokeWidth={4} className="text-white" />
-                </Button>
-              </div>
-            </div> */}
-
             {/* Button for Download */}
             <div className="flex items-center justify-center md:justify-end w-full gap-2 px-2 md:px-0">
-              <Button className="flex items-center gap-2 max-lg:w-full  bg-light-primary hover:bg-light-button-hover">
-                <Download className="size-4 text-white" />
-                <span className="text-white">Download as CSV</span>
-              </Button>
+              
               <OrderDialog />
             </div>
           </div>

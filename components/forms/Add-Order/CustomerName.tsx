@@ -8,19 +8,17 @@ import { CircleMinus } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash";
 import { useAuth } from "@/hooks/useAuthStore";
-import { getCustomers } from "@/utils/getFirestoreCustomers";
+import { getCustomers } from "@/utils/customer/getFirestoreCustomers";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/app/config/firebase";
 
 // import { mockCustomers } from "@/data/customers";
 
-const CustomerNameField = ({customers,isNewCustomer, setIsNewCustomer}) => {
+const CustomerNameField = ({ customers, isNewCustomer, setIsNewCustomer, setWhatsappNum,setSelectedCustomer }) => {
   const [nameSuggestions, setNameSuggestions] = useState([]);
   const [userId, setUserId] = useState<string | null>(null);
   // const [customers, setCustomers] = useState();
-  console.log(customers)
-
- 
+  // console.log(customers);
 
   const {
     register,
@@ -49,6 +47,8 @@ const CustomerNameField = ({customers,isNewCustomer, setIsNewCustomer}) => {
   const handleSelectCustomer = (customer) => {
     setValue("customerName", customer.name);
     setNameSuggestions([]);
+    setWhatsappNum("+91"+customer.whatsappNumber)
+    setSelectedCustomer(customer);
     // You can optionally set other fields here if needed
   };
 
@@ -97,7 +97,7 @@ const CustomerNameField = ({customers,isNewCustomer, setIsNewCustomer}) => {
       {/* Switch to add new customer */}
       <div className="mt-3 flex items-center gap-3">
         <Switch
-        className="bg-light-primary/40"
+          className="bg-light-primary/40"
           id="new-customer-toggle"
           checked={isNewCustomer}
           onCheckedChange={(checked) => {

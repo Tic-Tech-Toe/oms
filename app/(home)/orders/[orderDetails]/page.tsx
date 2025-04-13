@@ -5,45 +5,44 @@ import { OrderType } from "@/types/orderType";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowDown,  Edit } from "lucide-react";
+import { ArrowDown, Edit } from "lucide-react";
 import OrderDetailComponent from "@/components/OrderDetailComponent";
 import FooterComponent from "@/components/FooterComponent";
 import OrderPaymentDetailComponent from "@/components/OrderPaymentDetailComponent";
 import { getBadgeClass } from "@/components/Table/columns";
 import OrderCustomerRel from "@/components/OrderCustomerRel";
-import { useOrderStore } from "@/hooks/useOrderStore" // ✅ Import Zustand Store
+import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore"; // ✅ Import Zustand Store
 import OrderTimeline from "@/components/OrderTimeline";
 
-
-
-
 const OrderDetails = () => {
-  const { allOrders} = useOrderStore();
-const router = useRouter();
-const [order, setOrder] = useState<OrderType | null>(null);;
+  const { allOrders } = useOrderStore();
+  const router = useRouter();
+  const [order, setOrder] = useState<OrderType | null>(null);
 
-// useEffect(() => {
-//   loadAllOrders(); 
-// }, [loadAllOrders]);
+  // useEffect(() => {
+  //   loadAllOrders();
+  // }, [loadAllOrders]);
 
-useEffect(() => {
-  const storedOrder = localStorage.getItem("selectedOrder");
-  if (storedOrder) {
-    const parsedOrder = JSON.parse(storedOrder);
-    const latestOrder = allOrders.find(o => o.id === parsedOrder.id) || parsedOrder;
-    setOrder(latestOrder);
-  }
-}, [allOrders]);
+  useEffect(() => {
+    const storedOrder = localStorage.getItem("selectedOrder");
+    if (storedOrder) {
+      const parsedOrder = JSON.parse(storedOrder);
+      const latestOrder =
+        allOrders.find((o) => o.id === parsedOrder.id) || parsedOrder;
+      setOrder(latestOrder);
+    }
+  }, [allOrders]);
 
   if (!order) return <p>Loading...</p>;
 
-  const renderData =  [
+  const renderData = [
     {
       heading: "Order Summary",
       badge: (
         <Badge
           className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getBadgeClass(
-            order.status || "", "order"
+            order.status || "",
+            "order"
           )}`}
         >
           {order.status}
@@ -65,7 +64,8 @@ useEffect(() => {
       badge: (
         <Badge
           className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getBadgeClass(
-            order.paymentStatus || "","payment"
+            order.paymentStatus || "",
+            "payment"
           )}`}
         >
           {order.paymentStatus}
@@ -74,8 +74,8 @@ useEffect(() => {
       component: <OrderPaymentDetailComponent order={order} />,
       footer: (
         <FooterComponent
-        order={order}
-        status={order.paymentStatus}
+          order={order}
+          status={order.paymentStatus}
           text="Review order and set payment status"
           buttonOne="Send Payment Reminder"
           buttonTwo="Collect payment"
@@ -84,7 +84,7 @@ useEffect(() => {
     },
   ];
 
-  const handleNavigation = (e:any) => {
+  const handleNavigation = (e: any) => {
     e.preventDefault();
     router.back(); // Go back without re-rendering
   };
@@ -100,14 +100,15 @@ useEffect(() => {
         </Link>
         /#{order.id}
       </span>
-      
+
       <div className="w-full h-10  rounded-xl mt-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-4 ">
             <span className="text-2xl font-bold">Order ID: {order.id}</span>
             <Badge
               className={`rounded-full md:font-normal text-xs select-none shadow-none mt-1 ${getBadgeClass(
-                order.paymentStatus || "","payment"
+                order.paymentStatus || "",
+                "payment"
               )}`}
             >
               Payment {order.paymentStatus}
@@ -139,10 +140,9 @@ useEffect(() => {
               className="shadow-xl border-light-light-gray dark:border-zinc-900 border-2 rounded-2xl overflow-hidden"
             >
               <div className="p-2">
-              <h3 className="text-xl font-semibold mb-2">{sec.heading}</h3>
-              {sec.badge}
-              <div>{sec.component}
-              </div>
+                <h3 className="text-xl font-semibold mb-2">{sec.heading}</h3>
+                {sec.badge}
+                <div>{sec.component}</div>
               </div>
               <div>{sec.footer}</div>
             </div>
@@ -155,7 +155,6 @@ useEffect(() => {
           </div>
           <div className="p-4 border rounded-2xl shadow-xl mt-4">
             <OrderTimeline timeline={order.timeline} />
-
           </div>
         </div>
       </div>
