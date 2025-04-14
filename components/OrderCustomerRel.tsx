@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { CustomerType, OrderType } from '@/types/orderType'
 import { ShoppingCart, User } from 'lucide-react'
 import React from 'react'

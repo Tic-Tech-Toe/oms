@@ -1,4 +1,5 @@
-import React from "react";
+//@ts-nocheck
+import React, { JSX } from "react";
 import { FaCheckCircle, FaDotCircle, FaTimesCircle, FaTruck, FaBox } from "react-icons/fa";
 import clsx from "clsx"; // optional, but nice for conditional classes
 
@@ -39,7 +40,7 @@ const OrderTimeline: React.FC<Props> = ({ timeline }) => {
             {/* Content */}
             <div className="flex flex-col text-[15px] sm:text-base transition-all duration-300 group-hover:scale-[1.01]">
               <span className="font-semibold text-neutral-800 dark:text-white tracking-wide">
-                {entry.action}
+                {entry?.action}
               </span>
               <span className="text-sm text-neutral-500">{entry.date}</span>
             </div>

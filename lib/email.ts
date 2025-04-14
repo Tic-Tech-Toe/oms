@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import nodemailer from 'nodemailer';
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -34,31 +35,52 @@ export async function sendPasswordSetupEmail({
   email,
   link,
 }: {
-  name: string
-  email: string
-  link: string
+  name: string;
+  email: string;
+  link: string;
 }) {
-  await resend.emails.send({
-    from: 'onboarding@resend.dev',
-    to: [email],
-    subject: 'Welcome to ShipTrack! Set your password',
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,      // Your Gmail address
+      pass: process.env.EMAIL_PASS,      // Gmail App Password (not your real password!)
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Welcome to ShipTrack – Set Your Password ✨',
     html: `
-      <h2>Hi ${name},</h2>
-      <p>👋 Welcome aboard ShipTrack!</p>
-      <p>Your request has been approved and you're now part of our community.</p>
-      <p>Please click the button below to set your password and get started:</p>
-      <p style="margin: 20px 0;"><a href="${link}" target="_blank" style="
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #1D4ED8;
-        color: white;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: bold;
-      ">Set Your Password</a></p>
-      <p>If you didn't request this, you can safely ignore this email.</p>
-      <br />
-      <p>– The ShipTrack Team 🚚</p>
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827; padding: 20px; background-color: #f9fafb; border-radius: 12px;">
+        <h2 style="color: #6366f1;">👋 Welcome aboard, ${name}!</h2>
+        <p style="font-size: 16px;">Your request has been approved. You're officially a part of ShipTrack 🚀</p>
+        <p style="margin: 24px 0;">
+          <a href="${link}" target="_blank" style="
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4f46e5;
+            color: #ffffff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+          ">
+            Set Your Password
+          </a>
+        </p>
+        <p style="font-size: 14px; color: #6b7280;">If you didn't request this, you can safely ignore this email.</p>
+        <br />
+        <p style="font-size: 16px;">– The ShipTrack Team 🚚</p>
+      </div>
     `,
-  })
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Password setup email sent to', email);
+  } catch (err) {
+    console.error('❌ Failed to send password setup email:', err);
+    throw err;
+  }
 }

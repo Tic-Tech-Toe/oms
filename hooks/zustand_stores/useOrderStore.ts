@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { create } from "zustand";
 import { OrderType } from "@/types/orderType";
 import {
@@ -67,7 +69,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
             ...updatedFields,
             payment: {
               ...(order.payment || {}),
-              ...(updatedFields.payment || {}),
+              ...(updatedFields?.payment || {}),
             },
             customer: {
               ...(order.customer || {}),

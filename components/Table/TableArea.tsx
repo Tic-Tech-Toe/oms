@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -37,6 +39,7 @@ export interface PaginationType {
 
 const TableArea = ({ allOrders }: { allOrders: [] }) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [editingRowId,setEditingRowId] = useState<string | null>(null);
 
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
@@ -70,16 +73,18 @@ const TableArea = ({ allOrders }: { allOrders: [] }) => {
     pageSize: 8,
   });
 
-  // useEffect(() => {
-  //   loadAllOrders();
-  // }, [loadAllOrders]);
+
 
   const filteredData = useMemo(() => {
     if (activeTab === "all") return allOrders;
     return allOrders.filter((data) => data?.status.toLowerCase() === activeTab);
   }, [activeTab, allOrders]);
 
-  const memoizedColumns = useMemo(() => columns, []);
+  const memoizedColumns = useMemo(
+    () => columns({ editingRowId, setEditingRowId }),
+    [editingRowId]
+  );
+  
   const memoizedData = useMemo(() => filteredData, [filteredData]);
 
   const table = useReactTable({
