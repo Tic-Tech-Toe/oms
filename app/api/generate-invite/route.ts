@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       used: false,
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL';
     const inviteLink = `${baseUrl}/register?secret=${inviteSecret}`;
 
     // Send email
