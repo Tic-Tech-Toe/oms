@@ -32,6 +32,7 @@ const OrderDetails = () => {
       const latestOrder =
         allOrders.find((o) => o.id === parsedOrder.id) || parsedOrder;
       setOrder(latestOrder);
+      console.log(latestOrder)
     }
   }, [allOrders]);
 

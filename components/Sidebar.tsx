@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import Link from "next/link";
 
 const Sidebar = React.memo(() => {
   const router = useRouter();
@@ -89,67 +90,65 @@ const Sidebar = React.memo(() => {
 
       {/* User Profile */}
       <div
-        className={`py-4 px-4 border-t border-gray-200 dark:border-gray-700 flex items-center ${
-          isCollapsed ? "justify-center" : "justify-between"
+  className={`py-4 px-4 border-t border-gray-200 dark:border-gray-700 flex items-center ${
+    isCollapsed ? "justify-center" : "justify-between"
+  }`}
+>
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <div
+        className={`relative group cursor-pointer rounded-full p-1 transition ${
+          isCollapsed ? "hover:bg-light-primary/30" : ""
         }`}
+        title={!isCollapsed ? "" : user?.displayName || "Profile"}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div
-              className="relative group cursor-pointer"
-              title={!isCollapsed ? "" : user?.displayName || "Profile"}
-            >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-600 p-[2px] shadow-md hover:scale-105 transition-transform duration-200">
-                <div className="w-full h-full bg-white dark:bg-[#121212] rounded-full flex items-center justify-center text-sm font-semibold text-gray-900 dark:text-white">
-                  {user?.displayName
-                    ? user.displayName
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                    : "RK"}
-                </div>
-              </div>
-            </div>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            side="top"
-            align={isCollapsed ? "center" : "end"}
-            className="min-w-[160px] p-2 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border dark:border-gray-700 space-y-1"
-          >
-            {!isCollapsed && (
-              <div
-                className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                onClick={() => router.push("/orders/account")}
-              >
-                <Settings size={16} />
-                <span className="text-sm">Account Settings</span>
-              </div>
-            )}
-            <div
-              className={`flex items-center gap-2 cursor-pointer p-2 rounded-md text-red-500 ${
-                isCollapsed
-                  ? "justify-center hover:bg-red-100 dark:hover:bg-red-900/30"
-                  : "hover:bg-red-100 dark:hover:bg-red-900/30"
-              } transition-colors`}
-              onClick={logout}
-            >
-              <LogOut size={16} />
-              {!isCollapsed && <span className="text-sm">Logout</span>}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {!isCollapsed && (
-          <div className="ml-3 overflow-hidden">
-            <h1 className="font-semibold text-sm truncate">
-              {user?.displayName || "Rishi Kumarr"}
-            </h1>
-            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-600 p-[2px] shadow-md hover:scale-105 transition-transform duration-200">
+          <div className="w-full h-full bg-white dark:bg-[#121212] rounded-full flex items-center justify-center text-sm font-semibold text-gray-900 dark:text-white">
+            {initials}
           </div>
-        )}
+        </div>
       </div>
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent
+      side="top"
+      align={isCollapsed ? "center" : "end"}
+      className={`min-w-[160px] p-2 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border dark:border-gray-700 space-y-1 ${isCollapsed && "flex items-center justify-around min-w-[100px]"} `}
+    >
+      <Link href="/orders/account">
+        <div
+          className={`flex items-center gap-2 cursor-pointer p-2  hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+            isCollapsed ? "justify-center rounded-xl" : "rounded-md"
+          }`}
+        >
+          <Settings size={16} />
+          {!isCollapsed && <span className="text-sm">Account Settings</span>}
+        </div>
+      </Link>
+
+      <div
+        className={`flex items-center gap-2 cursor-pointer p-2  text-red-500 ${
+          isCollapsed
+            ? "justify-center hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl"
+            : "hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md"
+        } transition-colors`}
+        onClick={logout}
+      >
+        <LogOut size={16} />
+        {!isCollapsed && <span className="text-sm">Logout</span>}
+      </div>
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  {!isCollapsed && (
+    <div className="ml-3 overflow-hidden">
+      <h1 className="font-semibold text-sm truncate">
+        {user?.displayName || "Rishi Kumarr"}
+      </h1>
+      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+    </div>
+  )}
+</div>
     </div>
   );
 });
