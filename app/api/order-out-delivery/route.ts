@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   // Validate incoming data
   if (!phoneNumber || !customerName || !deliveryWindow) {
     return NextResponse.json(
-      { success: false, message: 'phoneNumber, customerName, and deliveryWindow are required' },
+      { success: false, message: 'phoneNumber, customerName, and delivery Window are required' },
       { status: 400 }
     );
   }

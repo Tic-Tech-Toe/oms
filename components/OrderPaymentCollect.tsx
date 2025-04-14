@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { useOrderStore } from "@/hooks/useOrderStore";
+import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
 import { Checkbox } from "./ui/checkbox";
 import { useCurrency } from "@/hooks/useCurrency";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -27,9 +27,9 @@ const OrderPaymentCollect = ({
     if (!order) return 0;
 
     const totalAmount = order?.totalAmount ?? 0;
-    const rewardPoints = redeemReward ? order?.customer?.rewardPoint ?? 0 : 0;
+    const rewardPoints = redeemReward ? (order?.customer?.rewardPoint ?? 0) : 0;
     const totalAfterDiscount = Math.max(totalAmount - rewardPoints, 0);
-    const totalPaid = order.payment?.totalPaid ?? 0;
+    const totalPaid = order.payment?.totalPaid || 0;
 
     return Math.max(totalAfterDiscount - totalPaid, 0);
   };
@@ -44,10 +44,14 @@ const OrderPaymentCollect = ({
 
     const orderDate = new Date(order.orderDate);
     const today = new Date();
-    const diffInDays = Math.floor((today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+    const diffInDays = Math.floor(
+      (today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
     const isEligibleForReward = diffInDays <= 7;
 
-    const newRewardPoints = isEligibleForReward ? Math.floor(order.totalAmount * 0.1) : 0;
+    const newRewardPoints = isEligibleForReward
+      ? Math.floor(order.totalAmount * 0.1)
+      : 0;
 
     console.log("New Reward Points:", newRewardPoints);
 
@@ -65,15 +69,21 @@ const OrderPaymentCollect = ({
         ],
       },
       customer: {
-        rewardPoint: (redeemReward ? 0 : order.customer.rewardPoint) + newRewardPoints,
+        rewardPoint:
+          (redeemReward ? 0 : order.customer.rewardPoint) + newRewardPoints,
       },
     });
 
-    console.log(`✅ Order updated in Zustand Store! (New Reward: ${newRewardPoints})`);
+    console.log(
+      `✅ Order updated in Zustand Store! (New Reward: ${newRewardPoints})`
+    );
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // await new Promise((resolve) => setTimeout(resolve, 100));
 
-    console.log("🔹 After Update:", useOrderStore.getState().allOrders.find(o => o.id === order.id));
+    console.log(
+      "🔹 After Update:",
+      useOrderStore.getState().allOrders.find((o) => o.id === order.id)
+    );
 
     setOpen(false);
   };
@@ -82,7 +92,8 @@ const OrderPaymentCollect = ({
     <div className="flex flex-col py-4">
       <div className="flex items-center justify-between">
         <span className="text-2xl font-semibold">
-          Collect Payment of: {useCurrency(getTotalPayment(order, redeemReward))}
+          Collect Payment of:{" "}
+          {useCurrency(getTotalPayment(order, redeemReward))}
         </span>
         {isMiniBill ? (
           <ChevronUp size={14} onClick={() => setIsMiniBill(false)} />
@@ -106,12 +117,15 @@ const OrderPaymentCollect = ({
               </div>
             )}
             <div className="flex justify-between text-sm font-semibold">
-              Paid by customer <span>{useCurrency(order.payment.totalPaid)}</span>
+              Paid by customer{" "}
+              <span>{useCurrency(order.payment.totalPaid)}</span>
+              {/* Paid by customer <span>{useCurrency(order.payment.totalPaid)}</span> */}
             </div>
 
             <div className="h-[2px] mt-6 bg-gray-600 dark:bg-gray-300 rounded-full" />
             <div className="flex justify-between text-sm font-semibold mt-4 mb-4">
-              Total <span>{useCurrency(getTotalPayment(order, redeemReward))}</span>
+              Total{" "}
+              <span>{useCurrency(getTotalPayment(order, redeemReward))}</span>
             </div>
           </div>
         </div>
@@ -143,7 +157,10 @@ const OrderPaymentCollect = ({
               checked={redeemReward}
               onCheckedChange={(checked) => setRedeemReward(!!checked)}
             />
-            <label htmlFor="redeem-reward" className="text-sm font-medium leading-none">
+            <label
+              htmlFor="redeem-reward"
+              className="text-sm font-medium leading-none"
+            >
               <span className="text-xs font-semibold">
                 Reward points of {order.customer.rewardPoint} will be applied
               </span>

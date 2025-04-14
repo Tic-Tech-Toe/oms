@@ -1,8 +1,8 @@
-// app/components/OrderDialog.tsx
+//@ts-nocheck
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,10 +24,16 @@ import { AddOrderSchema } from "@/lib/validations";
 import { z } from "zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { OrderItem, OrderType } from "@/types/orderType";
+import { ItemType, OrderItem, OrderType } from "@/types/orderType";
 import { mockItemsData } from "@/data/item";
-import { useOrderStore } from "@/hooks/useOrderStore";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/app/config/firebase";
+import { decreaseInventoryStock, useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
+import {
+  addCustomer,
+  getCustomers,
+} from "@/utils/customer/getFirestoreCustomers";
+import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
 
 type FormData = z.infer<typeof AddOrderSchema>;
 
@@ -35,7 +41,19 @@ const OrderDialog = () => {
   const [sendToWhatsapp, setSendToWhatsapp] = useState(false);
   const [whatsappNum, setWhatsappNum] = useState("");
   const [status, setStatus] = useState("pending");
+  const [isNewCustomer, setIsNewCustomer] = useState(false);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
 
+  const [open, setOpen] = useState(false);
+
+  const { toast } = useToast();
+  const { addOrder } = useOrderStore();
+  const user = auth.currentUser;
+
+  const { inventory, loadInventory } = useInventoryStore();
+
+const items = inventory;
   const methods = useForm<FormData>({
     resolver: zodResolver(AddOrderSchema),
     defaultValues: {
@@ -44,107 +62,188 @@ const OrderDialog = () => {
     },
   });
 
-  const { addOrder } = useOrderStore(); // Access addOrder from store
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.uid) return;
+  
+      try {
+        const [customerData] = await Promise.all([
+          getCustomers(user.uid),
+          loadInventory(user.uid),
+        ]);
+  
+        setCustomers(customerData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load customer or inventory data.",
+          variant: "destructive",
+        });
+      }
+    };
+  
+    fetchData();
+  }, [user?.uid]);
+
+  const handleDialogClose = () => {
+    methods.reset();
+    setWhatsappNum("");
+    setSendToWhatsapp(false);
+    setStatus("pending");
+    setOpen(false);
+  };
+
+  const handleSendToWhatsapp = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSendToWhatsapp(e.target.checked);
+  };
 
   const onSubmit = async (data: FormData) => {
-    console.log("Inside form submission");
-    console.log(data);
-
-    // Transform the items data into the required format
+    if (!items || items.length === 0) {
+      toast({
+        title: "No Inventory Loaded",
+        description: "Cannot place order as inventory data is missing.",
+        variant: "destructive",
+      });
+      return;
+    }
+  
     const transformedItems: OrderItem[] = data.items.map((item) => {
-      const productData = mockItemsData.find(
-        (product) => product.itemId === item.itemId
+      const productData = items.find(
+        (product: ItemType) => product.itemId === item.itemId
       );
-      if (!productData) {
-        return {
-          itemId: item.itemId,
-          quantity: item.quantity,
-          price: 0,
-          total: 0,
-          sku: "Unknown",
-          category: "Unknown",
-          itemName: "unknown",
-        };
-      }
-
-      return {
-        itemId: productData.itemId,
-        quantity: item.quantity,
-        price: productData.price,
-        total: productData.price * item.quantity,
-        sku: productData.sku,
-        category: productData.category,
-        itemName: productData.name,
-      };
+  
+      return productData
+        ? {
+            itemId: productData.itemId,
+            quantity: item.quantity,
+            price: productData.price,
+            total: productData.price * item.quantity,
+            sku: productData.sku,
+            category: productData.category,
+            itemName: productData.name,
+          }
+        : {
+            itemId: item.itemId,
+            quantity: item.quantity,
+            price: 0,
+            total: 0,
+            sku: "Unknown",
+            category: "Unknown",
+            itemName: "unknown",
+          };
     });
-
-    // Create a new order object
+  
+    const totalAmount = transformedItems.reduce(
+      (sum, item) => sum + item.total,
+      0
+    );
+    let customerId = "";
+    let customerName = data.customerName;
+  
+    if (isNewCustomer && user?.uid) {
+      try {
+        const newCustomer = await addCustomer(user.uid, {
+          name: customerName,
+          whatsappNumber: whatsappNum,
+          rewardPoint: 0,
+          createdAt: new Date().toISOString(),
+        });
+        customerId = newCustomer.id;
+      } catch (error) {
+        console.error("❌ Failed to add new customer:", error);
+        toast({
+          title: "Error",
+          description: "Failed to add the new customer to the database.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else if (selectedCustomer) {
+      customerId = selectedCustomer.id;
+    }
+  
     const newOrder: OrderType = {
-      id: "Dy-001",
       orderDate: data.orderDate.toDateString(),
-      status: "processing",
+      status,
       paymentStatus: "pending",
-      totalAmount: 444,
+      totalAmount,
       items: transformedItems,
       customer: {
+        id: customerId || "unknown",
         name: data.customerName,
         whatsappNumber: whatsappNum,
         rewardPoint: 0,
       },
       createdAt: data.orderDate.toISOString(),
       updatedAt: data.orderDate.toISOString(),
+      timeline: [
+        { date: data.orderDate.toISOString(), action: "Order placed" },
+      ],
+      payment: {
+        id: `pay-${Date.now()}`,
+        orderId: "Dy-001",
+        customerId: user?.uid || "unknown",
+        totalPaid: 0,
+        partialPayments: [],
+      },
     };
-
-    // Add the new order to the store
-    const result = await addOrder(newOrder);
-
+  
+    const result = await addOrder(user?.uid || "", newOrder);
+  
     if (result.success) {
-      toast({
-        title: "Order Added!",
-        description: `The order has been placed for ${data.customerName} successfully.`,
-      });
-
-      // Handle WhatsApp sending logic if the checkbox is checked
+      // 🔽 Decrease stock quantities in Firestore
+      const updateResult = await decreaseInventoryStock(user?.uid || "", transformedItems);
+  
+      if (!updateResult.success) {
+        toast({
+          title: "Partial Inventory Update",
+          description: `Order placed, but failed to update stock for: ${updateResult.failedItems.join(", ")}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Order Added!",
+          description: `Order placed for ${data.customerName}. Inventory updated.`,
+        });
+      }
+  
+      // 🔄 Reload Zustand inventory
+      const { loadInventory } = useInventoryStore.getState();
+      await loadInventory(user?.uid || "");
+  
+      // 📤 Send WhatsApp message if enabled
       if (sendToWhatsapp) {
-        const messageBody = [
-          data.customerName,
-          newOrder.id,
-          data.orderDate.toDateString(),
-          transformedItems
-            .map((item) => `- ${item.quantity} × ${item.itemName}`)
-            .join(", "),
-        ];
-
-        console.log("Message body:", messageBody);
-
-        // Check for missing details in messageBody
-        if (messageBody.some((item) => !item)) {
-          toast({
-            title: "Error",
-            description: "The message body is missing some details.",
-            variant: "destructive",
-          });
-          return;
-        }
-
         try {
-          const whatsappResponse = await fetch("/api/order-received", {
+          const messageBody = [
+            data.customerName,
+            newOrder.id,
+            data.orderDate.toDateString(),
+            transformedItems
+              .map((item) => `- ${item.quantity} × ${item.itemName}`)
+              .join(", "),
+          ];
+  
+          if (messageBody.some((item) => !item)) {
+            toast({
+              title: "Error",
+              description: "The message body is missing some details.",
+              variant: "destructive",
+            });
+            return;
+          }
+  
+          const res = await fetch("/api/order-received", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               phoneNumber: whatsappNum,
               messageBody,
             }),
           });
-
-          const whatsappResult = await whatsappResponse.json();
-          // console.log(whatsappResult);
-
-          if (whatsappResult.success) {
+  
+          const resData = await res.json();
+          if (resData.success) {
             toast({
               title: "Message Sent!",
               description: `Order details sent to ${data.customerName} on WhatsApp.`,
@@ -152,7 +251,7 @@ const OrderDialog = () => {
           } else {
             toast({
               title: "Failed to Send Message",
-              description: whatsappResult.message || "Unknown error",
+              description: resData.message || "Unknown error",
               variant: "destructive",
             });
           }
@@ -166,33 +265,22 @@ const OrderDialog = () => {
           });
         }
       }
+  
+      handleDialogClose();
+      console.log("📝 New Order:", newOrder);
     }
-
-    handleDialogClose();
-    setOpen(false);
-    console.log(newOrder);
   };
-
-  const handleDialogClose = () => {
-    methods.reset();
-  };
-
-  const handleDialogOpen = () => {
-    setOpen(true);
-  };
-
-  const handleSendToWhatsapp = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSendToWhatsapp(e.target.checked);
-  };
+  
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button className="text-sm font-semibold text-light-primary border-2 border-light-primary hover:border-light-button-hover px-6 py-2 rounded-md ">
+        <Button className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700">
           <Plus className="text-xl mr-2" />
           Add Order
         </Button>
       </DialogTrigger>
+
       <DialogContent className="animate-in fade-in-0 zoom-in-95 p-7 px-8 w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto max-sm:w-full max-sm:max-h-[85vh] backdrop-blur-xl border border-zinc-300/20 dark:border-white/10 shadow-2xl rounded-xl transition-all duration-300">
         <DialogHeader>
           <DialogTitle className="text-[20px] font-medium text-zinc-900 dark:text-zinc-100">
@@ -203,34 +291,43 @@ const OrderDialog = () => {
           </DialogDescription>
         </DialogHeader>
         <Separator />
+
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-6">
-              <CustomerNameField />
-              <WhatsAppNumberField setWhatsappNum={setWhatsappNum} />
+              <CustomerNameField
+                customers={customers}
+                isNewCustomer={isNewCustomer}
+                setIsNewCustomer={setIsNewCustomer}
+                setWhatsappNum={setWhatsappNum}
+                setSelectedCustomer={setSelectedCustomer}
+              />
+              <WhatsAppNumberField
+                whatsappNum={whatsappNum}
+                setWhatsappNum={setWhatsappNum}
+              />
             </div>
+
             <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-4">
               <OrderStatus status={status} setStatus={setStatus} />
               <OrderDate />
             </div>
-            <PickOrderField />
+
+            <PickOrderField userId={user?.uid || ""} />
 
             <DialogFooter className="mt-10 mb-4 w-full">
               {/* Mobile layout */}
               <div className="sm:hidden flex flex-col gap-4 w-full">
                 <div className="flex justify-between items-center gap-4">
-                  {/* Cancel Button */}
                   <Button
                     type="button"
                     onClick={handleDialogClose}
-                    className="h-12 w-1/2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-red-100 dark:hover:bg-red-900 transition-all duration-150 flex items-center justify-center"
+                    className="h-12 w-1/2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-red-100 dark:hover:bg-red-900"
                     variant="ghost"
                   >
-                    <X className="w-5 h-5" strokeWidth={2.5} />
+                    <X className="w-5 h-5" />
                   </Button>
-
-                  {/* WhatsApp Toggle */}
-                  <label className="w-1/2 flex items-center justify-center gap-3 h-12 px-2 border-2 rounded-xl transition-all duration-150 cursor-pointer hover:shadow-md border-light-primary dark:border-zinc-600">
+                  <label className="w-1/2 flex items-center justify-center gap-3 h-12 px-2 border-2 rounded-xl cursor-pointer hover:shadow-md border-light-primary dark:border-zinc-600">
                     <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       WhatsApp
                     </span>
@@ -242,45 +339,34 @@ const OrderDialog = () => {
                         className="sr-only"
                       />
                       <div
-                        className={`w-10 h-5 flex items-center rounded-full p-1 duration-300 ease-in-out ${
-                          sendToWhatsapp
-                            ? "bg-green-500"
-                            : "bg-zinc-300 dark:bg-zinc-600"
-                        }`}
+                        className={`w-10 h-5 flex items-center rounded-full p-1 transition-all ${sendToWhatsapp ? "bg-green-500" : "bg-zinc-300 dark:bg-zinc-600"}`}
                       >
                         <div
-                          className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-                            sendToWhatsapp ? "translate-x-5" : ""
-                          }`}
+                          className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all ${sendToWhatsapp ? "translate-x-5" : ""}`}
                         />
                       </div>
                     </div>
                   </label>
                 </div>
-
-                {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="h-12 w-full rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold tracking-wide shadow-md transition-all"
+                  className="h-12 w-full rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold shadow-md"
                 >
                   Add Order
                 </Button>
               </div>
 
               {/* Desktop layout */}
-              <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
-                {/* Cancel Button */}
+              <div className="hidden sm:flex sm:items-center sm:justify-between gap-4 w-full">
                 <Button
                   type="button"
                   onClick={handleDialogClose}
-                  className="h-12 w-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-red-100 dark:hover:bg-red-900 transition-all duration-150 flex items-center justify-center"
+                  className="h-12 w-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-red-100 dark:hover:bg-red-900"
                   variant="ghost"
                 >
-                  <X className="w-5 h-5" strokeWidth={2.5} />
+                  <X className="w-5 h-5" />
                 </Button>
-
-                {/* WhatsApp Toggle */}
-                <label className="w-full sm:flex-1 flex items-center justify-center gap-3 h-12 px-4 border-2 rounded-xl transition-all duration-150 cursor-pointer hover:shadow-md border-light-primary dark:border-zinc-600">
+                <label className="w-full sm:flex-1 flex items-center justify-center gap-3 h-12 px-4 border-2 rounded-xl cursor-pointer hover:shadow-md border-light-primary dark:border-zinc-600">
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                     Send to WhatsApp
                   </span>
@@ -292,25 +378,17 @@ const OrderDialog = () => {
                       className="sr-only"
                     />
                     <div
-                      className={`w-10 h-5 flex items-center rounded-full p-1 duration-300 ease-in-out ${
-                        sendToWhatsapp
-                          ? "bg-green-500"
-                          : "bg-zinc-300 dark:bg-zinc-600"
-                      }`}
+                      className={`w-10 h-5 flex items-center rounded-full p-1 transition-all ${sendToWhatsapp ? "bg-green-500" : "bg-zinc-300 dark:bg-zinc-600"}`}
                     >
                       <div
-                        className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-                          sendToWhatsapp ? "translate-x-5" : ""
-                        }`}
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all ${sendToWhatsapp ? "translate-x-5" : ""}`}
                       />
                     </div>
                   </div>
                 </label>
-
-                {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="h-12 w-full sm:flex-[2] rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold tracking-wide shadow-md transition-all"
+                  className="h-12 w-full sm:flex-[2] rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold shadow-md"
                 >
                   Add Order
                 </Button>

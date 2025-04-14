@@ -47,37 +47,42 @@ const AccessRequests = () => {
 
   const handleApprove = async (req: AccessRequest) => {
     setProcessingId(req.id)
+  
     try {
-      // Add to `users` collection
-      await setDoc(doc(db, 'users', req.id), {
-        name: req.name,
-        email: req.email,
-        company: req.company || '',
-        role: 'member', // or 'user'
-        createdAt: new Date()
+      const res = await fetch('/api/approve-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId: req.id }),
       })
-
-      // Remove from access_requests
-      await deleteDoc(doc(db, 'access_requests', req.id))
-
-      // Update UI
+  
+      const data = await res.json()
+  
+      if (!res.ok) {
+        throw new Error(data.error || 'Approval failed')
+      }
+  
+      // Remove from UI
       setRequests(prev => prev.filter(r => r.id !== req.id))
-
+  
       toast({
         title: 'Access Approved ✅',
-        description: `${req.name} has been added to users.`,
+        description: `${req.name} has been added as a member.`,
       })
-    } catch (err) {
+    } catch (err: any) {
       console.error('Approval failed:', err)
       toast({
         title: 'Error ❌',
-        description: 'Could not approve this request.',
+        description: err.message || 'Could not approve this request.',
         variant: 'destructive',
       })
     } finally {
       setProcessingId(null)
     }
   }
+  
+  
 
   const handleReject = async (id: string) => {
     setProcessingId(id)

@@ -1,5 +1,6 @@
 export type ItemType = {
   itemId: string; // Unique identifier for the item
+  quantity:number;
   name: string; // Item name
   price: number; // Price per unit of the item
   itemImage?: string; // URL or path to item image
@@ -18,31 +19,46 @@ export type OrderItem = {
 };
 
 
+export type OrderTimelineEntry = {
+  date: string; // ISO string or formatted timestamp
+  action: string; // Description of what happened (e.g., "Order placed", "Payment received")
+};
+
 export type OrderType = {
-  id: string; // Unique order ID
-  orderDate: string; // Date when order was placed
-  // status: "processing" | "shipped" | "delivered" | "cancelled" | "pending";
+  id: string;
+  customerId: string;
+  customer?: CustomerType; // optional for full info in UI
+  orderDate: string;
   status: string;
-  totalAmount: number; // Total amount of the order
-  // paymentStatus: "pending" | "partially_paid" | "paid" | "failed" | "refunded"; 
-  paymentStatus: string; 
-  shippingAddress?: string; // Shipping address
-  billingAddress?: string; // Billing address
-  items: OrderItem[]; // List of items in the order (linked to ItemType)
-  customer: CustomerType; // Customer information
-  paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery"; // Payment method
-  payment?: PaymentType; // ✅ Linking payment details inside Order
-  trackingNumber?: string; // Tracking number for shipped orders
-  shippingDate?: string; // Date when the order was shipped
-  estimatedDeliveryDate?: string; // Estimated delivery date
-  deliveredDate?: string; // Date when the order was delivered
-  cancelationDate?: string; // Date when the order was canceled
-  createdAt: string; // Creation timestamp
-  updatedAt: string; // Last updated timestamp
+  totalAmount: number;
+  paymentStatus: string;
+  shippingAddress?: string;
+  billingAddress?: string;
+  items: OrderItem[];
+  paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery";
+  payment?: PaymentType;
+  trackingNumber?: string;
+  shippingDate?: string;
+  estimatedDeliveryDate?: string;
+  deliveredDate?: string;
+  cancelationDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  timeline?: OrderTimelineEntry[];
 };
 
 
+export type PaymentType = {
+  id: string;
+  orderId: string;
+  customerId: string;
+  paymentMethod?: string;
+  totalPaid: number; // Sum of all partial payments
+  partialPayments: { date: string; amountPaid: number }[];
+};
+
 export type CustomerType = {
+  id:string;
   name: string; // Customer's full name
   whatsappNumber: string; // WhatsApp number for customer contact
   rewardPoint?: number;
@@ -53,11 +69,4 @@ export type CustomerType = {
   alternatePhoneNumber?: string; // Optional alternate contact number
 };
 
-export type PaymentType = {
-  id: string;
-  orderId: string;
-  customerId: string;
-  paymentMethod: string;
-  totalPaid: number; // Sum of all partial payments
-  partialPayments: { date: string; amountPaid: number }[];
-};
+

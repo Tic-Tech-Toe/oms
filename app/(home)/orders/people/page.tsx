@@ -1,58 +1,78 @@
+//@ts-nocheck
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { CustomerType } from "@/types/orderType";
-import { addCustomer, getCustomers } from "@/utils/getFirestoreCustomers";
 import { useToast } from "@/hooks/use-toast";
 import AddCustomerDialog from "@/components/AddCustomerDialog";
+import EditCustomerDialog from "@/components/EditCustomerDialog";
 import { auth } from "@/app/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { mockCustomers } from "@/data/customers";
+import { MessageCircle, Phone, Edit, Trash2 } from "lucide-react";
+import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 
 export default function People() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [customers, setCustomers] = useState<CustomerType[]>([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(
+    null
+  );
+
+  const {
+    customers,
+    loadCustomers,
+    addCustomer,
+    updateCustomer,
+    deleteCustomer,
+  } = useCustomerStore();
+
   const { toast } = useToast();
 
-  // Listen to user auth state and set userId
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserId(user.uid);
-      } else {
-        console.warn("User not logged in.");
+        await loadCustomers(user.uid);
       }
     });
-
     return () => unsubscribe();
-  }, []);
+  }, [loadCustomers]);
 
-  // Fetch customers when userId is available
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      if (!userId) return;
-      const data = await getCustomers(userId);
-      setCustomers(data);
-    };
-    fetchCustomers();
-  }, [userId]);
-
-  // Handle adding new customer
   const handleAddCustomer = async (customerData: CustomerType) => {
-    if (!userId) return;
+    const user = auth.currentUser;
+    if (!user) return;
+
     try {
-      await addCustomer(userId, customerData);
-      const updated = await getCustomers(userId);
-      setCustomers(updated);
-      toast({ title: "Customer added" });
-    } catch (err) {
-      console.error("Failed to add customer:", err);
-      toast({ title: "Something went wrong", variant: "destructive" });
+      await addCustomer(user.uid, customerData);
+      toast({ title: "Customer added!" });
+    } catch {
+      toast({ title: "Failed to add customer", variant: "destructive" });
     }
   };
 
-  console.log(userId,"....................")
+  const handleUpdateCustomer = async (updatedData: CustomerType) => {
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    try {
+      await updateCustomer(user.uid, updatedData.id!, updatedData);
+      toast({ title: "Customer updated!" });
+      setEditingCustomer(null);
+    } catch {
+      toast({ title: "Update failed", variant: "destructive" });
+    }
+  };
+  
+
+  const handleDelete = async (id: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      await deleteCustomer(user.uid, id);
+      toast({ title: "Customer deleted" });
+    } catch {
+      toast({ title: "Delete failed", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="min-h-screen p-6">
@@ -65,68 +85,86 @@ export default function People() {
           <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
         </div>
 
-        {/* Customer Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-  {customers.map((cust, idx) => (
-    <div
-      key={idx}
-      className=" backdrop-blur-md border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow p-6 relative overflow-hidden group"
-    >
-      {/* Reward Badge */}
-      {/* {cust.rewardPoint && (
-        <div className="absolute top-4 right-4 bg-yellow-400 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
-          ⭐ {cust.rewardPoint} pts
-        </div>
-      )} */}
-
-      {/* Customer Name */}
-      <h2 className="text-2xl font-bold  ">
-        {cust.name}
-      </h2>
-
-      {/* Info */}
-      <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
-        <p>Email: <span className="font-medium">{cust.email || "Not Provided"}</span></p>
-        <p>WhatsApp: <span className="font-medium">{cust.whatsappNumber}</span></p>
-        {cust.phoneNumber && (
-          <p>Phone: <span className="font-medium">{cust.phoneNumber}</span></p>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <a
-            href={`https://wa.me/91${cust.whatsappNumber}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-green-600 text-sm font-medium hover:underline transition"
-          >
-            💬 WhatsApp
-          </a>
-          {cust.phoneNumber && (
-            <a
-              href={`tel:${cust.phoneNumber}`}
-              className="inline-flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline transition"
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {customers.map((cust) => (
+            <div
+              key={cust.id}
+              className="relative group bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-3xl px-5 py-4 shadow-sm hover:shadow-md transition flex justify-between items-start"
             >
-              📞 Call
-            </a>
-          )}
+              {/* Info */}
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">{cust.name}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {cust.email || "No email"}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  +91 {cust.whatsappNumber}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col items-end gap-3 opacity-70 group-hover:opacity-100 transition">
+                <a
+                  href={`https://wa.me/91${cust.whatsappNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group/action relative hover:text-green-500"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
+                    WhatsApp
+                  </span>
+                </a>
+
+                {/* {cust.phoneNumber && (
+                  <a
+                    href={`tel:${cust.phoneNumber}`}
+                    className="group/action relative hover:text-blue-500"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
+                      Call
+                    </span>
+                  </a>
+                )} */}
+
+                <button
+                  onClick={() => setEditingCustomer(cust)}
+                  className="group/action relative hover:text-black dark:hover:text-white"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
+                    Edit
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => handleDelete(cust.id!)}
+                  className="group/action relative hover:text-red-600"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
+                    Delete
+                  </span>
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        <button className="text-sm text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition">
-          ✏️ Edit
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
 
-
-        {/* Empty State */}
         {customers.length === 0 && (
           <div className="text-center text-gray-400 mt-20 text-sm">
             No customers yet.
           </div>
+        )}
+
+        {editingCustomer && (
+          <EditCustomerDialog
+            customer={editingCustomer}
+            open={!!editingCustomer}
+            onClose={() => setEditingCustomer(null)}
+            onSave={handleUpdateCustomer}
+          />
         )}
       </div>
     </div>

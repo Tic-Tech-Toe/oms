@@ -22,7 +22,7 @@ import {
 const Sidebar = React.memo(() => {
   const router = useRouter();
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const { user, logout } = useAuth();
 
   const initials =

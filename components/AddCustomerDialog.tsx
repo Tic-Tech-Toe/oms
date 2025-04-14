@@ -19,8 +19,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Schema
 const AddCustomerSchema = z.object({
+  // id:z.string(),
   name: z.string().min(1, "Full Name is required"),
   whatsappNumber: z.string().min(10, "WhatsApp number is required"),
+  rewardPoint:z.number(),
   email: z.string().email().optional(),
   phoneNumber: z.string().optional(),
   alternatePhoneNumber: z.string().optional(),
@@ -40,8 +42,10 @@ export default function AddCustomerDialog({
   const methods = useForm<FormData>({
     resolver: zodResolver(AddCustomerSchema),
     defaultValues: {
+      // id: "pers1",
       name: "",
       whatsappNumber: "",
+      rewardPoint: 0,
       email: "",
       phoneNumber: "",
       alternatePhoneNumber: "",
@@ -64,7 +68,7 @@ export default function AddCustomerDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="px-6 py-2 text-sm font-semibold rounded-xl border border-light-primary text-light-primary hover:border-light-button-hover">
+        <Button className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Add Customer
         </Button>
@@ -82,10 +86,10 @@ export default function AddCustomerDialog({
             <FloatingInput label="Full Name" name="name" required />
             <FloatingInput label="WhatsApp Number" name="whatsappNumber" required />
             <FloatingInput label="Email" name="email" type="email" />
-            <FloatingInput label="Phone Number" name="phoneNumber" />
-            <FloatingInput label="Alternate Phone" name="alternatePhoneNumber" />
-            <FloatingInput label="Shipping Address" name="shippingAddress" />
-            <FloatingInput label="Billing Address" name="billingAddress" />
+            {/* <FloatingInput label="Phone Number" name="phoneNumber" /> */}
+            {/* <FloatingInput label="Alternate Phone" name="alternatePhoneNumber" /> */}
+            {/* <FloatingInput label="Shipping Address" name="shippingAddress" /> */}
+            {/* <FloatingInput label="Billing Address" name="billingAddress" /> */}
 
             <DialogFooter className="mt-6 flex justify-between items-center">
               <Button

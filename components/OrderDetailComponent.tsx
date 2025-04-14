@@ -37,7 +37,7 @@ const Counter = ({
           onClick={handleIncrement}
         />
         {/* ✅ NumberTicker added for animation */}
-        <NumberTicker value={quantity} className="text-sm font-semibold border border-x py-1 px-2 h-full" />
+        <span className="text-sm font-semibold border border-x py-1 px-2 h-full">{quantity}</span>
         <Minus
           size={24}
           className="border p-1 border-l h-full px-1 dark:hover:bg-zinc-800 hover:bg-light-light-gray cursor-pointer"

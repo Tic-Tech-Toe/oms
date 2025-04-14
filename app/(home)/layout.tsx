@@ -1,13 +1,16 @@
 // import Header from "@/components/Header";
+import RouteChangeLoader from "@/components/RouteChangeLoader";
 import { Toaster } from "@/components/ui/toaster";
 import React from "react";
+import { RouteChangeProvider } from "../context/RouteChangeContext";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-        {children}
-        <Toaster />
-    </>
+    <RouteChangeProvider>
+      <RouteChangeLoader />
+      {children}
+      <Toaster />
+    </RouteChangeProvider>
   );
 };
 

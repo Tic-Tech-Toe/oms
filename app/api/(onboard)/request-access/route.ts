@@ -19,13 +19,12 @@ const db = getFirestore()
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { secret, name, company, whatsappSecret, password } = body
+    const { secret, name, company, whatsappNumber } = body
 
-    if (!secret || !name || !whatsappSecret || !password) {
+    if (!secret || !name || !whatsappNumber) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // 1. Validate secret
     const inviteSnap = await db
       .collection('invites')
       .where('secret', '==', secret)
@@ -41,32 +40,25 @@ export async function POST(req: NextRequest) {
     const inviteId = inviteDoc.id
     const inviteData = inviteDoc.data()
 
-    // 2. Hash password before storing
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // 3. Store request
     const requestRef = await db.collection('access_requests').add({
       name,
       company,
-      whatsappSecret,
-      password: hashedPassword,
+      whatsappNumber,
       inviteId,
       email: inviteData.email,
       approved: false,
       createdAt: new Date(),
     })
 
-    // 4. Optionally mark invite as "used" temporarily or keep until approval
     await db.collection('invites').doc(inviteId).update({ used: true })
 
-    // 5. Notify Admin via Email
     const requestId = requestRef.id
     await sendAdminApprovalEmail({ name, company, requestId })
 
-    // return NextResponse.json({ message: 'Request submitted. Awaiting admin approval.' }, { status: 200 })
-    return NextResponse.json({ message: 'Working on this yet' }, { status: 200 })
+    return NextResponse.json({ message: 'Request submitted. Awaiting admin approval.' }, { status: 200 })
   } catch (err) {
     console.error('Error in request-access:', err)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
+

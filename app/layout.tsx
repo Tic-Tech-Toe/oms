@@ -10,6 +10,7 @@ const satoshi = localFont({
   src: "./fonts/SatoshiVariable.ttf", // path is relative to /app/layout.tsx
   variable: "--font-satoshi",
   weight: "100 200 300 400 500 600 700 800 900",
+  display: "swap",
 });
 
 // Clash Display (for headings/hero)
@@ -17,6 +18,7 @@ const clashDisplay = localFont({
   src: "./fonts/ClashDisplayVariable.ttf",
   variable: "--font-clash-display",
   weight: "200 300 400 500 600 700",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
