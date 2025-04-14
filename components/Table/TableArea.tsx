@@ -39,7 +39,7 @@ export interface PaginationType {
 
 const TableArea = ({ allOrders }: { allOrders: [] }) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [editingRowId,setEditingRowId] = useState<string | null>(null);
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
 
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
@@ -73,8 +73,6 @@ const TableArea = ({ allOrders }: { allOrders: [] }) => {
     pageSize: 8,
   });
 
-
-
   const filteredData = useMemo(() => {
     if (activeTab === "all") return allOrders;
     return allOrders.filter((data) => data?.status.toLowerCase() === activeTab);
@@ -84,7 +82,7 @@ const TableArea = ({ allOrders }: { allOrders: [] }) => {
     () => columns({ editingRowId, setEditingRowId }),
     [editingRowId]
   );
-  
+
   const memoizedData = useMemo(() => filteredData, [filteredData]);
 
   const table = useReactTable({
@@ -146,9 +144,7 @@ const TableArea = ({ allOrders }: { allOrders: [] }) => {
               </TabsList>
             </div>
 
-            {/* Button for Download */}
             <div className="flex items-center justify-center md:justify-end w-full gap-2 px-2 md:px-0">
-              
               <OrderDialog />
             </div>
           </div>
@@ -181,7 +177,7 @@ const TableArea = ({ allOrders }: { allOrders: [] }) => {
                         </TableRow>
                       ))}
                     </TableHeader>
-                    <TableBody>
+                    {/* <TableBody>
                       {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                           <TableRow
@@ -198,6 +194,62 @@ const TableArea = ({ allOrders }: { allOrders: [] }) => {
                             ))}
                           </TableRow>
                         ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={table.getAllColumns.length}
+                            className="h-24 text-center"
+                          >
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody> */}
+                    <TableBody>
+                      {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => {
+                          const isEditing = editingRowId === row.original.id;
+
+                          return (
+                            <React.Fragment key={row.id}>
+                              <TableRow
+                                data-state={row.getIsSelected() && "selected"}
+                                className={`transition-all durati ${
+                                  isEditing ? "bg-muted/40" : ""
+                                }`}
+                              >
+                                {row.getVisibleCells().map((cell) => (
+                                  <TableCell key={cell.id}>
+                                    {flexRender(
+                                      cell.column.columnDef.cell,
+                                      cell.getContext()
+                                    )}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+
+                              {isEditing && (
+                                <TableRow className="bg-muted/20 border-t">
+                                  <TableCell
+                                    colSpan={row.getVisibleCells().length}
+                                  >
+                                    <div className="flex items-center gap-4 p-4">
+                                      <label className="text-sm font-medium w-36 ml-24">
+                                        Invoice Number:
+                                      </label>
+                                      <input
+                                        className="input input-bordered w-full max-w-xs border px-3 py-2 rounded-md"
+                                        placeholder="Enter invoice number"
+                                        // value={...} // you can bind local state here
+                                        // onChange={...}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
+                          );
+                        })
                       ) : (
                         <TableRow>
                           <TableCell

@@ -17,6 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { useCurrency } from "@/hooks/useCurrency";
+
 
 export const getBadgeClass = (status: string, type: "order" | "payment") => {
   const statusClasses: Record<"order" | "payment", Record<string, string>> = {
@@ -171,6 +173,44 @@ export const columns = ({
     cell: ({ row }) => {
       const isEditing = editingRowId === row.original.id;
 
+      const handleSendReminder = async () => {
+        const order = row.original;
+      
+        const phoneNumber = order.customer?.whatsappNumber;
+        if (!phoneNumber) {
+          alert("Customer WhatsApp number is missing.");
+          return;
+        }
+      
+        const messageBody = [
+          order.customer?.name || "Customer",
+          `${ useCurrency( order.totalAmount - order.payment.totalPaid )}`, // amount due
+          order.id, // invoiceId
+          order.orderDate || "N/A", // dueDate (can be improved later)
+          `${order.payment.totalPaid || 0}`, // paidAmount
+          `${order.totalAmount}`, // totalAmount
+        ];
+      
+        try {
+          const res = await fetch("/api/payment-reminder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phoneNumber, messageBody }),
+          });
+      
+          const data = await res.json();
+          if (data.success) {
+            alert("✅ Payment reminder sent successfully!");
+          } else {
+            alert("❌ Failed to send reminder: " + data.message);
+          }
+        } catch (err) {
+          console.error(err);
+          alert("❌ Something went wrong while sending the reminder.");
+        }
+      };
+      
+
       if (isEditing) {
         return (
           <div className="flex items-center gap-2">
@@ -216,7 +256,11 @@ export const columns = ({
 
       return (
         <div className="flex items-center gap-2">
-          <Button
+          <TooltipProvider>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+            <Button
             size="icon"
             variant="ghost"
             className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
@@ -224,21 +268,30 @@ export const columns = ({
           >
             <Pencil className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </Button>
-          <Button
+            </TooltipTrigger>
+            <TooltipContent className=" rounded-md shadow-md border bg-cyan-500 text-black">
+
+              <p>Edit</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+            <Button
             size="icon"
             variant="ghost"
             className="rounded-full hover:bg-green-100 dark:hover:bg-green-900"
-            onClick={() => {
-              const phone = row.original.customer?.phone;
-              if (phone) {
-                window.open(`https://wa.me/${phone}`, "_blank");
-              } else {
-                alert("Customer has no phone number");
-              }
-            }}
-          >
+            onClick={handleSendReminder}
+            >
             <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
           </Button>
+            </TooltipTrigger>
+            <TooltipContent className=" rounded-md shadow-md border bg-green-500 text-black">
+              <p>Send payment reminder</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          
+            </TooltipProvider>
         </div>
       );
     },

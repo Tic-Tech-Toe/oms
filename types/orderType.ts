@@ -32,6 +32,7 @@ export type OrderType = {
   status: string;
   totalAmount: number;
   paymentStatus: string;
+  invoiceNumber?: string;
   shippingAddress?: string;
   billingAddress?: string;
   items: OrderItem[];

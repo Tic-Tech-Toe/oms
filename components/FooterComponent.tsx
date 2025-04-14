@@ -26,7 +26,7 @@ const FooterComponent = ({
   const [open, setOpen] = useState(false);
   const { loadAllOrders } = useOrderStore();
 
-  const { user } = auth.currentUser();
+  // const { user } = auth.currentUser();
 
   const refreshOrders = () => {
     loadAllOrders(user.id);
