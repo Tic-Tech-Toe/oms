@@ -13,7 +13,6 @@ export default function AccountPage() {
 const [isEditingSecret, setIsEditingSecret] = useState(false);
 const [showSecret, setShowSecret] = useState(false);
 
-// const { toast } = useToast();
 
   const { user } = useAuth();
   const router = useRouter();

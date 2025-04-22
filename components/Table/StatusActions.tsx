@@ -1,79 +1,212 @@
-//@ts-nocheck
-
+import React, { useEffect, useState } from "react";
+import { Check, X } from "lucide-react";
 import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
-import { OrderType } from "@/types/orderType";
-import { Row } from "@tanstack/react-table";
-import { useState } from "react";
-import { Badge } from "../ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { auth } from "@/app/config/firebase";
+import { STATUS_WHATSAPP_CONFIG } from "@/utils/whatsappConfig";
+import DeliveryWindowDialog from "../DeliveryWindowDialog";
 
-const StatusActions = ({
+interface StatusActionsProps {
+  row: any;
+  field: "status" | "paymentStatus";
+  statuses: string[];
+  getStatusBadgeClass: (status: string) => string;
+}
+
+const StatusActions: React.FC<StatusActionsProps> = ({
   row,
   field,
   statuses,
   getStatusBadgeClass,
-  isEditing,
-}: {
-  row: Row<OrderType>;
-  field: "status" | "paymentStatus";
-  statuses: string[];
-  getStatusBadgeClass: (status: string) => string;
-  isEditing: boolean;
 }) => {
-  const updateOrder = useOrderStore((state) => state.updateOrder);
-  const [selectedStatus, setSelectedStatus] = useState(
-    row.original[field] || statuses[0]
-  );
-  const [open, setOpen] = useState(false);
+  const initialValue = row.original[field] as string;
+  const [newStatus, setNewStatus] = useState(initialValue);
 
-  const handleStatusChange = (newStatus: string) => {
-    setSelectedStatus(newStatus);
-    updateOrder(row.original.id, { [field]: newStatus });
-    setOpen(false);
+  const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
+  const [deliveryWindow, setDeliveryWindow] = useState<string>("");
+
+  const { updateOrder } = useOrderStore();
+  const { toast, dismiss } = useToast();
+  const userId = auth.currentUser?.uid;
+
+  // Keep local select in sync with external changes
+  useEffect(() => {
+    setNewStatus(initialValue);
+  }, [initialValue]);
+
+  /**
+   * Central update+notification logic.
+   * If `deliveryWindow` is provided, it updates that field too.
+   */
+  const updateStatusAndNotify = async (
+    statusValue: string,
+    deliveryWindow: string
+  ) => {
+    setNewStatus(statusValue);
+  
+    // Grab the existing timeline (fall back to empty array)
+    const oldTimeline: Array<{ date: string; action: string }> = row.original.timeline ?? [];
+  
+    // Create a new timeline entry based on the status change
+    const newEntry = {
+      date: new Date().toISOString(),
+      action: statusValue === "Shipped" && deliveryWindow
+        ? `Shipped (window: ${deliveryWindow})`
+        : statusValue,
+    };
+  
+    // Build the Firestore update payload
+    const updatePayload: Record<string, any> = {
+      [field]: statusValue,
+      timeline: [...oldTimeline, newEntry],
+    };
+  
+    if (deliveryWindow) {
+      updatePayload.deliveryWindow = deliveryWindow;
+    }
+  
+    try {
+      // 1️⃣ Update in Zustand + Firestore
+      await updateOrder(userId, row.original.id, updatePayload);
+  
+      // 2️⃣ If we're dealing with an order status, fire off WhatsApp prompt
+      if (field === "status" && STATUS_WHATSAPP_CONFIG[statusValue]) {
+        const { apiRoute, getPayload } = STATUS_WHATSAPP_CONFIG[statusValue];
+  
+        // Inject our chosen window for shipped
+        const enrichedRow = {
+          ...row,
+          original: {
+            ...row.original,
+            deliveryWindow: deliveryWindow,
+          },
+        };
+        const payload = getPayload(enrichedRow);
+  
+        // Show toast with action buttons
+        const handle = toast({
+          title: `Order ${statusValue}`,
+          description: `Send "${statusValue}" update via WhatsApp?`,
+          duration: 5000,
+          action: (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={async () => {
+                  const res = await fetch(apiRoute, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                  });
+                  const data = await res.json();
+                  if (!data.success) {
+                    toast({
+                      title: "WhatsApp error",
+                      description: data.message,
+                      variant: "destructive",
+                    });
+                  }
+                  dismiss(handle.id);
+                }}
+              >
+                <Check className="w-4 h-4 text-green-600" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => dismiss(handle.id)}
+              >
+                <X className="w-4 h-4 text-red-500" />
+              </Button>
+            </div>
+          ),
+        });
+      } else if (field === "paymentStatus") {
+        // Simple payment-status feedback
+        toast({
+          title: "Payment status updated",
+          description: `Set to ${statusValue}`,
+        });
+      }
+    } catch {
+      toast({
+        title: "Update failed",
+        description: "Could not save change. Try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+
+  /**
+   * Called when the user picks a status from the dropdown.
+   * - For "Shipped", we first show the dialog.
+   * - Otherwise, we immediately update+notify.
+   */
+  const handleStatusChange = (value: string) => {
+    if (value === "Shipped") {
+      setShowDeliveryDialog(true);
+      return;
+    }
+    updateStatusAndNotify(value, deliveryWindow);
+  };
+
+  /** When user confirms a delivery window in the dialog */
+  const handleDeliveryConfirm = (formattedWindow: string) => {
+    setShowDeliveryDialog(false);
+    setDeliveryWindow(formattedWindow);
+    // Now actually update and prompt WhatsApp
+    updateStatusAndNotify("Shipped", formattedWindow);
   };
 
   return (
-    <div className="flex items-center justify-between md:w-2/3 space-x-1">
-      <Badge
-        className={`rounded-full font-normal select-none shadow-none ${getStatusBadgeClass(selectedStatus)}`}
-      >
-        {selectedStatus}
-      </Badge>
+    <>
+      <div className="flex items-center gap-2">
+        {/* Badge */}
+        <span
+          className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeClass(
+            newStatus
+          )}`}
+        >
+          {newStatus}
+        </span>
 
-      {isEditing && (
-        <DropdownMenu open={open} onOpenChange={setOpen}>
-          <DropdownMenuTrigger asChild>
-            <ChevronDown size={16} className="cursor-pointer" />
-          </DropdownMenuTrigger>
+        {/* Dropdown */}
+        <Select
+          value={newStatus}
+          onValueChange={handleStatusChange}
+          onOpenChange={() => {}}
+        >
+          <SelectTrigger className="text-xs border-none cursor-pointer" />
+          <SelectContent className="text-xs">
+            {statuses.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          <DropdownMenuContent className="w-56 z-[50]">
-            <DropdownMenuRadioGroup
-              value={selectedStatus}
-              onValueChange={handleStatusChange}
-            >
-              {statuses.map((status) => (
-                <DropdownMenuRadioItem key={status} value={status}>
-                  <Badge
-                    className={`rounded-full font-normal select-none shadow-none ${getStatusBadgeClass(status)}`}
-                  >
-                    {status}
-                  </Badge>
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Delivery dialog */}
+      {showDeliveryDialog && (
+        <DeliveryWindowDialog
+          open={showDeliveryDialog}
+          onClose={() => setShowDeliveryDialog(false)}
+          onConfirm={handleDeliveryConfirm}
+          setDeliveryWindow={setDeliveryWindow}
+        />
       )}
-    </div>
+    </>
   );
 };
-
 
 export default StatusActions;

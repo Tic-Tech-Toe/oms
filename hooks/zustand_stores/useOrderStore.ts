@@ -23,6 +23,8 @@ interface OrderAppState {
   addOrder: (userId: string, newOrder: Omit<OrderType, "id">) => Promise<{ success: boolean; orderId?: string }>;
   updateOrder: (userId: string, orderId: string, updatedFields: Partial<OrderType>) => Promise<void>;
   getOrdersByCustomerId: (customerId: string) => OrderType[];
+
+  storeStatusChange: (orderId: string, newStatus: string) => void;
 }
 
 export const useOrderStore = create<OrderAppState>((set, get) => ({
@@ -59,9 +61,9 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
     }
   },
 
-  updateOrder: async (orderId, updatedFields) => {
+  updateOrder: async (userId, orderId, updatedFields) => {
     const { allOrders } = get();
-  
+
     const updatedOrders = allOrders.map((order) =>
       order.id === orderId
         ? {
@@ -69,7 +71,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
             ...updatedFields,
             payment: {
               ...(order.payment || {}),
-              ...(updatedFields?.payment || {}),
+              ...(updatedFields.payment || {}),
             },
             customer: {
               ...(order.customer || {}),
@@ -78,17 +80,29 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
           }
         : order
     );
-  
-    set({ allOrders: updatedOrders }); // ✅ CORRECT TYPE now
-  
-    // Persist to Firestore
-    const userId = updatedFields?.customer?.id || "default-user-id"; // Ideally pass real userId as param
-    await updateOrderInFirestore(userId, orderId, updatedFields);
+
+    set({ allOrders: updatedOrders });
+
+    try {
+      await updateOrderInFirestore(userId, orderId, updatedFields);
+      console.log("✅ Firestore order update complete");
+    } catch (error) {
+      console.error("🔥 Failed to update order in Firestore:", error);
+    }
   },
-  
 
   getOrdersByCustomerId: (customerId: string) => {
     return get().allOrders.filter((order) => order.customerId === customerId);
+  },
+
+  storeStatusChange: (orderId, newStatus) => {
+    const { allOrders } = get();
+    const updatedOrders = allOrders.map((order) =>
+      order.id === orderId
+        ? { ...order, status: newStatus }
+        : order
+    );
+    set({ allOrders: updatedOrders });
   },
 }));
 

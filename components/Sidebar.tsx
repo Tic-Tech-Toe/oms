@@ -7,6 +7,7 @@ import {
   Layers,
   LayoutGrid,
   LogOut,
+  Radio,
   Settings,
   UserRound,
 } from "lucide-react";
@@ -37,6 +38,7 @@ const Sidebar = React.memo(() => {
     { name: "dashboard", icon: LayoutGrid, path: "/orders" },
     { name: "people", icon: UserRound, path: "/orders/people" },
     { name: "inventory", icon: Layers, path: "/orders/inventory" },
+    { name: "broadcast", icon: Radio, path: "/orders/broadcast" },
   ];
 
   return (

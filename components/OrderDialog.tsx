@@ -147,6 +147,7 @@ const items = inventory;
           name: customerName,
           whatsappNumber: whatsappNum,
           rewardPoint: 0,
+          
           createdAt: new Date().toISOString(),
         });
         customerId = newCustomer.id;
@@ -168,6 +169,7 @@ const items = inventory;
       status,
       paymentStatus: "pending",
       totalAmount,
+      invoiceNumber: "",
       items: transformedItems,
       customer: {
         id: customerId || "unknown",
@@ -190,6 +192,8 @@ const items = inventory;
     };
   
     const result = await addOrder(user?.uid || "", newOrder);
+    console.log(result)
+
   
     if (result.success) {
       // 🔽 Decrease stock quantities in Firestore
@@ -217,12 +221,14 @@ const items = inventory;
         try {
           const messageBody = [
             data.customerName,
-            newOrder.id,
+            result.orderId,
             data.orderDate.toDateString(),
             transformedItems
-              .map((item) => `- ${item.quantity} × ${item.itemName}`)
+              .map((item) => `${item.quantity} × ${item.itemName}`)
               .join(", "),
           ];
+
+          console.log(messageBody)
   
           if (messageBody.some((item) => !item)) {
             toast({
