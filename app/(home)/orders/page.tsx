@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 "use client";
 import React, { useEffect } from "react";
 import StatCards from "@/components/StatCards";
@@ -10,10 +8,7 @@ import { auth } from "@/app/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 const Overview = () => {
-  const {
-    allOrders,
-    loadAllOrders,
-  } = useOrderStore();
+  const { allOrders, loadAllOrders } = useOrderStore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

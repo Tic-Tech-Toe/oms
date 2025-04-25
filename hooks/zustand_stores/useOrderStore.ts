@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 import { create } from "zustand";
 import { OrderType } from "@/types/orderType";
 import {
@@ -20,8 +18,15 @@ interface OrderAppState {
   setOpenEditDialog: (open: boolean) => void;
 
   loadAllOrders: (userId: string) => Promise<void>;
-  addOrder: (userId: string, newOrder: Omit<OrderType, "id">) => Promise<{ success: boolean; orderId?: string }>;
-  updateOrder: (userId: string, orderId: string, updatedFields: Partial<OrderType>) => Promise<void>;
+  addOrder: (
+    userId: string,
+    newOrder: Omit<OrderType, "id">
+  ) => Promise<{ success: boolean; orderId?: string }>;
+  updateOrder: (
+    userId: string,
+    orderId: string,
+    updatedFields: Partial<OrderType>
+  ) => Promise<void>;
   getOrdersByCustomerId: (customerId: string) => OrderType[];
 
   storeStatusChange: (orderId: string, newStatus: string) => void;
@@ -81,7 +86,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
         : order
     );
 
-    set({ allOrders: updatedOrders });
+    set({ allOrders : updatedOrders });
 
     try {
       await updateOrderInFirestore(userId, orderId, updatedFields);
@@ -98,9 +103,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   storeStatusChange: (orderId, newStatus) => {
     const { allOrders } = get();
     const updatedOrders = allOrders.map((order) =>
-      order.id === orderId
-        ? { ...order, status: newStatus }
-        : order
+      order.id === orderId ? { ...order, status: newStatus } : order
     );
     set({ allOrders: updatedOrders });
   },

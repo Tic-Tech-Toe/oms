@@ -1,13 +1,16 @@
-// @ts-nocheck
-
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z, ZodType } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { DefaultValues, FieldValues, useForm, SubmitHandler, Control } from "react-hook-form";
+import {
+  DefaultValues,
+  FieldValues,
+  useForm,
+  SubmitHandler,
+  Control,
+} from "react-hook-form";
 import CustomerNameField from "./CustomerName";
 import WhatsAppNumberField from "./WhatsappNumber";
 import PickOrderField from "./PickOrder";
@@ -83,15 +86,18 @@ const AddOrderForm = <T extends FieldValues>({
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 mt-10 w-full">
+      <form
+        onSubmit={handleSubmit(handleFormSubmit)}
+        className="space-y-6 mt-10 w-full"
+      >
         {/* Customer Name Field */}
         <CustomerNameField control={control} />
 
         <WhatsAppNumberField
-        control={control}
-        name="whatsappNumber"  
-        selectedCustomer={null} 
-      />
+          control={control}
+          name="whatsappNumber"
+          selectedCustomer={null}
+        />
 
         {/* Pick Order Field */}
         <PickOrderField control={control} setValue={setValue} />
@@ -115,7 +121,7 @@ const AddOrderForm = <T extends FieldValues>({
 
 // Helper function to generate a unique order ID
 const generateOrderId = () => {
-  return 'order-' + Math.random().toString(36).substr(2, 9); // Generates a random string for the order ID
+  return "order-" + Math.random().toString(36).substr(2, 9); // Generates a random string for the order ID
 };
 
 export default AddOrderForm;

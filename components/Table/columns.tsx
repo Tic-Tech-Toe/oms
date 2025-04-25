@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -8,7 +7,15 @@ import { OrderType } from "@/types/orderType";
 import { useRouter } from "next/navigation";
 import StatusActions from "./StatusActions";
 import { Button } from "../ui/button";
-import { ArrowUpDown, Check, ChevronDown, MessageCircle, Pencil, Trash, X } from "lucide-react";
+import {
+  ArrowUpDown,
+  Check,
+  ChevronDown,
+  MessageCircle,
+  Pencil,
+  Trash,
+  X,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,12 +23,17 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { useCurrency } from "@/hooks/useCurrency";
-import { getBadgeClass, ORDER_STATUSES, PAYMENT_STATUSES } from "@/utils/statusUtils";
+import {
+  getBadgeClass,
+  ORDER_STATUSES,
+  PAYMENT_STATUSES,
+} from "@/utils/statusUtils";
 import UpdateInvoice from "./UpdateInvoice";
 import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/app/config/firebase";
+import { auth, db } from "@/app/config/firebase";
 import { useState } from "react";
+import { deleteDoc, doc } from "firebase/firestore";
 
 export const columns = ({
   editingRowId,
@@ -71,7 +83,7 @@ export const columns = ({
     ),
     cell: ({ row }) => {
       const router = useRouter();
-      const invoice = row.original.invoiceNumber;
+      const invoice = row.original.invoiceNumber || "";
       if (showInvoice) {
         return invoice && invoice.trim() !== "" ? (
           <span className="font-bold underline underline-offset-2 cursor-pointer transition-opacity duration-300">
@@ -117,11 +129,7 @@ export const columns = ({
 
   // Order Status
   {
-    header: () => (
-      <div className="flex items-center gap-1">
-        Order Status
-      </div>
-    ),
+    header: () => <div className="flex items-center gap-1">Order Status</div>,
     accessorKey: "status",
     cell: ({ row }) => (
       <StatusActions
@@ -133,7 +141,6 @@ export const columns = ({
       />
     ),
   },
-  
 
   // Order Date
   {
@@ -158,11 +165,7 @@ export const columns = ({
 
   // Payment Status
   {
-    header: () => (
-      <div className="flex items-center gap-1">
-        Payment Status
-      </div>
-    ),
+    header: () => <div className="flex items-center gap-1">Payment Status</div>,
     accessorKey: "paymentStatus",
     cell: ({ row }) => (
       <StatusActions
@@ -174,7 +177,6 @@ export const columns = ({
       />
     ),
   },
-  
 
   // Actions (Save, Edit, Cancel, Reminder)
   {
@@ -183,8 +185,8 @@ export const columns = ({
     cell: ({ row }) => {
       const { updateOrder, loadAllOrders } = useOrderStore.getState();
       const { toast } = useToast();
-      const userId = auth.currentUser.uid;
-  
+      const userId = auth?.currentUser?.uid;
+
       const handleSendReminder = async () => {
         const order = row.original;
         const phoneNumber = order.customer?.whatsappNumber;
@@ -192,23 +194,23 @@ export const columns = ({
           alert("Customer WhatsApp number is missing.");
           return;
         }
-  
+
         const messageBody = [
           order.customer?.name || "Customer",
-          `${useCurrency(order.totalAmount - order.payment.totalPaid)}`,
+          `${useCurrency(order.totalAmount - (order?.payment?.totalPaid || 0))}`,
           order.invoiceNumber || order.id,
           order.orderDate || "N/A",
-          `${order.payment.totalPaid || 0}`,
+          `${order?.payment?.totalPaid || 0}`,
           `${order.totalAmount}`,
         ];
-  
+
         try {
           const res = await fetch("/api/payment-reminder", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ phoneNumber, messageBody }),
           });
-  
+
           const data = await res.json();
           if (data.success) {
             alert("✅ Payment reminder sent successfully!");
@@ -220,15 +222,22 @@ export const columns = ({
           alert("❌ Something went wrong while sending the reminder.");
         }
       };
-  
+
       const handleDelete = async () => {
-        const confirmDelete = confirm("Are you sure you want to delete this order?");
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this order?"
+        );
         if (!confirmDelete) return;
-  
+
         try {
+          if (!userId) {
+            // Handle the case where userId is undefined
+            console.error("User ID is not defined");
+            return;
+          }
           const orderDoc = doc(db, "users", userId, "orders", row.original.id);
           await deleteDoc(orderDoc);
-          await loadAllOrders(userId); // Refresh local state
+          await loadAllOrders(userId || ""); // Refresh local state
           toast({
             title: "Deleted",
             description: "Order has been removed.",
@@ -243,7 +252,7 @@ export const columns = ({
           });
         }
       };
-  
+
       return (
         <div className="flex items-center gap-2">
           <TooltipProvider>
@@ -262,7 +271,7 @@ export const columns = ({
                 <p>Send payment reminder</p>
               </TooltipContent>
             </Tooltip>
-  
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -283,5 +292,4 @@ export const columns = ({
       );
     },
   },
-  
 ];

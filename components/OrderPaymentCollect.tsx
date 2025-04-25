@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { OrderType } from "@/types/orderType";
 import React, { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
@@ -9,6 +7,9 @@ import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
 import { Checkbox } from "./ui/checkbox";
 import { useCurrency } from "@/hooks/useCurrency";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { auth } from "@/app/config/firebase";
+import { useToast } from "@/hooks/use-toast";
+// import { toast } from "sonner";
 
 const OrderPaymentCollect = ({
   order,
@@ -22,25 +23,29 @@ const OrderPaymentCollect = ({
   const { updateOrder } = useOrderStore();
   const [redeemReward, setRedeemReward] = useState(false);
   const [isMiniBill, setIsMiniBill] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const user = auth.currentUser;
+  const userId = user?.uid || "";
+
+  const { toast } = useToast();
+ 
   const getTotalPayment = (order: OrderType, redeemReward: boolean) => {
     if (!order) return 0;
 
     const totalAmount = order?.totalAmount ?? 0;
-    const rewardPoints = redeemReward ? (order?.customer?.rewardPoint ?? 0) : 0;
+    const rewardPoints = redeemReward ? order?.customer?.rewardPoint ?? 0 : 0;
     const totalAfterDiscount = Math.max(totalAmount - rewardPoints, 0);
-    const totalPaid = order.payment?.totalPaid || 0;
+    const totalPaid = order.payment?.totalPaid ?? 0;
 
     return Math.max(totalAfterDiscount - totalPaid, 0);
   };
 
   const handleCompletePay = async () => {
-    console.log("⏳ Processing Payment...");
-
+    setLoading(true);
     const remainingBalance = getTotalPayment(order, redeemReward);
     const totalPaid = (order.payment?.totalPaid ?? 0) + remainingBalance;
-
-    const isFullyPaid = totalPaid >= (order.payment?.totalAmount ?? 0);
+    const isFullyPaid = totalPaid >= (order.totalAmount ?? 0);
 
     const orderDate = new Date(order.orderDate);
     const today = new Date();
@@ -50,50 +55,53 @@ const OrderPaymentCollect = ({
     const isEligibleForReward = diffInDays <= 7;
 
     const newRewardPoints = isEligibleForReward
-      ? Math.floor(order.totalAmount * 0.1)
+      ? Math.floor((order.totalAmount ?? 0) * 0.1)
       : 0;
 
-    console.log("New Reward Points:", newRewardPoints);
-
-    // Zustand store update
-    const { updateOrder } = useOrderStore.getState();
-
-    updateOrder(order.id, {
-      paymentStatus: "paid",
-      payment: {
-        totalAmount: order.payment.totalAmount,
-        totalPaid: totalPaid,
-        partialPayments: [
-          ...(order.payment?.partialPayments || []),
-          { date: today.toISOString(), amountPaid: remainingBalance },
+    try {
+      await updateOrder(userId, order.id, {
+        paymentStatus: "paid",
+        updatedAt: today.toISOString(),
+        payment: {
+          totalPaid,
+          partialPayments: [
+            ...(order.payment?.partialPayments || []),
+            { date: today.toISOString(), amountPaid: remainingBalance },
+          ],
+        },
+        customer: {
+          ...order.customer,
+          rewardPoint:
+            (redeemReward ? 0 : order?.customer?.rewardPoint ?? 0) + newRewardPoints,
+        },
+        timeline: [
+          ...(order.timeline || []),
+          {
+            date: today.toISOString(),
+            action: `💰 Payment of ${useCurrency(remainingBalance)} received`,
+          },
         ],
-      },
-      customer: {
-        rewardPoint:
-          (redeemReward ? 0 : order.customer.rewardPoint) + newRewardPoints,
-      },
-    });
+      });
+      
 
-    console.log(
-      `✅ Order updated in Zustand Store! (New Reward: ${newRewardPoints})`
-    );
-
-    // await new Promise((resolve) => setTimeout(resolve, 100));
-
-    console.log(
-      "🔹 After Update:",
-      useOrderStore.getState().allOrders.find((o) => o.id === order.id)
-    );
-
-    setOpen(false);
+      toast({
+        title:"Payment Updated",
+        description: "✅ Payment completed & order updated.",
+      });
+      setOpen(false);
+    } catch (error) {
+      toast({description:"❌ Failed to update order. Try again.", variant:"destructive"});
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col py-4">
       <div className="flex items-center justify-between">
         <span className="text-2xl font-semibold">
-          Collect Payment of:{" "}
-          {useCurrency(getTotalPayment(order, redeemReward))}
+          Collect Payment of: {useCurrency(getTotalPayment(order, redeemReward))}
         </span>
         {isMiniBill ? (
           <ChevronUp size={14} onClick={() => setIsMiniBill(false)} />
@@ -113,13 +121,12 @@ const OrderPaymentCollect = ({
             </div>
             {redeemReward && (
               <div className="flex justify-between text-sm font-semibold">
-                Discount <span>{useCurrency(order.customer.rewardPoint)}</span>
+                Discount <span>{useCurrency(order?.customer?.rewardPoint)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm font-semibold">
               Paid by customer{" "}
-              <span>{useCurrency(order.payment.totalPaid)}</span>
-              {/* Paid by customer <span>{useCurrency(order.payment.totalPaid)}</span> */}
+              <span>{useCurrency(order?.payment?.totalPaid)}</span>
             </div>
 
             <div className="h-[2px] mt-6 bg-gray-600 dark:bg-gray-300 rounded-full" />
@@ -150,7 +157,7 @@ const OrderPaymentCollect = ({
       </div>
 
       <div className="w-full h-10 mt-6 flex flex-col items-center">
-        {order.customer.rewardPoint > 0 && (
+        {order?.customer?.rewardPoint > 0 && (
           <div className="flex items-center space-x-2">
             <Checkbox
               id="redeem-reward"
@@ -162,16 +169,17 @@ const OrderPaymentCollect = ({
               className="text-sm font-medium leading-none"
             >
               <span className="text-xs font-semibold">
-                Reward points of {order.customer.rewardPoint} will be applied
+                Reward points of {order?.customer?.rewardPoint} will be applied
               </span>
             </label>
           </div>
         )}
         <Button
           onClick={handleCompletePay}
+          disabled={loading}
           className="mt-4 bg-dark-primary w-full hover:bg-light-button-hover"
         >
-          Complete payment
+          {loading ? "Processing..." : "Complete payment"}
         </Button>
       </div>
     </div>

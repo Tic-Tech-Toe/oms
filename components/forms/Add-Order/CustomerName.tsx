@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +12,13 @@ import { auth } from "@/app/config/firebase";
 
 // import { mockCustomers } from "@/data/customers";
 
-const CustomerNameField = ({ customers, isNewCustomer, setIsNewCustomer, setWhatsappNum,setSelectedCustomer }) => {
+const CustomerNameField = ({
+  customers,
+  isNewCustomer,
+  setIsNewCustomer,
+  setWhatsappNum,
+  setSelectedCustomer,
+}) => {
   const [nameSuggestions, setNameSuggestions] = useState([]);
   const [userId, setUserId] = useState<string | null>(null);
   // const [customers, setCustomers] = useState();
@@ -47,7 +51,7 @@ const CustomerNameField = ({ customers, isNewCustomer, setIsNewCustomer, setWhat
   const handleSelectCustomer = (customer) => {
     setValue("customerName", customer.name);
     setNameSuggestions([]);
-    setWhatsappNum("+91"+customer.whatsappNumber)
+    setWhatsappNum("+91" + customer.whatsappNumber);
     setSelectedCustomer(customer);
     // You can optionally set other fields here if needed
   };

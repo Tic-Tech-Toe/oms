@@ -35,7 +35,7 @@ const userId = user?.uid;
     }
 
     try {
-        await updateOrder(userId, orderId, {invoiceNumber: newInvoice})
+        await updateOrder(userId || "", orderId, {invoiceNumber: newInvoice})
         setIsSaved(true)
         toast({
             title: "Invoice Updated Successfully",

@@ -1,6 +1,11 @@
-//@ts-nocheck
 import React, { JSX } from "react";
-import { FaCheckCircle, FaDotCircle, FaTimesCircle, FaTruck, FaBox } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaDotCircle,
+  FaTimesCircle,
+  FaTruck,
+  FaBox,
+} from "react-icons/fa";
 import clsx from "clsx"; // optional, but nice for conditional classes
 
 export type TimelineEntry = {
@@ -15,19 +20,23 @@ type Props = {
 const iconMap: Record<string, JSX.Element> = {
   "Order Placed": <FaDotCircle className="text-blue-500" />,
   "Payment Received": <FaCheckCircle className="text-green-500" />,
-  "Shipped": <FaTruck className="text-orange-500" />,
-  "Delivered": <FaBox className="text-purple-500" />,
-  "Cancelled": <FaTimesCircle className="text-red-500" />,
+  Shipped: <FaTruck className="text-orange-500" />,
+  Delivered: <FaBox className="text-purple-500" />,
+  Cancelled: <FaTimesCircle className="text-red-500" />,
 };
 
 const OrderTimeline: React.FC<Props> = ({ timeline }) => {
   if (!timeline?.length)
-    return <p className="text-sm text-muted-foreground">No timeline available</p>;
+    return (
+      <p className="text-sm text-muted-foreground">No timeline available</p>
+    );
 
   return (
     <div className="relative border-l-[3px] border-neutral-300 dark:border-neutral-600 pl-6 space-y-10 py-4">
       {timeline.map((entry, idx) => {
-        const icon = iconMap[entry.label] || <FaDotCircle className="text-gray-400" />;
+        const icon = iconMap[entry.label] || (
+          <FaDotCircle className="text-gray-400" />
+        );
         return (
           <div key={idx} className="relative group">
             {/* Icon */}
