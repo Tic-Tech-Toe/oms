@@ -1,16 +1,21 @@
-//@ts-nocheck
-
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/checkbox";
 import { format } from "date-fns";
-// import OrderActions from "../order/OrderActions";
 import { OrderType } from "@/types/orderType";
 import { useRouter } from "next/navigation";
 import StatusActions from "./StatusActions";
 import { Button } from "../ui/button";
-import { ArrowUpDown, Check, MessageCircle, Pencil, X } from "lucide-react";
+import {
+  ArrowUpDown,
+  Check,
+  ChevronDown,
+  MessageCircle,
+  Pencil,
+  Trash,
+  X,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -18,45 +23,29 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { useCurrency } from "@/hooks/useCurrency";
-
-
-export const getBadgeClass = (status: string, type: "order" | "payment") => {
-  const statusClasses: Record<"order" | "payment", Record<string, string>> = {
-    order: {
-      pending:
-        "bg-yellow-500/40 border border-yellow-500 text-yellow-700 dark:bg-yellow-500/30 dark:border-yellow-500 dark:text-yellow-200",
-      processing:
-        "bg-blue-500/40 border border-blue-500 text-blue-700 dark:bg-blue-500/30 dark:border-blue-500 dark:text-blue-200",
-      shipped:
-        "bg-green-500/40 border border-green-500 text-green-700 dark:bg-green-500/30 dark:border-green-500 dark:text-green-200",
-      delivered:
-        "bg-teal-500/40 border border-teal-500 text-teal-700 dark:bg-teal-500/30 dark:border-teal-500 dark:text-teal-200",
-      cancelled:
-        "bg-red-500/40 border border-red-500 text-red-700 dark:bg-red-500/30 dark:border-red-500 dark:text-red-200",
-    },
-    payment: {
-      pending:
-        "bg-yellow-500/40 border border-yellow-500 text-yellow-700 dark:bg-yellow-500/30 dark:border-yellow-500 dark:text-yellow-200",
-      paid: "bg-green-500/40 border border-green-500 text-green-700 dark:bg-green-500/30 dark:border-green-500 dark:text-green-200",
-      failed:
-        "bg-red-500/40 border border-red-500 text-red-700 dark:bg-red-500/30 dark:border-red-500 dark:text-red-200",
-      refunded:
-        "bg-blue-500/40 border border-blue-500 text-blue-700 dark:bg-blue-500/30 dark:border-blue-500 dark:text-blue-200",
-    },
-  };
-
-  return (
-    statusClasses[type]?.[status.toLowerCase()] ??
-    "bg-gray-500/40 border border-gray-500 text-gray-700 dark:bg-gray-500/30 dark:border-gray-500 dark:text-gray-200"
-  );
-};
+import {
+  getBadgeClass,
+  ORDER_STATUSES,
+  PAYMENT_STATUSES,
+} from "@/utils/statusUtils";
+import UpdateInvoice from "./UpdateInvoice";
+import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
+import { useToast } from "@/hooks/use-toast";
+import { auth, db } from "@/app/config/firebase";
+import { useState } from "react";
+import { deleteDoc, doc } from "firebase/firestore";
+import { handleSendPaymentReminder } from "@/utils/sendPaymentReminder";
 
 export const columns = ({
   editingRowId,
   setEditingRowId,
+  showInvoice,
+  toggleInvoiceVisibility,
 }: {
   editingRowId: string | null;
   setEditingRowId: (id: string | null) => void;
+  showInvoice: boolean;
+  toggleInvoiceVisibility: () => void;
 }): ColumnDef<OrderType>[] => [
   {
     id: "select",
@@ -64,7 +53,7 @@ export const columns = ({
       <div className="pl-4">
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
         />
       </div>
     ),
@@ -72,67 +61,89 @@ export const columns = ({
       <div className="pl-4">
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(v) => row.toggleSelected(!!v)}
         />
       </div>
     ),
     enableSorting: false,
     enableHiding: false,
   },
+
+  // Order ID or Invoice
   {
-    header: "Order Id",
-    accessorKey: "id",
+    id: "orderOrInvoice",
+    header: () => (
+      <Button
+        variant="ghost"
+        onClick={toggleInvoiceVisibility}
+        className="flex items-center gap-1"
+      >
+        {showInvoice ? "Invoice No." : "Order Id"}
+        <ArrowUpDown className="h-3 w-3" />
+      </Button>
+    ),
     cell: ({ row }) => {
       const router = useRouter();
-      const handleOrderClick = () => {
-        localStorage.setItem("selectedOrder", JSON.stringify(row.original));
-        router.push(`/orders/${row.original.id}`);
-      };
+      const invoice = row.original.invoiceNumber || "";
+      if (showInvoice) {
+        return invoice && invoice.trim() !== "" ? (
+          <span className="font-bold underline underline-offset-2 cursor-pointer transition-opacity duration-300">
+            {invoice}
+          </span>
+        ) : (
+          <UpdateInvoice orderId={row.original.id} invoiceNumber={invoice} />
+        );
+      }
+
+      // Order ID mode
       return (
         <span
-          onClick={handleOrderClick}
-          className="font-bold underline underline-offset-2 dark:hover:text-gray-400 cursor-pointer"
+          className="font-bold underline underline-offset-2 cursor-pointer transition-opacity duration-300"
+          onClick={() => {
+            localStorage.setItem("selectedOrder", JSON.stringify(row.original));
+            router.push(`/orders/${row.original.id}`);
+          }}
         >
           {"# " + row.original.id}
         </span>
       );
     },
   },
+
+  // Customer Name
   {
     header: "Customer Name",
     accessorKey: "customerName",
     cell: ({ row }) => <span>{row?.original?.customer?.name}</span>,
   },
+
+  // Order Value
   {
     header: "Order Value",
     accessorKey: "totalAmount",
     cell: ({ row }) => (
       <span className="font-semibold">
-        ₹ {row.original.totalAmount.toFixed(2)}
+        ₹ {useCurrency(row.original.totalAmount)}
       </span>
     ),
   },
+
+  // Order Status
   {
-    header: "Order Status",
+    header: () => <div className="flex items-center gap-1">Order Status</div>,
     accessorKey: "status",
     cell: ({ row }) => (
       <StatusActions
-        key={`${row.original.id}-status-${editingRowId}`}
+        key={`${row.original.id}-os`}
         row={row}
         field="status"
-        statuses={[
-          "Pending",
-          "Processing",
-          "Shipped",
-          "Delivered",
-          "Cancelled",
-        ]}
+        statuses={ORDER_STATUSES}
         getStatusBadgeClass={(status) => getBadgeClass(status, "order")}
-        // forceOpen={editingRowId === row.original.id}
-        isEditing={editingRowId === row.original.id}
       />
     ),
   },
+
+  // Order Date
   {
     header: ({ column }) => (
       <Button
@@ -152,146 +163,181 @@ export const columns = ({
       return <span className="text-center ml-4">{formatDate}</span>;
     },
   },
+
+  // Payment Status
   {
-    header: "Payment Status",
+    header: () => <div className="flex items-center gap-1">Payment Status</div>,
     accessorKey: "paymentStatus",
     cell: ({ row }) => (
       <StatusActions
-        key={`${row.original.id}-status-${editingRowId}`}
+        key={`${row.original.id}-ps`}
         row={row}
         field="paymentStatus"
-        statuses={["Pending", "Paid", "Failed", "Refunded"]}
+        statuses={PAYMENT_STATUSES}
         getStatusBadgeClass={(status) => getBadgeClass(status, "payment")}
-        isEditing={editingRowId === row.original.id}
-        // forceOpen={editingRowId === row.original.id}
       />
     ),
   },
+
+  // Actions (Save, Edit, Cancel, Reminder)
   {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const isEditing = editingRowId === row.original.id;
+      const { updateOrder, loadAllOrders } = useOrderStore.getState();
+      const { toast } = useToast();
+      const userId = auth?.currentUser?.uid;
+      const order=row.original;
+      // const handleSendReminder = async () => {
+      //   const order = row.original;
+      //   const phoneNumber = order.customer?.whatsappNumber;
+      //   if (!phoneNumber) {
+      //     alert("Customer WhatsApp number is missing.");
+      //     return;
+      //   }
 
-      const handleSendReminder = async () => {
-        const order = row.original;
-      
-        const phoneNumber = order.customer?.whatsappNumber;
-        if (!phoneNumber) {
-          alert("Customer WhatsApp number is missing.");
-          return;
-        }
-      
-        const messageBody = [
-          order.customer?.name || "Customer",
-          `${ useCurrency( order.totalAmount - order.payment.totalPaid )}`, // amount due
-          order.id, // invoiceId
-          order.orderDate || "N/A", // dueDate (can be improved later)
-          `${order.payment.totalPaid || 0}`, // paidAmount
-          `${order.totalAmount}`, // totalAmount
-        ];
-      
+      //   const messageBody = [
+      //     order.customer?.name || "Customer",
+      //     `${useCurrency(order.totalAmount - (order?.payment?.totalPaid || 0))}`,
+      //     order.invoiceNumber || order.id,
+      //     order.orderDate || "N/A",
+      //     `${order?.payment?.totalPaid || 0}`,
+      //     `${order.totalAmount}`,
+      //   ];
+
+      //   try {
+      //     const res = await fetch("/api/payment-reminder", {
+      //       method: "POST",
+      //       headers: { "Content-Type": "application/json" },
+      //       body: JSON.stringify({ phoneNumber, messageBody }),
+      //     });
+
+      //     const data = await res.json();
+      //     if (data.success) {
+      //       toast({
+      //         title: "Success",
+      //         description: "Payment reminder sent successfully.",
+      //       });
+            
+      //     } else {
+      //       toast({
+      //         title: "Failed ",
+      //         description: "Payment reminder was not sent.",
+      //         variant: "destructive",
+      //       });
+            
+      //     }
+      //   } catch (err) {
+      //     console.error(err);
+      //     alert("❌ Something went wrong while sending the reminder.");
+      //   }
+      // };
+
+      const handleDelete = async () => {
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this order?"
+        );
+        if (!confirmDelete) return;
+
         try {
-          const res = await fetch("/api/payment-reminder", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phoneNumber, messageBody }),
-          });
-      
-          const data = await res.json();
-          if (data.success) {
-            alert("✅ Payment reminder sent successfully!");
-          } else {
-            alert("❌ Failed to send reminder: " + data.message);
+          if (!userId) {
+            // Handle the case where userId is undefined
+            console.error("User ID is not defined");
+            return;
           }
-        } catch (err) {
-          console.error(err);
-          alert("❌ Something went wrong while sending the reminder.");
+          const orderDoc = doc(db, "users", userId, "orders", row.original.id);
+          await deleteDoc(orderDoc);
+          await loadAllOrders(userId || ""); // Refresh local state
+          toast({
+            title: "Deleted",
+            description: "Order has been removed.",
+            variant: "destructive",
+          });
+        } catch (error) {
+          console.error("Delete failed:", error);
+          toast({
+            title: "Error",
+            description: "Could not delete the order. Try again.",
+            variant: "destructive",
+          });
         }
       };
-      
-
-      if (isEditing) {
-        return (
-          <div className="flex items-center gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 hover:scale-105 transition-all duration-200"
-                    onClick={() => {
-                      // Save logic
-                      setEditingRowId(null);
-                    }}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="rounded-md shadow-md border bg-green-200 text-black">
-                  <p>Save</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 hover:scale-105 transition-all duration-200"
-                    onClick={() => setEditingRowId(null)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="rounded-md shadow-md border bg-red-200 text-black">
-                  <p>Cancel</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        );
-      }
 
       return (
         <div className="flex items-center gap-2">
           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full hover:bg-green-100 dark:hover:bg-green-900"
+                  onClick={() => {
+                    let selectedDueDate = new Date().toISOString().split("T")[0]; // Default today
+                  
+                    const toastId = toast({
+                      title: "Set Due Date",
+                      description: (
+                        <div className="flex flex-col gap-2">
+                          <input
+                            type="date"
+                            id="dueDateInput"
+                            className="border rounded p-2 w-full"
+                            defaultValue={selectedDueDate}
+                            onChange={(e) => {
+                              selectedDueDate = e.target.value;
+                            }}
+                          />
+                          <div className="flex items-center justify-end gap-2 mt-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={async () => {
+                                await handleSendPaymentReminder(row.original, selectedDueDate); // ✅ Send the selected due date
+                                dismiss(toastId.id);
+                              }}
+                            >
+                              <Check className="w-4 h-4 text-green-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => dismiss(toastId.id)}
+                            >
+                              <X className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ),
+                      duration: 999999, // Until manually closed
+                    });
+                  }}
+                  
+                >
+                  <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="rounded-xl shadow-md border bg-green-300 text-black">
+                <p>Send payment reminder</p>
+              </TooltipContent>
+            </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-            <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
-            onClick={() => setEditingRowId(row.original.id)}
-          >
-            <Pencil className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          </Button>
-            </TooltipTrigger>
-            <TooltipContent className=" rounded-md shadow-md border bg-cyan-500 text-black">
-
-              <p>Edit</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-            <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full hover:bg-green-100 dark:hover:bg-green-900"
-            onClick={handleSendReminder}
-            >
-            <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-          </Button>
-            </TooltipTrigger>
-            <TooltipContent className=" rounded-md shadow-md border bg-green-500 text-black">
-              <p>Send payment reminder</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full hover:bg-red-100 dark:hover:bg-red-900"
+                  onClick={handleDelete}
+                >
+                  <Trash className="h-4 w-4 text-red-600 dark:text-red-400" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="rounded-xl shadow-md border bg-red-300 text-black">
+                <p>Delete order</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       );
     },

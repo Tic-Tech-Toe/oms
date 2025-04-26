@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -51,7 +49,7 @@ export default function People() {
   const handleUpdateCustomer = async (updatedData: CustomerType) => {
     const user = auth.currentUser;
     if (!user) return;
-  
+
     try {
       await updateCustomer(user.uid, updatedData.id!, updatedData);
       toast({ title: "Customer updated!" });
@@ -60,7 +58,6 @@ export default function People() {
       toast({ title: "Update failed", variant: "destructive" });
     }
   };
-  
 
   const handleDelete = async (id: string) => {
     const user = auth.currentUser;

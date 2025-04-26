@@ -7,6 +7,7 @@ import {
   Layers,
   LayoutGrid,
   LogOut,
+  Radio,
   Settings,
   UserRound,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
+import ThemeSwitch from "./ThemeSwitch";
 
 const Sidebar = React.memo(() => {
   const router = useRouter();
@@ -37,6 +39,7 @@ const Sidebar = React.memo(() => {
     { name: "dashboard", icon: LayoutGrid, path: "/orders" },
     { name: "people", icon: UserRound, path: "/orders/people" },
     { name: "inventory", icon: Layers, path: "/orders/inventory" },
+    { name: "broadcast", icon: Radio, path: "/orders/broadcast" },
   ];
 
   return (
@@ -87,13 +90,13 @@ const Sidebar = React.memo(() => {
           );
         })}
       </div>
-
       {/* User Profile */}
       <div
   className={`py-4 px-4 border-t border-gray-200 dark:border-gray-700 flex items-center ${
-    isCollapsed ? "justify-center" : "justify-between"
+    isCollapsed ? "justify-center flex-col" : "justify-between "
   }`}
 >
+  <ThemeSwitch />
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <div

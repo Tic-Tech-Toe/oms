@@ -15,14 +15,14 @@ export const getOrders = async (userId: string): Promise<OrderType[]> => {
     const ordersRef = collection(db, "users", userId, "orders");
     const snapshot = await getDocs(ordersRef);
 
-    const orders: OrderType[] = snapshot.docs.map((doc) => ({
-      ...(doc.data() as OrderType),
-      id: doc.id, // Ensure Firestore doc ID is used as the order ID
+    const orders: OrderType[] = snapshot.docs.map((docSnap) => ({
+      ...(docSnap.data() as OrderType),
+      id: docSnap.id, // ✅ Use Firestore doc ID
     }));
 
     return orders;
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    console.error("❌ Error fetching orders:", error);
     return [];
   }
 };
@@ -34,9 +34,10 @@ export const addOrder = async (
 ): Promise<string> => {
   try {
     const ordersRef = collection(db, "users", userId, "orders");
+
     const newDocRef = await addDoc(ordersRef, {
       ...orderData,
-      createdAt: serverTimestamp(),
+      createdAt: serverTimestamp(), // 🕒 Firestore managed
       updatedAt: serverTimestamp(),
     });
 
@@ -53,14 +54,16 @@ export const updateOrderInFirestore = async (
   userId: string,
   orderId: string,
   updatedFields: Partial<OrderType>
-) => {
+): Promise<void> => {
   const orderRef = doc(db, "users", userId, "orders", orderId);
+
   try {
     await updateDoc(orderRef, {
       ...updatedFields,
-      updatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(), // 🕒 Always update modified time
     });
-    console.log("✅ Order updated in Firestore");
+
+    console.log("✅ Order updated in Firestore:", orderId);
   } catch (error) {
     console.error("🔥 Error updating order in Firestore:", error);
     throw error;

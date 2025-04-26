@@ -1,7 +1,4 @@
-// @ts-nocheck
-"use client";
-
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, ChangeEvent } from "react";
 import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,69 +22,92 @@ import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
 import ShoppingBagDialog from "@/components/ShoppingBagDialog";
 import { ItemType } from "@/types/orderType";
 
-const PickOrderField = ({ userId }: { userId: string }) => {
+interface CartEntry {
+  itemId: string;
+  quantity: number;
+  price: number;
+  total: number;
+  sku: string ;
+  category: string;
+  itemName: string;
+}
+
+interface PickOrderFieldProps {
+  userId: string;
+}
+
+function PickOrderField({ userId }: PickOrderFieldProps) {
   const { inventory, loadInventory } = useInventoryStore();
   const {
     setValue,
     formState: { errors },
-  } = useFormContext();
+  } = useFormContext<{ items: CartEntry[] }>();
 
-  const [query, setQuery] = useState("");
-  const [filteredItems, setFilteredItems] = useState<ItemType>([]);
-  const [quantities, setQuantities] = useState({});
-  const [cartState, setCartState] = useState({});
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const inputRef = useRef(null);
+  const [query, setQuery] = useState<string>("");
+  const [filteredItems, setFilteredItems] = useState<ItemType[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [cartState, setCartState] = useState<Record<string, CartEntry>>({});
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const inputRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
 
+  // Load inventory on mount or when userId changes
   useEffect(() => {
-    loadInventory(userId);
-  }, [userId]);
+    void loadInventory(userId);
+  }, [userId, loadInventory]);
 
+  // Synchronize filteredItems when inventory or query changes
   useEffect(() => {
-    if (!query.trim()) {
-      setFilteredItems(inventory);
-    }
+    setFilteredItems(
+      query.trim()
+        ? inventory.filter((item) =>
+            item.name.toLowerCase().includes(query.toLowerCase())
+          )
+        : inventory
+    );
   }, [inventory, query]);
 
+  // Debounced search
   const debouncedSearch = useCallback(
     debounce((value: string) => {
-      if (!value.trim()) {
-        setFilteredItems(inventory);
-      } else {
-        setFilteredItems(
-          inventory.filter((item) =>
-            item.name.toLowerCase().includes(value.toLowerCase())
-          )
-        );
-      }
+      setFilteredItems(
+        value.trim()
+          ? inventory.filter((item) =>
+              item.name.toLowerCase().includes(value.toLowerCase())
+            )
+          : inventory
+      );
     }, 300),
     [inventory]
   );
 
+  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (inputRef.current && !inputRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  const updateCart = (product, isChecked) => {
+  // Add or remove item from cart
+  const updateCart = (product: ItemType, isChecked: boolean) => {
     setCartState((prev) => {
       const updated = { ...prev };
       if (isChecked) {
-        const selectedQty = quantities[product.itemId] || 1;
+        const qty = quantities[product.itemId] || 1;
         updated[product.itemId] = {
           itemId: product.itemId,
-          quantity: selectedQty,
+          quantity: qty,
           price: product.price,
-          total: (product.price || 0) * selectedQty,
-          sku: product.sku,
-          category: product.category,
+          total: product.price * qty,
+          sku: product.sku || "",
+          category: product.category || "",
           itemName: product.name,
         };
         toast({ title: `${product.name} added to cart.` });
@@ -95,7 +115,7 @@ const PickOrderField = ({ userId }: { userId: string }) => {
         delete updated[product.itemId];
         toast({ title: `${product.name} removed from cart.` });
       }
-      setValue("items", Object.values(updated));
+      setValue("items", Object.values(updated), { shouldDirty: true });
       return updated;
     });
   };
@@ -105,7 +125,7 @@ const PickOrderField = ({ userId }: { userId: string }) => {
       name="items"
       render={() => (
         <FormItem className="flex w-full flex-col mt-5">
-          <FormLabel className="text-slate-600">
+          <FormLabel>
             <div className="flex justify-between items-center">
               <span>Pick Order</span>
               <ShoppingBagDialog
@@ -115,39 +135,31 @@ const PickOrderField = ({ userId }: { userId: string }) => {
             </div>
           </FormLabel>
 
-          {/* Global warnings above input */}
-          {inventory.length > 0 &&
-            Object.entries(quantities)
-              .filter(([itemId, qty]) => {
-                const item = inventory.find((i) => i.itemId === itemId);
-                return item && qty > item.quantity;
-              })
-              .map(([itemId, qty]) => {
-                const item = inventory.find((i) => i.itemId === itemId);
-                return (
-                  <div
-                    key={`warn-${itemId}`}
-                    className="flex items-center gap-2 text-yellow-800 bg-yellow-100 border border-yellow-300 px-3 py-1 rounded-md text-sm mb-1"
-                  >
-                    <AlertTriangle size={16} />
-                    <span>
-                      <strong>{item.name}</strong>: selected quantity ({qty})
-                      exceeds available stock ({item.quantity})
-                    </span>
-                  </div>
-                );
-              })}
+          {/* Warnings if quantity exceeds stock */}
+          {Object.entries(quantities).map(([itemId, qty]) => {
+            const item = inventory.find((i) => i.itemId === itemId);
+            if (!item || qty <= item.quantity) return null;
+            return (
+              <div
+                key={`warn-${itemId}`}
+                className="flex items-center gap-2 text-yellow-800 bg-yellow-100 border border-yellow-300 px-3 py-1 rounded-md text-sm mb-1"
+              >
+                <AlertTriangle size={16} />
+                <span>
+                  <strong>{item.name}</strong>: selected quantity ({qty})
+                  exceeds available stock ({item.quantity})
+                </span>
+              </div>
+            );
+          })}
 
           <FormControl>
             <div className="relative" ref={inputRef}>
-              <div className="text-base h-12 rounded-xl border border-zinc-300 dark:border-zinc-700 px-4 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-zinc-500">
-                <Search
-                  size={20}
-                  className="text-gray-500 dark:text-gray-400"
-                />
+              <div className="text-base h-12 rounded-xl border px-4 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-zinc-500">
+                <Search size={20} className="text-gray-500" />
                 <Input
                   value={query}
-                  onChange={(e) => {
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     const val = e.target.value;
                     setQuery(val);
                     debouncedSearch(val);
@@ -155,7 +167,7 @@ const PickOrderField = ({ userId }: { userId: string }) => {
                   }}
                   onFocus={() => setDropdownOpen(true)}
                   placeholder="Start typing to search product"
-                  className="text-base bg-transparent border-none outline-none flex-1 placeholder:text-gray-400 dark:placeholder:text-zinc-500"
+                  className="bg-transparent border-none outline-none flex-1"
                 />
                 {query && (
                   <button
@@ -166,61 +178,60 @@ const PickOrderField = ({ userId }: { userId: string }) => {
                   >
                     <X
                       size={18}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                      className="text-gray-400 hover:text-gray-600"
                     />
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.preventDefault(); // ✅ prevent unintended form behavior
-                    e.stopPropagation(); // ✅ stop event bubbling
+                    e.preventDefault();
+                    e.stopPropagation();
                     setDropdownOpen((prev) => !prev);
                   }}
                 >
                   <ChevronDown
                     size={18}
-                    className={`text-gray-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                    className={`text-gray-400 transition-transform \${
+                      dropdownOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
               </div>
 
               {dropdownOpen && (
-                <div className="absolute w-full mt-2 z-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg max-h-80 overflow-y-auto transition-all animate-fade-in">
-                  {(filteredItems?.length ?? 0) === 0 ? (
-                    <div className="text-center text-sm text-gray-500 dark:text-zinc-400 py-3">
+                <div className="absolute w-full mt-2 z-20 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                  {filteredItems.length === 0 ? (
+                    <div className="text-center text-sm text-gray-500 py-3">
                       No products found.
                     </div>
                   ) : (
                     filteredItems.map((product) => {
                       const currentQty = quantities[product.itemId] || 1;
-                      const exceedsStock = currentQty > product.quantity;
-
+                      const exceedsStock = () => product.quantity;
                       return (
                         <div
                           key={product.itemId}
-                          className="p-3 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-all"
+                          className="p-3 cursor-pointer hover:bg-gray-100 rounded-md"
                         >
-                          <div className="flex items-center justify-between gap-2 px-2">
-                            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="flex-1 text-sm font-medium">
                               {product.name}
                             </span>
-
                             <div className="flex items-center gap-2">
                               <Minus
                                 size={16}
-                                className="bg-zinc-200 dark:bg-zinc-700 hover:border hover:border-red-400 rounded-full p-1 cursor-pointer"
+                                className="p-1 rounded-full cursor-pointer bg-gray-200"
                                 onClick={() =>
                                   setQuantities((prev) => ({
                                     ...prev,
                                     [product.itemId]: Math.max(
                                       (prev[product.itemId] || 1) - 1,
-                                      0
+                                      1
                                     ),
                                   }))
                                 }
                               />
-
                               <input
                                 type="number"
                                 value={currentQty}
@@ -229,28 +240,22 @@ const PickOrderField = ({ userId }: { userId: string }) => {
                                   setQuantities((prev) => ({
                                     ...prev,
                                     [product.itemId]:
-                                      isNaN(val) || val < 0 ? 0 : val,
+                                      isNaN(val) || val < 1 ? 1 : val,
                                   }));
                                 }}
-                                className={`w-12 text-xs text-center font-semibold border rounded-md bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 ${
-                                  exceedsStock
-                                    ? "border-red-500"
-                                    : "border-zinc-300 dark:border-zinc-600"
-                                }`}
+                                className="w-12 text-center border rounded"
                               />
-
                               <Plus
                                 size={16}
-                                className="bg-zinc-200 dark:bg-zinc-700 hover:bg-green-600 text-zinc-700 dark:text-zinc-300 rounded-full p-1 cursor-pointer"
+                                className="p-1 rounded-full cursor-pointer bg-gray-200"
                                 onClick={() =>
                                   setQuantities((prev) => ({
                                     ...prev,
                                     [product.itemId]:
-                                      (prev[product.itemId] || 0) + 1,
+                                      (prev[product.itemId] || 1) + 1,
                                   }))
                                 }
                               />
-
                               <input
                                 type="checkbox"
                                 className="ml-2 w-4 h-4 accent-green-500"
@@ -261,9 +266,8 @@ const PickOrderField = ({ userId }: { userId: string }) => {
                               />
                             </div>
                           </div>
-
-                          {exceedsStock && (
-                            <div className="mt-1 text-xs text-red-500 flex items-center gap-1 px-2">
+                          {exceedsStock() && (
+                            <div className="mt-1 text-xs text-red-500 flex items-center gap-1">
                               <AlertTriangle size={14} />
                               Selected quantity exceeds stock (
                               {product.quantity})
@@ -277,11 +281,12 @@ const PickOrderField = ({ userId }: { userId: string }) => {
               )}
             </div>
           </FormControl>
+
           <FormMessage />
         </FormItem>
       )}
     />
   );
-};
+}
 
-export default PickOrderField;
+export default PickOrderField

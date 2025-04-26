@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -17,23 +15,25 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, X } from "lucide-react";
 import CustomerNameField from "./forms/Add-Order/CustomerName";
 import WhatsAppNumberField from "./forms/Add-Order/WhatsappNumber";
-import PickOrderField from "./forms/Add-Order/PickOrder";
-import OrderStatus from "./forms/Add-Order/OrderStatus";
 import OrderDate from "./forms/Add-Order/OrderDate";
 import { AddOrderSchema } from "@/lib/validations";
 import { z } from "zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemType, OrderItem, OrderType } from "@/types/orderType";
-import { mockItemsData } from "@/data/item";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/app/config/firebase";
-import { decreaseInventoryStock, useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
+import {
+  decreaseInventoryStock,
+  useOrderStore,
+} from "@/hooks/zustand_stores/useOrderStore";
 import {
   addCustomer,
   getCustomers,
 } from "@/utils/customer/getFirestoreCustomers";
 import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
+import OrderStatus from "./forms/Add-Order/OrderStatus";
+import PickOrderField from "./forms/Add-Order/PickOrder";
 
 type FormData = z.infer<typeof AddOrderSchema>;
 
@@ -53,7 +53,7 @@ const OrderDialog = () => {
 
   const { inventory, loadInventory } = useInventoryStore();
 
-const items = inventory;
+  const items = inventory;
   const methods = useForm<FormData>({
     resolver: zodResolver(AddOrderSchema),
     defaultValues: {
@@ -65,13 +65,13 @@ const items = inventory;
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.uid) return;
-  
+
       try {
         const [customerData] = await Promise.all([
           getCustomers(user.uid),
           loadInventory(user.uid),
         ]);
-  
+
         setCustomers(customerData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -82,7 +82,7 @@ const items = inventory;
         });
       }
     };
-  
+
     fetchData();
   }, [user?.uid]);
 
@@ -107,12 +107,12 @@ const items = inventory;
       });
       return;
     }
-  
+
     const transformedItems: OrderItem[] = data.items.map((item) => {
       const productData = items.find(
         (product: ItemType) => product.itemId === item.itemId
       );
-  
+
       return productData
         ? {
             itemId: productData.itemId,
@@ -133,20 +133,21 @@ const items = inventory;
             itemName: "unknown",
           };
     });
-  
+
     const totalAmount = transformedItems.reduce(
       (sum, item) => sum + item.total,
       0
     );
     let customerId = "";
     let customerName = data.customerName;
-  
+
     if (isNewCustomer && user?.uid) {
       try {
         const newCustomer = await addCustomer(user.uid, {
           name: customerName,
           whatsappNumber: whatsappNum,
           rewardPoint: 0,
+
           createdAt: new Date().toISOString(),
         });
         customerId = newCustomer.id;
@@ -162,12 +163,13 @@ const items = inventory;
     } else if (selectedCustomer) {
       customerId = selectedCustomer.id;
     }
-  
+
     const newOrder: OrderType = {
       orderDate: data.orderDate.toDateString(),
       status,
       paymentStatus: "pending",
       totalAmount,
+      invoiceNumber: "",
       items: transformedItems,
       customer: {
         id: customerId || "unknown",
@@ -188,13 +190,17 @@ const items = inventory;
         partialPayments: [],
       },
     };
-  
+
     const result = await addOrder(user?.uid || "", newOrder);
-  
+    console.log(result);
+
     if (result.success) {
       // 🔽 Decrease stock quantities in Firestore
-      const updateResult = await decreaseInventoryStock(user?.uid || "", transformedItems);
-  
+      const updateResult = await decreaseInventoryStock(
+        user?.uid || "",
+        transformedItems
+      );
+
       if (!updateResult.success) {
         toast({
           title: "Partial Inventory Update",
@@ -207,23 +213,25 @@ const items = inventory;
           description: `Order placed for ${data.customerName}. Inventory updated.`,
         });
       }
-  
+
       // 🔄 Reload Zustand inventory
       const { loadInventory } = useInventoryStore.getState();
       await loadInventory(user?.uid || "");
-  
+
       // 📤 Send WhatsApp message if enabled
       if (sendToWhatsapp) {
         try {
           const messageBody = [
             data.customerName,
-            newOrder.id,
+            result.orderId,
             data.orderDate.toDateString(),
             transformedItems
-              .map((item) => `- ${item.quantity} × ${item.itemName}`)
+              .map((item) => `${item.quantity} × ${item.itemName}`)
               .join(", "),
           ];
-  
+
+          console.log(messageBody);
+
           if (messageBody.some((item) => !item)) {
             toast({
               title: "Error",
@@ -232,7 +240,7 @@ const items = inventory;
             });
             return;
           }
-  
+
           const res = await fetch("/api/order-received", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -241,7 +249,7 @@ const items = inventory;
               messageBody,
             }),
           });
-  
+
           const resData = await res.json();
           if (resData.success) {
             toast({
@@ -265,12 +273,11 @@ const items = inventory;
           });
         }
       }
-  
+
       handleDialogClose();
       console.log("📝 New Order:", newOrder);
     }
   };
-  
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>

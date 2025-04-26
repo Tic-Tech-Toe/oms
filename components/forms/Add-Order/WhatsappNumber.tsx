@@ -1,13 +1,10 @@
-//@ts-nocheck
-"use client"; 
+"use client";
 
 import { useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-
-
-const WhatsAppNumberField = ({whatsappNum, setWhatsappNum}) => {
+const WhatsAppNumberField = ({ whatsappNum, setWhatsappNum }) => {
   const [manuallyEdited, setManuallyEdited] = useState(false);
 
   const handleFocus = () => {
@@ -21,8 +18,6 @@ const WhatsAppNumberField = ({whatsappNum, setWhatsappNum}) => {
     setWhatsappNum("91" + inputValue.replace(/^91/, "")); // ensure no duplicate '91'
     setManuallyEdited(true);
   };
-
-
 
   return (
     <div className="mt-5 flex flex-col gap-2">
