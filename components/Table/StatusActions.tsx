@@ -169,7 +169,7 @@ const StatusActions: React.FC<StatusActionsProps> = ({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center  gap-2">
         {/* Badge */}
         <span
           className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeClass(
@@ -185,7 +185,7 @@ const StatusActions: React.FC<StatusActionsProps> = ({
           onValueChange={handleStatusChange}
           onOpenChange={() => {}}
         >
-          <SelectTrigger className="text-xs border-none cursor-pointer" />
+          <SelectTrigger className="text-xs border-none " />
           <SelectContent className="text-xs">
             {statuses.map((s) => (
               <SelectItem key={s} value={s}>

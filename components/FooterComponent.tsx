@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import OrderPaymentCollect from "./OrderPaymentCollect";
 import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
 import { auth } from "@/app/config/firebase";
+import OrderUpdateDialog from "./OrderUpdateDialog";
 
 interface FooterComponentProps {
   text: string;
@@ -14,7 +15,7 @@ interface FooterComponentProps {
   order: OrderType;
   buttonOneLabel: string;
   buttonTwoLabel: string;
-  onButtonOneClick?: (order: OrderType) => void;
+  onButtonOneClick?: () => void;
   onButtonTwoClick?: (order: OrderType) => void;
   showDialogForButtonTwo?: boolean;
 }
@@ -42,7 +43,7 @@ const FooterComponent = ({
   const buttons = (
     <div className="flex gap-2">
       <Button
-        onClick={() => onButtonOneClick?.(order)}
+        onClick={() => onButtonOneClick?.()}
         disabled={isDisabled}
         className={`border-purple-700 border-2 text-purple-500 hover:bg-purple-800 hover:text-white rounded-xl ${
           isDisabled ? "opacity-50 cursor-not-allowed" : ""
@@ -69,20 +70,24 @@ const FooterComponent = ({
     <div className="bg-light-light-gray dark:bg-dark-background mt-2 p-4 flex items-center justify-between rounded-b-2xl">
       <span className="text-sm font-semibold">{text}</span>
 
-      {showDialogForButtonTwo ? (
+      
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>{buttons}</DialogTrigger>
           <DialogContent>
+          {showDialogForButtonTwo ? (
             <OrderPaymentCollect
               order={order}
               setOpen={setOpen}
               refreshOrders={refreshOrders}
-            />
+            /> ) : (
+              <OrderUpdateDialog 
+              order={order}
+                setOpen={setOpen}
+                refreshOrders={refreshOrders} />
+            )}
           </DialogContent>
         </Dialog>
-      ) : (
-        buttons
-      )}
+     
     </div>
   );
 };

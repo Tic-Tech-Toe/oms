@@ -37,34 +37,13 @@ export default function OrderDetailComponent({ order }: { order: OrderType }) {
 
   return (
     <div className="space-y-6">
-      {/* Header: Add Item Button */}
-      <div className="flex justify-between items-center">
-        <h4 className="text-xl font-semibold">Items</h4>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-blue-500 text-white hover:bg-blue-600">Add Item</Button>
-          </DialogTrigger>
-          <DialogContent className="w-[400px] bg-white rounded-lg shadow-lg p-6">
-            <h5 className="text-lg font-semibold mb-4">Add Item to Order</h5>
-            <div className="space-y-3 max-h-60 overflow-y-auto">
-              {inventory.map((item) => (
-                <div
-                  key={item.itemId}
-                  className="flex justify-between items-center p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
-                >
-                  <div>
-                    <p className="font-medium text-gray-700">{item.itemName}</p>
-                    <p className="text-sm text-gray-500">₹{item.price.toFixed(2)}</p>
-                  </div>
-                  <Button size="xs" className="bg-green-500 text-white" onClick={() => handleAddItem(item)}>
-                    Add
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+     {/* Header: Edit Order Button */}
+<div className="flex justify-between items-center">
+  <h4 className="text-xl font-semibold">Items</h4>
+ 
+</div>
+
+
 
       {/* List of Current Order Items */}
       <div className="space-y-4">
@@ -78,16 +57,9 @@ export default function OrderDetailComponent({ order }: { order: OrderType }) {
               <p className="text-sm text-gray-500">{item.category}</p>
             </div>
             <div className="flex items-center gap-4">
-              <Input
-                type="number"
-                min={0}
-                className="w-20 text-center"
-                value={quantities[item.itemId] ?? 0}
-                onChange={(e) =>
-                  handleQuantityChange(item.itemId, parseInt(e.target.value, 10))
-                }
-                onBlur={() => handleQuantityBlur(item.itemId)}
-              />
+              
+                <span>{quantities[item.itemId] ?? 0}</span>
+               
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 ₹{((quantities[item.itemId] ?? 0) * item.price).toFixed(2)}
               </p>

@@ -15,15 +15,12 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, X } from "lucide-react";
 import CustomerNameField from "./forms/Add-Order/CustomerName";
 import WhatsAppNumberField from "./forms/Add-Order/WhatsappNumber";
-import PickOrderField from "./forms/Add-Order/PickOrder";
-import OrderStatus from "./forms/Add-Order/OrderStatus";
 import OrderDate from "./forms/Add-Order/OrderDate";
 import { AddOrderSchema } from "@/lib/validations";
 import { z } from "zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ItemType, OrderItem, OrderType } from "@/types/orderType";
-import { mockItemsData } from "@/data/item";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/app/config/firebase";
 import {
@@ -35,6 +32,8 @@ import {
   getCustomers,
 } from "@/utils/customer/getFirestoreCustomers";
 import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
+import OrderStatus from "./forms/Add-Order/OrderStatus";
+import PickOrderField from "./forms/Add-Order/PickOrder";
 
 type FormData = z.infer<typeof AddOrderSchema>;
 

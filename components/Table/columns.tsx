@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { auth, db } from "@/app/config/firebase";
 import { useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
+import { handleSendPaymentReminder } from "@/utils/sendPaymentReminder";
 
 export const columns = ({
   editingRowId,
@@ -122,7 +123,7 @@ export const columns = ({
     accessorKey: "totalAmount",
     cell: ({ row }) => (
       <span className="font-semibold">
-        ₹ {useCurrency(row.original.totalAmount.toFixed(2))}
+        ₹ {useCurrency(row.original.totalAmount)}
       </span>
     ),
   },
@@ -186,42 +187,51 @@ export const columns = ({
       const { updateOrder, loadAllOrders } = useOrderStore.getState();
       const { toast } = useToast();
       const userId = auth?.currentUser?.uid;
+      const order=row.original;
+      // const handleSendReminder = async () => {
+      //   const order = row.original;
+      //   const phoneNumber = order.customer?.whatsappNumber;
+      //   if (!phoneNumber) {
+      //     alert("Customer WhatsApp number is missing.");
+      //     return;
+      //   }
 
-      const handleSendReminder = async () => {
-        const order = row.original;
-        const phoneNumber = order.customer?.whatsappNumber;
-        if (!phoneNumber) {
-          alert("Customer WhatsApp number is missing.");
-          return;
-        }
+      //   const messageBody = [
+      //     order.customer?.name || "Customer",
+      //     `${useCurrency(order.totalAmount - (order?.payment?.totalPaid || 0))}`,
+      //     order.invoiceNumber || order.id,
+      //     order.orderDate || "N/A",
+      //     `${order?.payment?.totalPaid || 0}`,
+      //     `${order.totalAmount}`,
+      //   ];
 
-        const messageBody = [
-          order.customer?.name || "Customer",
-          `${useCurrency(order.totalAmount - (order?.payment?.totalPaid || 0))}`,
-          order.invoiceNumber || order.id,
-          order.orderDate || "N/A",
-          `${order?.payment?.totalPaid || 0}`,
-          `${order.totalAmount}`,
-        ];
+      //   try {
+      //     const res = await fetch("/api/payment-reminder", {
+      //       method: "POST",
+      //       headers: { "Content-Type": "application/json" },
+      //       body: JSON.stringify({ phoneNumber, messageBody }),
+      //     });
 
-        try {
-          const res = await fetch("/api/payment-reminder", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phoneNumber, messageBody }),
-          });
-
-          const data = await res.json();
-          if (data.success) {
-            alert("✅ Payment reminder sent successfully!");
-          } else {
-            alert("❌ Failed to send reminder: " + data.message);
-          }
-        } catch (err) {
-          console.error(err);
-          alert("❌ Something went wrong while sending the reminder.");
-        }
-      };
+      //     const data = await res.json();
+      //     if (data.success) {
+      //       toast({
+      //         title: "Success",
+      //         description: "Payment reminder sent successfully.",
+      //       });
+            
+      //     } else {
+      //       toast({
+      //         title: "Failed ",
+      //         description: "Payment reminder was not sent.",
+      //         variant: "destructive",
+      //       });
+            
+      //     }
+      //   } catch (err) {
+      //     console.error(err);
+      //     alert("❌ Something went wrong while sending the reminder.");
+      //   }
+      // };
 
       const handleDelete = async () => {
         const confirmDelete = confirm(
@@ -262,7 +272,47 @@ export const columns = ({
                   size="icon"
                   variant="ghost"
                   className="rounded-full hover:bg-green-100 dark:hover:bg-green-900"
-                  onClick={handleSendReminder}
+                  onClick={() => {
+                    let selectedDueDate = new Date().toISOString().split("T")[0]; // Default today
+                  
+                    const toastId = toast({
+                      title: "Set Due Date",
+                      description: (
+                        <div className="flex flex-col gap-2">
+                          <input
+                            type="date"
+                            id="dueDateInput"
+                            className="border rounded p-2 w-full"
+                            defaultValue={selectedDueDate}
+                            onChange={(e) => {
+                              selectedDueDate = e.target.value;
+                            }}
+                          />
+                          <div className="flex items-center justify-end gap-2 mt-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={async () => {
+                                await handleSendPaymentReminder(row.original, selectedDueDate); // ✅ Send the selected due date
+                                dismiss(toastId.id);
+                              }}
+                            >
+                              <Check className="w-4 h-4 text-green-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => dismiss(toastId.id)}
+                            >
+                              <X className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ),
+                      duration: 999999, // Until manually closed
+                    });
+                  }}
+                  
                 >
                   <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </Button>

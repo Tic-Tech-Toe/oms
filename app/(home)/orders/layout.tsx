@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthProvider } from "@/app/context/AuthContext";
-import MainHead from "@/components/MainHead";
 import Sidebar from "@/components/Sidebar";
 // import ThemeSwitch from '@/components/ThemeSwitch'
 import Topbar from "@/components/Topbar";
@@ -17,7 +16,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex flex-col w-full h-screen">
         <Topbar />
         <main className="flex-1 overflow-y-auto">
-          <MainHead />
+          <br />
           {children}
         </main>
       </div>

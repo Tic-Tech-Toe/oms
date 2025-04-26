@@ -36,7 +36,7 @@ interface PickOrderFieldProps {
   userId: string;
 }
 
-export function PickOrderField({ userId }: PickOrderFieldProps) {
+function PickOrderField({ userId }: PickOrderFieldProps) {
   const { inventory, loadInventory } = useInventoryStore();
   const {
     setValue,
@@ -288,3 +288,5 @@ export function PickOrderField({ userId }: PickOrderFieldProps) {
     />
   );
 }
+
+export default PickOrderField

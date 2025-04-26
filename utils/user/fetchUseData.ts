@@ -5,14 +5,14 @@ import { doc, getDoc } from "firebase/firestore";
 export const fetchUserData = async (user: User) => {
   if (!user) return null;
 
-  console.log(user)
+  // console.log(user)
 
   try {
     const userRef = doc(db, "users", user.uid);
     // console.log(userRef)
     const userSnap = await getDoc(userRef);
-    console.log(userSnap)
-    console.log("Firestore document exists:", userSnap.exists()); // Log to check if document exists
+    // console.log(userSnap)
+    // console.log("Firestore document exists:", userSnap.exists()); // Log to check if document exists
 
     if (userSnap.exists()) {
       return {
