@@ -125,7 +125,7 @@ export async function sendPaymentReceived(
   earnedRewardPoint: string,
   newRewardPoint: string,
 ){
-  const messageBody = [phoneNumber, customerName, amount, orderId, earnedRewardPoint, newRewardPoint]
+  const messageBody = [customerName, amount, orderId, earnedRewardPoint, newRewardPoint]
   return sendMessage(phoneNumber,messageBody,"payment_confirmation_2")
 }
 
