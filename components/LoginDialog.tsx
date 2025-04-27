@@ -57,7 +57,7 @@ const LoginDialog = () => {
       });
 
       const userData = await fetchUserData(userCred.user);
-      console.log(userData)
+      // console.log(userData)
       if (userData?.role === "admin") {
         router.push("/admin/invite");
       } else if (userData?.role === "member") {
