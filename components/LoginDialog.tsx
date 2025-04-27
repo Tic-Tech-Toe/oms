@@ -61,7 +61,7 @@ const LoginDialog = () => {
       if (userData?.role === "admin") {
         router.push("/admin/invite");
       } else if (userData?.role === "member") {
-        router.push("/orders");
+        router.push("https://oms-delta.vercel.app/orders");
       } else {
         setError("Unauthorized user.");
       }
