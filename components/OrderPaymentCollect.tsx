@@ -1,5 +1,7 @@
+"use client"
+
 import { OrderType } from "@/types/orderType";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
@@ -9,6 +11,9 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { auth } from "@/app/config/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/app/context/AuthContext";
+import { fetchUserData } from "@/utils/user/fetchUseData";
+import { updateCurrentUser, User } from "firebase/auth";
 // import { toast } from "sonner";
 
 const OrderPaymentCollect = ({
@@ -24,10 +29,9 @@ const OrderPaymentCollect = ({
   const [redeemReward, setRedeemReward] = useState(false);
   const [isMiniBill, setIsMiniBill] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState();
 
-  const user = auth.currentUser;
-  const userId = user?.uid || "";
-
+  const userId = auth.currentUser?.uid || "";
   const { toast } = useToast();
  
   const getTotalPayment = (order: OrderType, redeemReward: boolean) => {
@@ -46,19 +50,20 @@ const OrderPaymentCollect = ({
     const remainingBalance = getTotalPayment(order, redeemReward);
     const totalPaid = (order.payment?.totalPaid ?? 0) + remainingBalance;
     const isFullyPaid = totalPaid >= (order.totalAmount ?? 0);
-
+  
     const orderDate = new Date(order.orderDate);
     const today = new Date();
     const diffInDays = Math.floor(
       (today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24)
     );
     const isEligibleForReward = diffInDays <= 7;
-
+  
     const newRewardPoints = isEligibleForReward
-      ? Math.floor((order.totalAmount ?? 0) * 0.1)
+      ? Math.floor(((order.totalAmount ?? 0) * (user?.rewardPercentage)) / 100)
       : 0;
-
+  
     try {
+      // 1. Update Firestore Order
       await updateOrder(userId, order.id, {
         paymentStatus: "paid",
         updatedAt: today.toISOString(),
@@ -82,20 +87,57 @@ const OrderPaymentCollect = ({
           },
         ],
       });
-      
-
+  
+      // 2. Send WhatsApp Payment Received Message
+      const phoneNumber = order.customer?.whatsappNumber;
+      if (phoneNumber) {
+        const messageBody = [
+          order.customer?.name || "Customer",
+          remainingBalance.toString(),
+          order.id,
+          redeemReward ? order.customer?.rewardPoint?.toString() || "0" : "0",
+          ((redeemReward ? 0 : order.customer?.rewardPoint ?? 0) + newRewardPoints).toString(),
+        ];
+  
+        const res = await fetch('/api/payment-received', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phoneNumber, messageBody }),
+        });
+  
+        const data = await res.json();
+        if (!data.success) {
+          console.error("Failed to send payment confirmation: ", data.message);
+        }
+      } else {
+        console.warn("Customer WhatsApp number is missing, skipping WhatsApp confirmation.");
+      }
+  
       toast({
-        title:"Payment Updated",
+        title: "Payment Updated",
         description: "✅ Payment completed & order updated.",
       });
       setOpen(false);
+  
     } catch (error) {
-      toast({description:"❌ Failed to update order. Try again.", variant:"destructive"});
+      toast({ description: "❌ Failed to update order. Try again.", variant: "destructive" });
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
+  
+
+  useEffect(() => {
+    // const user = fetchUserData(auth?.currentUser)
+    const fetchUser = async () => {
+      const res = await fetchUserData(auth?.currentUser)
+      // console.log(res)
+      setUser(res);
+      // console.log(user)
+    };
+    fetchUser();
+  },[])
 
   return (
     <div className="flex flex-col py-4">
