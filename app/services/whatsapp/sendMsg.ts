@@ -117,4 +117,16 @@ export async function sendPaymentReminderMsg(
   return sendMessage(phoneNumber, messageBody, "payment_reminder_3");
 }
 
+export async function sendPaymentReceived(
+  phoneNumber: string,
+  customerName: string,
+  amount: string,
+  orderId: string,
+  earnedRewardPoint: string,
+  newRewardPoint: string,
+){
+  const messageBody = [phoneNumber, customerName, amount, orderId, earnedRewardPoint, newRewardPoint]
+  return sendMessage(phoneNumber,messageBody,"payment_confirmation_2")
+}
+
 
