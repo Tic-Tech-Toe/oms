@@ -67,7 +67,7 @@ const Hero = ({id}:{id:string}) => {
         data-theme="dark"
         className="md:flex-1 rounded-3xl relative md:mt-0 mt-6 py-4 dark"
       >
-        <Safari url="shiptrack.com" className="size-full" imageSrc="/webMock.jpg"  />
+        <Safari url="shiptrack.com" className="size-full" imageSrc="/webMock.JPG"  />
         {/* <Iphone15Pro className="size-[70%] absolute bottom-0" src="/whatsappMock.jpg" stroke="2px" /> */}
       </div>
     </section>
