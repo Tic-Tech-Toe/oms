@@ -2,7 +2,7 @@ import { sendPaymentReceived } from "@/app/services/whatsapp/sendMsg";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request){
-    console.log("")
+    console.log("Started sending payment complete msg")
 
     const { phoneNumber, messageBody } = await req.json();
 

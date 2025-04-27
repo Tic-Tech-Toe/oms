@@ -200,7 +200,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
               </div>
 
               {dropdownOpen && (
-                <div className="absolute w-full mt-2 z-20 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                <div className="absolute w-full mt-2 z-20 bg-background border rounded-lg shadow-lg max-h-80 overflow-y-auto">
                   {filteredItems.length === 0 ? (
                     <div className="text-center text-sm text-gray-500 py-3">
                       No products found.
@@ -212,7 +212,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                       return (
                         <div
                           key={product.itemId}
-                          className="p-3 cursor-pointer hover:bg-gray-100 rounded-md"
+                          className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 rounded-md"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="flex-1 text-sm font-medium">
@@ -221,7 +221,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                             <div className="flex items-center gap-2">
                               <Minus
                                 size={16}
-                                className="p-1 rounded-full cursor-pointer bg-gray-200"
+                                className="p-1 rounded-full cursor-pointer"
                                 onClick={() =>
                                   setQuantities((prev) => ({
                                     ...prev,
@@ -247,7 +247,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                               />
                               <Plus
                                 size={16}
-                                className="p-1 rounded-full cursor-pointer bg-gray-200"
+                                className="p-1 rounded-full cursor-pointer "
                                 onClick={() =>
                                   setQuantities((prev) => ({
                                     ...prev,
@@ -266,13 +266,13 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                               />
                             </div>
                           </div>
-                          {exceedsStock() && (
+                          {/* {exceedsStock() && (
                             <div className="mt-1 text-xs text-red-500 flex items-center gap-1">
                               <AlertTriangle size={14} />
                               Selected quantity exceeds stock (
                               {product.quantity})
                             </div>
-                          )}
+                          )} */}
                         </div>
                       );
                     })
