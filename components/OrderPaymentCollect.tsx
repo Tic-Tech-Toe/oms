@@ -95,7 +95,7 @@ const OrderPaymentCollect = ({
           order.customer?.name || "Customer",
           remainingBalance.toString(),
           order.id,
-          redeemReward ? order.customer?.rewardPoint?.toString() || "0" : "0",
+          redeemReward ? order.customer?.rewardPoint?.toString() : "0",
           ((redeemReward ? 0 : order.customer?.rewardPoint ?? 0) + newRewardPoints).toString(),
         ];
   
