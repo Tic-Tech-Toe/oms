@@ -44,13 +44,13 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   loadAllOrders: async (userId) => {
     set({ isLoading: true });
     try {
-      const orders = await getOrders(userId);
+      const orders = await getOrders(userId); // Fetch orders from Firestore
       set({ allOrders: orders });
     } catch (error) {
-      console.error("Error loading orders from Firestore:", error);
-    } finally {
-      set({ isLoading: false });
+      console.error("Error fetching orders:", error);
+      set({ allOrders: [], isLoading: false });
     }
+    set({ isLoading: false });
   },
 
   addOrder: async (userId, newOrder) => {

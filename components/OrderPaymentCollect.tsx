@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/app/context/AuthContext";
 import { fetchUserData } from "@/utils/user/fetchUseData";
 import { updateCurrentUser, User } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 // import { toast } from "sonner";
 
 const OrderPaymentCollect = ({
@@ -45,87 +47,94 @@ const OrderPaymentCollect = ({
     return Math.max(totalAfterDiscount - totalPaid, 0);
   };
 
-  const handleCompletePay = async () => {
-    setLoading(true);
-    const remainingBalance = getTotalPayment(order, redeemReward);
-    const totalPaid = (order.payment?.totalPaid ?? 0) + remainingBalance;
-    const isFullyPaid = totalPaid >= (order.totalAmount ?? 0);
-  
-    const orderDate = new Date(order.orderDate);
-    const today = new Date();
-    const diffInDays = Math.floor(
-      (today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const isEligibleForReward = diffInDays <= 7;
-  
-    const newRewardPoints = isEligibleForReward
-      ? Math.floor(((order.totalAmount ?? 0) * (user?.rewardPercentage)) / 100)
-      : 0;
-  
-    try {
-      // 1. Update Firestore Order
-      await updateOrder(userId, order.id, {
-        paymentStatus: "paid",
-        updatedAt: today.toISOString(),
-        payment: {
-          totalPaid,
-          partialPayments: [
-            ...(order.payment?.partialPayments || []),
-            { date: today.toISOString(), amountPaid: remainingBalance },
-          ],
-        },
-        customer: {
-          ...order.customer,
-          rewardPoint:
-            (redeemReward ? 0 : order?.customer?.rewardPoint ?? 0) + newRewardPoints,
-        },
-        timeline: [
-          ...(order.timeline || []),
-          {
-            date: today.toISOString(),
-            action: `💰 Payment of ${useCurrency(remainingBalance)} received`,
-          },
+
+const handleCompletePay = async () => {
+  setLoading(true);
+  const remainingBalance = getTotalPayment(order, redeemReward);
+  const totalPaid = (order.payment?.totalPaid ?? 0) + remainingBalance;
+  const isFullyPaid = totalPaid >= (order.totalAmount ?? 0);
+
+  const orderDate = new Date(order.orderDate);
+  const today = new Date();
+  const diffInDays = Math.floor(
+    (today.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const isEligibleForReward = diffInDays <= 7;
+
+  const newRewardPoints = isEligibleForReward
+    ? Math.floor(((order.totalAmount ?? 0) * (user?.rewardPercentage)) / 100)
+    : 0;
+
+  try {
+    // 1. Update the Customer's Reward Points in the Zustand store and Firestore
+    const { updateCustomer } = useCustomerStore.getState(); // Access updateCustomer from the Zustand store
+    const updatedRewardPoints = (redeemReward ? 0 : order.customer.rewardPoint ?? 0) + newRewardPoints;
+    
+    await updateCustomer(userId, order.customer.id, { rewardPoint: updatedRewardPoints });
+
+    // 2. Update Firestore Order Document (already done in the updateCustomer function)
+    await updateOrder(userId, order.id, {
+      paymentStatus: "paid",
+      updatedAt: today.toISOString(),
+      payment: {
+        totalPaid,
+        partialPayments: [
+          ...(order.payment?.partialPayments || []),
+          { date: today.toISOString(), amountPaid: remainingBalance },
         ],
+      },
+      customer: {
+        ...order.customer,
+        rewardPoint: updatedRewardPoints, // Updated rewardPoint after applying reward
+      },
+      timeline: [
+        ...(order.timeline || []),
+        {
+          date: today.toISOString(),
+          action: `💰 Payment of ${useCurrency(remainingBalance)} received`,
+        },
+      ],
+    });
+
+    // 3. Send WhatsApp Payment Received Message
+    const phoneNumber = order.customer?.whatsappNumber;
+    if (phoneNumber) {
+      const messageBody = [
+        order.customer?.name || "Customer",
+        remainingBalance.toString(),
+        order.id,
+        redeemReward ? order.customer?.rewardPoint?.toString() : "0",
+        updatedRewardPoints.toString(),
+      ];
+
+      const res = await fetch('/api/payment-received', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber, messageBody }),
       });
-  
-      // 2. Send WhatsApp Payment Received Message
-      const phoneNumber = order.customer?.whatsappNumber;
-      if (phoneNumber) {
-        const messageBody = [
-          order.customer?.name || "Customer",
-          remainingBalance.toString(),
-          order.id,
-          redeemReward ? order.customer?.rewardPoint?.toString() : "0",
-          ((redeemReward ? 0 : order.customer?.rewardPoint ?? 0) + newRewardPoints).toString(),
-        ];
-  
-        const res = await fetch('/api/payment-received', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phoneNumber, messageBody }),
-        });
-  
-        const data = await res.json();
-        if (!data.success) {
-          console.error("Failed to send payment confirmation: ", data.message);
-        }
-      } else {
-        console.warn("Customer WhatsApp number is missing, skipping WhatsApp confirmation.");
+
+      const data = await res.json();
+      if (!data.success) {
+        console.error("Failed to send payment confirmation: ", data.message);
       }
-  
-      toast({
-        title: "Payment Updated",
-        description: "✅ Payment completed & order updated.",
-      });
-      setOpen(false);
-  
-    } catch (error) {
-      toast({ description: "❌ Failed to update order. Try again.", variant: "destructive" });
-      console.error(error);
-    } finally {
-      setLoading(false);
+    } else {
+      console.warn("Customer WhatsApp number is missing, skipping WhatsApp confirmation.");
     }
-  };
+
+    toast({
+      title: "Payment Updated",
+      description: "✅ Payment completed & order updated.",
+    });
+    setOpen(false);
+
+  } catch (error) {
+    toast({ description: "❌ Failed to update order. Try again.", variant: "destructive" });
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
   
 
   useEffect(() => {

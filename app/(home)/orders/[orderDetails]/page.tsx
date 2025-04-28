@@ -22,9 +22,12 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { handleSendPaymentReminder } from "@/utils/sendPaymentReminder";
 import { useAuth } from "@/app/context/AuthContext";
 import { fetchUserData } from "@/utils/user/fetchUseData";
+import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 
 const OrderDetails = () => {
   const { allOrders } = useOrderStore();
+  const { customers, loadCustomers } = useCustomerStore();
+
   const router = useRouter();
   const [order, setOrder] = useState<OrderType | null>(null);
 
@@ -41,6 +44,14 @@ const OrderDetails = () => {
       setOrder(latestOrder);
     }
   }, [allOrders]);
+
+  useEffect(() => {
+    if(userId){
+      loadCustomers(userId)
+    }
+  },[userId, loadCustomers])
+
+  const relCustomer = customers.find((c) => c.id === order?.customer?.id)
 
   const handleOrderProcess = async (order: OrderType) => {
     alert("Order processing");
@@ -204,55 +215,54 @@ const OrderDetails = () => {
         <OrderPaymentDetailComponent order={order} />
       </div>
       <FooterComponent
-  text="Review order and set payment status"
-  order={order}
-  status={order.paymentStatus}
-  buttonOneLabel="Send Payment Reminder"
-  buttonTwoLabel="Collect payment"
-  onButtonOneClick={() => {
-    let selectedDueDate = new Date().toISOString().split("T")[0]; // default today
+        text="Review order and set payment status"
+        order={order}
+        status={order.paymentStatus}
+        buttonOneLabel="Send Payment Reminder"
+        buttonTwoLabel="Collect payment"
+        onButtonOneClick={() => {
+          let selectedDueDate = new Date().toISOString().split("T")[0]; // default today
 
-    const toastId = toast({
-      title: "Set Due Date",
-      description: (
-        <div className="flex flex-col gap-2">
-          <input
-            type="date"
-            id="dueDateInput"
-            className="border rounded p-2 w-full"
-            defaultValue={selectedDueDate}
-            onChange={(e) => {
-              selectedDueDate = e.target.value;
-            }}
-          />
-          <div className="flex items-center justify-end gap-2 mt-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={async () => {
-                // alert(selectedDueDate); //  selected date
-                await handleSendPaymentReminder(order, selectedDueDate);
-                dismiss(toastId.id);
-              }}
-            >
-              <Check className="w-4 h-4 text-green-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => dismiss(toastId.id)}
-            >
-              <X className="w-4 h-4 text-red-500" />
-            </Button>
-          </div>
-        </div>
-      ),
-      duration: 999999, // until dismissed manually
-    });
-  }}
-  showDialogForButtonTwo={true}
-/>
-
+          const toastId = toast({
+            title: "Set Due Date",
+            description: (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="date"
+                  id="dueDateInput"
+                  className="border rounded p-2 w-full"
+                  defaultValue={selectedDueDate}
+                  onChange={(e) => {
+                    selectedDueDate = e.target.value;
+                  }}
+                />
+                <div className="flex items-center justify-end gap-2 mt-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={async () => {
+                      // alert(selectedDueDate); //  selected date
+                      await handleSendPaymentReminder(order, selectedDueDate);
+                      dismiss(toastId.id);
+                    }}
+                  >
+                    <Check className="w-4 h-4 text-green-600" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => dismiss(toastId.id)}
+                  >
+                    <X className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            ),
+            duration: 999999, // until dismissed manually
+          });
+        }}
+        showDialogForButtonTwo={true}
+      />
     </div>
   );
 
@@ -291,7 +301,7 @@ const OrderDetails = () => {
 
         <div className="w-full md:w-1/3 flex flex-col gap-4">
           <div className="p-4 border rounded-2xl shadow-xl">
-            <OrderCustomerRel customer={order.customer} />
+            <OrderCustomerRel customer={relCustomer || order.customer} userId={userId} />
           </div>
           <div className="p-4 border rounded-2xl shadow-xl">
             <OrderTimeline timeline={order.timeline} />
