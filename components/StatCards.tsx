@@ -64,9 +64,9 @@ const StatCards = ({ allOrders }: { allOrders: OrderType[] }) => {
 
   // Count orders in specific states
   const orderInProgress = allOrders.filter(order =>
-    ['shipped', 'processing'].includes(order.status)
+    ['Shipped', 'Processing'].includes(order.status)
   ).length;
-  const completedOrders = allOrders.filter(order => order.status === 'delivered').length;
+  const completedOrders = allOrders.filter(order => order.status === 'Delivered').length;
 
   // Calculate total sales (currency converted)
   const totalSales = allOrders.reduce(
@@ -90,16 +90,16 @@ const StatCards = ({ allOrders }: { allOrders: OrderType[] }) => {
       additionalInfo: `Orders this week: ${thisWeeksOrders.length}`,
       icon: <Clock4 className="w-5 h-5" />,
     },
-    {
-      title: 'Repeat Customers',
-      value: repeatCustomerIds.length.toString(),
-      subtitle: `of ${uniqueCustomerIds.size} total customers`,
-      additionalInfo: `Repeat customers: ${repeatCustomerIds.length}. Repeat customer rate: ${(
-        (repeatCustomerIds.length / uniqueCustomerIds.size) *
-        100
-      ).toFixed(1)}%`,
-      icon: <Repeat className="w-5 h-5" />,
-    },
+    // {
+    //   title: 'Repeat Customers',
+    //   value: repeatCustomerIds.length.toString(),
+    //   subtitle: `of ${uniqueCustomerIds.size} total customers`,
+    //   additionalInfo: `Repeat customers: ${repeatCustomerIds.length}. Repeat customer rate: ${(
+    //     (repeatCustomerIds.length / uniqueCustomerIds.size) *
+    //     100
+    //   ).toFixed(1)}%`,
+    //   icon: <Repeat className="w-5 h-5" />,
+    // },
     {
       title: 'Orders in Progress',
       value: orderInProgress.toString(),

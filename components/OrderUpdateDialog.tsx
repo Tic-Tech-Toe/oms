@@ -62,7 +62,7 @@ const OrderUpdateDialog = ({ order, setOpen, refreshOrders }: OrderUpdateDialogP
 
     try {
       // Firestore
-      await updateOrderInFirestore(user.uid, order.id, updatePayload as Partial<OrderType>);
+      // await updateOrderInFirestore(user.uid, order.id, updatePayload as Partial<OrderType>);
       // Zustand store
       await updateOrder(user.uid, order.id, updatePayload as Partial<OrderType>);
 

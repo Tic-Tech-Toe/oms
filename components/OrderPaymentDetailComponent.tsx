@@ -9,16 +9,16 @@ const OrderPaymentDetailComponent = ({ order }: { order: OrderType }) => {
       des: order.items.length + "  " + "Items",
       amount: order.totalAmount,
     },
-    {
-      name: "discount",
-      des: "Timely payment",
-      amount: -2,
-    },
-    {
-      name: "shipping",
-      des: "Free shipping",
-      amount: 0,
-    },
+    // {
+    //   name: "discount",
+    //   des: "Timely payment",
+    //   amount: -2,
+    // },
+    // {
+    //   name: "shipping",
+    //   des: "Free shipping",
+    //   amount: 0,
+    // },
   ];
   const totalAmount = charges.reduce(
     (total, charge) => total + charge.amount,

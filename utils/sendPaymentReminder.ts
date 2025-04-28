@@ -24,7 +24,7 @@ export async function  handleSendPaymentReminder(order,dueDate){
       `${(order.totalAmount - (order?.payment?.totalPaid || 0))}`,
       order.invoiceNumber || order.id,
       dueDate || "N/A", // Due date
-      `${(order.totalAmount/100)*rewardPercentage || 0}`, // Reward point that will be earned
+      `${(order.totalAmount/100)*rewardPercentage || 10}`, // Reward point that will be earned
       `${order.customer.rewardPoint}`, // Customer's current reward point
     ];
 
