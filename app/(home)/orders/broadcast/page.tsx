@@ -1,26 +1,28 @@
-// app/broadcast/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-
-const mockContacts = [
-  { id: 1, name: 'Rishi', phone: '919635901369' },
-  { id: 2, name: 'Kiran', phone: '918273645011' },
-  { id: 3, name: 'Anjali', phone: '919998887776' },
-];
+import { auth } from '@/app/config/firebase';
+import { useCustomerStore } from '@/hooks/zustand_stores/useCustomerStore';
 
 export default function BroadcastPage() {
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
   const [template, setTemplate] = useState('');
   const [customMessage, setCustomMessage] = useState('');
   const { toast } = useToast();
+  const userId = auth.currentUser?.uid;
+  const { customers, loadCustomers } = useCustomerStore();
+
+  useEffect(() => {
+    if (userId) {
+      loadCustomers(userId);
+    }
+  }, [userId, loadCustomers]);
 
   const toggleContact = (id: number) => {
     setSelectedContacts((prev) =>
@@ -29,15 +31,14 @@ export default function BroadcastPage() {
   };
 
   const handleBroadcast = async () => {
-    if (!template || !customMessage || selectedContacts.length === 0) {
+    if (!template || !selectedContacts.length) {
       toast({
         title: 'Missing fields ⚠️',
-        description: 'Please select contacts, template and type a message.',
+        description: 'Please select contacts and a template.',
       });
       return;
     }
 
-    // Send to backend
     // await sendBroadcast(selectedContacts, template, customMessage)
 
     toast({
@@ -45,13 +46,13 @@ export default function BroadcastPage() {
       description: `Message sent to ${selectedContacts.length} contacts.`,
     });
 
-    // Reset
     setSelectedContacts([]);
     setCustomMessage('');
   };
 
   return (
-    <div className="min-h-screen px-6  bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
+    <div className="min-h-screen relative px-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
+      {/* Main Card */}
       <Card className="w-full max-w-4xl mx-auto shadow-xl border-none rounded-3xl bg-white dark:bg-zinc-900">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-dark-primary">
@@ -71,29 +72,18 @@ export default function BroadcastPage() {
             />
           </div>
 
-          {/* Message Box */}
-          {/* <div>
-            <Label className="mb-1 text-sm text-muted-foreground">Custom Message</Label>
-            <Textarea
-              placeholder="Type your message here..."
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              rows={4}
-            />
-          </div> */}
-
           {/* Contacts List */}
           <div>
             <Label className="mb-2 text-sm text-muted-foreground">Select Contacts</Label>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              {mockContacts.map((contact) => (
+              {customers.map((contact) => (
                 <div
                   key={contact.id}
                   className="flex items-center gap-2 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800"
                 >
                   <Checkbox
                     checked={selectedContacts.includes(contact.id)}
-                    className='bg-background'
+                    className="bg-background"
                     onCheckedChange={() => toggleContact(contact.id)}
                   />
                   <div>
@@ -104,15 +94,23 @@ export default function BroadcastPage() {
               ))}
             </div>
           </div>
-
-          {/* Send Button */}
-          <div className="text-center pt-4">
-            <Button onClick={handleBroadcast} className="text-lg px-6 py-2 rounded-xl bg-light-primary text-white" variant="default">
-               Send Broadcast
-            </Button>
-          </div>
         </CardContent>
       </Card>
+
+      {/* Floating Dock - Shown only if some contacts selected */}
+      {selectedContacts.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-zinc-800 shadow-lg border dark:border-zinc-700 rounded-full px-6 py-3 flex items-center gap-4 z-50">
+          <span className="font-semibold text-dark-primary dark:text-white">
+            {selectedContacts.length} {selectedContacts.length === 1 ? 'Contact' : 'Contacts'} Selected
+          </span>
+          <Button
+            onClick={handleBroadcast}
+            className="rounded-full bg-light-primary hover:bg-light-primary/90 text-white"
+          >
+            Send Now
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

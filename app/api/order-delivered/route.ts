@@ -1,5 +1,6 @@
 // app/api/order-delivered/route.ts
 import { sendMessage } from '@/app/services/whatsapp/sendMsg';
+import { useCurrency } from '@/hooks/useCurrency';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
   const messageBody = [
     customerName,     // Customer's name
     orderId,          // Order ID
-    `$${totalAmount}`,// Total amount
+    `${useCurrency(totalAmount)}`,// Total amount
   ];
 
   // Define the template name

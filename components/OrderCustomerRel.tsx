@@ -73,7 +73,7 @@ export function OrderCustomerRel({ customer, userId }: OrderCustomerRelProps) {
                   customerOrders.map((order) => (
                     <div
                       key={order.id}
-                      className="border p-4 rounded-lg bg-white dark:bg-gray-800 shadow-lg"
+                      className="border p-4 rounded-lg bg-white transition-all duration-300 dark:bg-gray-800 shadow-lg hover:-translate-y-2 hover:scale-105"
                     >
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">

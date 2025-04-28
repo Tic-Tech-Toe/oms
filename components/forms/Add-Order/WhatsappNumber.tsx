@@ -15,7 +15,7 @@ const WhatsAppNumberField = ({ whatsappNum, setWhatsappNum }) => {
 
   const handleChange = (e) => {
     const inputValue = e.target.value;
-    setWhatsappNum("91" + inputValue.replace(/^91/, "")); // ensure no duplicate '91'
+    setWhatsappNum(inputValue.replace(/^91/, "")); // ensure no duplicate '91'
     setManuallyEdited(true);
   };
 

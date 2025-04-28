@@ -33,14 +33,16 @@ const OrderPaymentCollect = ({
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState();
 
+  const { customers, loadCustomers } = useCustomerStore();
+
   const userId = auth.currentUser?.uid || "";
   const { toast } = useToast();
  
   const getTotalPayment = (order: OrderType, redeemReward: boolean) => {
     if (!order) return 0;
 
-    const totalAmount = order?.totalAmount ?? 0;
-    const rewardPoints = redeemReward ? order?.customer?.rewardPoint ?? 0 : 0;
+    const totalAmount = order?.totalAmount;
+    const rewardPoints = redeemReward ? customer?.rewardPoint : 0;
     const totalAfterDiscount = Math.max(totalAmount - rewardPoints, 0);
     const totalPaid = order.payment?.totalPaid ?? 0;
 
@@ -103,7 +105,7 @@ const handleCompletePay = async () => {
         order.customer?.name || "Customer",
         remainingBalance.toString(),
         order.id,
-        redeemReward ? order.customer?.rewardPoint?.toString() : "0",
+        redeemReward ? customer?.rewardPoint?.toString() : "0",
         updatedRewardPoints.toString(),
       ];
 
@@ -148,6 +150,13 @@ const handleCompletePay = async () => {
     fetchUser();
   },[])
 
+  useEffect(() => {
+    if(userId){
+      loadCustomers(userId)
+    }
+  },[userId, loadCustomers])
+  const customer = customers.find((c) => c.id === order?.customer?.id)
+
   return (
     <div className="flex flex-col py-4">
       <div className="flex items-center justify-between">
@@ -172,7 +181,7 @@ const handleCompletePay = async () => {
             </div>
             {redeemReward && (
               <div className="flex justify-between text-sm font-semibold">
-                Discount <span>{useCurrency(order?.customer?.rewardPoint)}</span>
+                Reward discount : <span>{useCurrency(customer?.rewardPoint)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm font-semibold">
@@ -208,7 +217,7 @@ const handleCompletePay = async () => {
       </div>
 
       <div className="w-full h-10 mt-6 flex flex-col items-center">
-        {order?.customer?.rewardPoint > 0 && (
+        {customer?.rewardPoint > 0 && (
           <div className="flex items-center space-x-2">
             <Checkbox
               id="redeem-reward"
@@ -220,7 +229,7 @@ const handleCompletePay = async () => {
               className="text-sm font-medium leading-none"
             >
               <span className="text-xs font-semibold">
-                Reward points of {order?.customer?.rewardPoint} will be applied
+                Reward points of {customer?.rewardPoint} will be applied
               </span>
             </label>
           </div>

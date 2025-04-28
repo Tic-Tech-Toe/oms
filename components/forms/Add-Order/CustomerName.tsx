@@ -51,7 +51,7 @@ const CustomerNameField = ({
   const handleSelectCustomer = (customer) => {
     setValue("customerName", customer.name);
     setNameSuggestions([]);
-    setWhatsappNum("+91" + customer.whatsappNumber);
+    setWhatsappNum(customer.whatsappNumber);
     setSelectedCustomer(customer);
     // You can optionally set other fields here if needed
   };
