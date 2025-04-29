@@ -95,7 +95,11 @@ export default function People() {
                   {cust.email || "No email"}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  +91 {cust.whatsappNumber}
+                  +91{" "}
+                  {cust.whatsappNumber.length > 10 &&
+                  cust.whatsappNumber.startsWith("91")
+                    ? cust.whatsappNumber.slice(2)
+                    : cust.whatsappNumber}
                 </p>
               </div>
 

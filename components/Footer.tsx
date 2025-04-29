@@ -43,7 +43,7 @@ const Footer = ({ id }: { id?: string }) => {
         >
           <h3 className="text-lg font-semibold mb-3">Follow Us</h3>
           <div className="flex gap-4 text-xl text-gray-600 dark:text-gray-300">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white"><FaGithub /></a>
+            <a href="https://github.com/Chandradeep-Pra" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white"><FaGithub /></a>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white"><FaTwitter /></a>
             <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-black dark:hover:text-white"><FaLinkedin /></a>
           </div>

@@ -9,6 +9,7 @@ import {
   Layers,
   LogOut,
   Settings,
+  Radio,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -41,6 +42,7 @@ const Topbar = () => {
     { name: "dashboard", icon: LayoutGrid, path: "/orders" },
     { name: "people", icon: UserRound, path: "/orders/people" },
     { name: "inventory", icon: Layers, path: "/orders/inventory" },
+    { name: "broadcast", icon: Radio, path: "/orders/broadcast" },
   ];
 
   return (
@@ -113,10 +115,10 @@ const Topbar = () => {
       {/* Search Bar */}
       {searchOpen && <div className="px-4 pb-2"><SearchBar /></div>}
 
-      {/* Navigation */}
+      {/* Mobile Navigation */}
       {menuOpen && (
         <nav className="border-t border-zinc-200 dark:border-zinc-800">
-          <ul className="flex justify-around px-2 py-3">
+          <ul className="flex flex-col px-4 py-3">
             {menuItems.map((item) => {
               const isActive = pathname === item.path;
               return (
@@ -126,14 +128,14 @@ const Topbar = () => {
                     router.push(item.path);
                     setMenuOpen(false);
                   }}
-                  className={`flex flex-col items-center text-sm transition-colors ${
+                  className={`flex items-center gap-2 p-2 text-sm transition-colors ${
                     isActive
                       ? "text-indigo-600 font-medium"
                       : "text-gray-500 dark:text-gray-400 hover:text-indigo-500"
                   }`}
                 >
                   <item.icon size={22} />
-                  <span className="mt-1 capitalize">{item.name}</span>
+                  <span className="ml-2 capitalize">{item.name}</span>
                 </li>
               );
             })}

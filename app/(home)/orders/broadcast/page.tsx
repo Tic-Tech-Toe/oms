@@ -51,7 +51,7 @@ export default function BroadcastPage() {
   };
 
   return (
-    <div className="min-h-screen relative px-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
+    <div className="h-full relative p-6 mt-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
       {/* Main Card */}
       <Card className="w-full max-w-4xl mx-auto shadow-xl border-none rounded-3xl bg-white dark:bg-zinc-900">
         <CardHeader className="text-center">
@@ -99,18 +99,30 @@ export default function BroadcastPage() {
 
       {/* Floating Dock - Shown only if some contacts selected */}
       {selectedContacts.length > 0 && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-zinc-800 shadow-lg border dark:border-zinc-700 rounded-full px-6 py-3 flex items-center gap-4 z-50">
-          <span className="font-semibold text-dark-primary dark:text-white">
-            {selectedContacts.length} {selectedContacts.length === 1 ? 'Contact' : 'Contacts'} Selected
-          </span>
-          <Button
-            onClick={handleBroadcast}
-            className="rounded-full bg-light-primary hover:bg-light-primary/90 text-white"
-          >
-            Send Now
-          </Button>
-        </div>
-      )}
+  <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-zinc-800 shadow-lg border dark:border-zinc-700 rounded-full md:px-6 md:py-3 p-2 flex items-center gap-4 z-50 md:gap-4 sm:gap-2">
+    {/* Mobile View: Only show number of selected contacts with a round icon */}
+    <span className="hidden md:block font-semibold text-dark-primary dark:text-white">
+      {selectedContacts.length} {selectedContacts.length === 1 ? 'Contact' : 'Contacts'} Selected
+    </span>
+
+    {/* For mobile view, show only the count with an icon */}
+    <div className="md:hidden flex items-center justify-between gap-2">
+      <span className="font-semibold text-dark-primary dark:text-white">
+        {selectedContacts.length}
+      </span>
+      
+    </div>
+
+    {/* Send Now Button */}
+    <Button
+      onClick={handleBroadcast}
+      className="rounded-full bg-light-primary hover:bg-light-primary/90 text-white"
+    >
+      Send Now
+    </Button>
+  </div>
+)}
+
     </div>
   );
 }
