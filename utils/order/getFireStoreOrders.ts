@@ -41,10 +41,10 @@ export const addOrder = async (
       updatedAt: serverTimestamp(),
     });
 
-    console.log("✅ Order added with ID:", newDocRef.id);
+    // console.log("✅ Order added with ID:", newDocRef.id);
     return newDocRef.id;
   } catch (error: any) {
-    console.error("🔥 Error adding order:", error.message, error.code, error);
+    // console.error("🔥 Error adding order:", error.message, error.code, error);
     throw error;
   }
 };

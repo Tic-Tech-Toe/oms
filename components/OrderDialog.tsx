@@ -150,7 +150,9 @@ const OrderDialog = () => {
 
           createdAt: new Date().toISOString(),
         });
-        customerId = newCustomer.id;
+        customerId = newCustomer;
+        // console.log("Is this customerId",newCustomer)
+        // console.log(customerId);
       } catch (error) {
         console.error("❌ Failed to add new customer:", error);
         toast({
@@ -175,7 +177,7 @@ const OrderDialog = () => {
         id: customerId || "unknown",
         name: data.customerName,
         whatsappNumber: whatsappNum,
-        rewardPoint: 0,
+        // rewardPoint: 0,
       },
       createdAt: data.orderDate.toISOString(),
       updatedAt: data.orderDate.toISOString(),
@@ -192,7 +194,7 @@ const OrderDialog = () => {
     };
 
     const result = await addOrder(user?.uid || "", newOrder);
-    console.log(result);
+    // console.log(result);
 
     if (result.success) {
       // 🔽 Decrease stock quantities in Firestore
@@ -224,6 +226,7 @@ const OrderDialog = () => {
           const messageBody = [
             data.customerName,
             result.orderId,
+            // result.invoiceNumber === "" ? result.orderId : result.invoiceNumber,
             data.orderDate.toDateString(),
             transformedItems
               .map((item) => `${item.quantity} × ${item.itemName}`)
@@ -275,7 +278,7 @@ const OrderDialog = () => {
       }
 
       handleDialogClose();
-      console.log("📝 New Order:", newOrder);
+      // console.log("📝 New Order:", newOrder);
     }
   };
 
