@@ -17,7 +17,7 @@ const Hero = ({id}:{id:string}) => {
 
   const handleClick = () => {
     const message = encodeURIComponent("Hi Ship, I am interested, let us connect.");
-    const phoneNumber = "+919748412275";
+    const phoneNumber = "+918981873533";
     const isMobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
 
     if (isMobile) {
