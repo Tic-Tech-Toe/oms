@@ -41,7 +41,7 @@ export const STATUS_WHATSAPP_CONFIG: Record<
     getPayload: (row) => ({
       phoneNumber: row.original.customer.whatsappNumber,
       customerName: row.original.customer.name,
-      orderId: row.original.invoiceNumber === ""? row.original.id : row.original.invoiceNumber,
+      orderId: row.original.invoiceNumber === "" ? row.original.id : row.original.invoiceNumber,
       totalAmount: row.original.totalAmount,
     }),
   },
