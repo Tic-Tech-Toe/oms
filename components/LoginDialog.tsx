@@ -62,6 +62,7 @@ const LoginDialog = () => {
         router.push("/admin/invite");
       } else if (userData?.role === "member") {
         router.push("/orders");
+        router.refresh()
       } else {
         setError("Unauthorized user.");
       }
