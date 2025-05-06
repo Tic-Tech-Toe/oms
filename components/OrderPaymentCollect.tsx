@@ -104,7 +104,7 @@ const handleCompletePay = async () => {
       const messageBody = [
         order.customer?.name || "Customer",
         remainingBalance.toString(),
-        order.id,
+        order.invoiceNumber || order.id,
         redeemReward ? customer?.rewardPoint?.toString() : "0",
         updatedRewardPoints.toString(),
       ];
