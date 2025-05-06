@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
-import { db } from '@/app/config/firebase';
+import { auth, db } from '@/app/config/firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 export default function AccountPage() {
   const [whatsappSecret, setWhatsappSecret] = useState('');
@@ -118,9 +119,27 @@ export default function AccountPage() {
     setIsEditingReward(false);
   }
 
+  async function handleResetPassword() {
+    if (!user?.email) return;
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      toast({
+        title: "Password Reset Sent ✅",
+        description: "Check your email to reset your password.",
+      });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      toast({
+        title: "Error ❌",
+        description: "Failed to send reset email. Try again later.",
+      });
+    }
+  }
+  
+
   return (
     <div className="min-h-screen px-6 py-12 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
-      <Card className="w-full shadow-2xl rounded-3xl border-none bg-white dark:bg-zinc-900">
+      <Card className="w-full shadow-2xl py-2 rounded-3xl border-none bg-white dark:bg-zinc-900">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-extrabold tracking-tight text-dark-primary">
             👋 Hey, {user?.displayName?.split(' ')[0] || 'there'}!
@@ -238,6 +257,15 @@ export default function AccountPage() {
 
           </div>
         </CardContent>
+        <div className="text-center mt-4">
+  <button
+    onClick={handleResetPassword}
+    className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 cursor-pointer text-white text-sm font-semibold rounded-full shadow-md hover:bg-indigo-800 transition"
+  >
+    🔐 Reset Password
+  </button>
+</div>
+
       </Card>
     </div>
   );
