@@ -101,6 +101,11 @@ export default function People() {
                     ? cust.whatsappNumber.slice(2)
                     : cust.whatsappNumber}
                 </p>
+                {cust.rewardPoint !== undefined && (
+    <div className="inline-flex items-center bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 text-sm font-medium px-3 py-1 rounded-full">
+      🎁 {cust.rewardPoint} Reward Points
+    </div>
+  )}
               </div>
 
               {/* Actions */}

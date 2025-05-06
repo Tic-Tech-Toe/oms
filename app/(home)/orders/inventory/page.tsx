@@ -24,7 +24,6 @@ export default function Inventory() {
   const [editState, setEditState] = useState<Record<string, Partial<ItemType>>>({});
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
 
-
   useEffect(() => {
     if (user?.uid) loadInventory(user.uid);
   }, [user]);
@@ -130,7 +129,11 @@ export default function Inventory() {
                 <div className="flex gap-4">
                   <button
                     className="text-blue-600"
-                    onClick={() => setExpandedItemId(expanded ? null : item.itemId)}
+                    onClick={() =>
+                      setExpandedItemId((prev) =>
+                        prev === item.itemId ? null : item.itemId
+                      )
+                    }
                   >
                     {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
@@ -160,13 +163,13 @@ export default function Inventory() {
                     label="Price"
                     value={editing.price ?? item.price}
                     type="number"
-                    onChange={(val) => handleFieldChange(item.itemId, "price", +val)}
+                    onChange={(val) => handleFieldChange(item.itemId, "price", parseFloat(val))}
                   />
                   <EditableField
                     label="Quantity"
                     value={editing.quantity ?? item.quantity}
                     type="number"
-                    onChange={(val) => handleFieldChange(item.itemId, "quantity", +val)}
+                    onChange={(val) => handleFieldChange(item.itemId, "quantity", parseFloat(val))}
                   />
                   <EditableField
                     label="Category"
@@ -186,17 +189,15 @@ export default function Inventory() {
       </div>
 
       {showAddItemDialog && (
-  <AddItemDialog
-    onAdd={(item) => {
-      if (user?.uid) {
-        // Add to Firestore and reload
-        useInventoryStore.getState().addItem(user.uid, item);
-      }
-    }}
-    onClose={() => setShowAddItemDialog(false)}
-  />
-)}
-
+        <AddItemDialog
+          onAdd={(item) => {
+            if (user?.uid) {
+              useInventoryStore.getState().addItem(user.uid, item);
+            }
+          }}
+          onClose={() => setShowAddItemDialog(false)}
+        />
+      )}
 
       {inventory.length === 0 && (
         <div className="text-gray-400 mt-10 text-center">No inventory yet.</div>
@@ -205,7 +206,7 @@ export default function Inventory() {
   );
 }
 
-// Helper inline editor
+// Editable Field component
 function EditableField({
   label,
   value,
@@ -224,6 +225,7 @@ function EditableField({
         className="w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-neutral-800 dark:text-white"
         value={value}
         type={type}
+        step={type === "number" ? "0.01" : undefined}
         onChange={(e) => onChange(e.target.value)}
       />
     </div>

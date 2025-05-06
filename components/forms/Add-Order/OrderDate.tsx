@@ -76,11 +76,11 @@ const OrderDate = () => {
             className="rounded-xl"
             classNames={{
               // Calendar day cell
-              day: "w-9 h-9 p-0 font-normal text-sm aria-selected:opacity-100 rounded-md",
+              day: "w-9 h-9 p-0 font-normal text-sm aria-selected:opacity-100 rounded-md hover:bg-blue-200",
 
               // Selected day styling
               day_selected:
-                "bg-light-primary text-red-300 hover:bg-light-primary hover:text-red-300",
+                "bg-light-primary  hover:bg-light-primary",
 
               // Today’s date styling
               day_today:
@@ -98,7 +98,7 @@ const OrderDate = () => {
 
               // Navigation icon button (background + hover)
               nav_button:
-                "h-7 w-7 bg-red-300 hover:bg-muted text-muted-foreground",
+                "h-7 w-7  hover:bg-muted text-muted-foreground",
 
               // Remove absolute positioning to align arrows in-line
               nav_button_previous: "",
@@ -113,7 +113,7 @@ const OrderDate = () => {
       </Popover>
 
       {errors.orderDate && (
-        <div className="flex items-center gap-1 text-sm text-red-500 mt-1">
+        <div className="flex items-center gap-1 text-sm  mt-1">
           <MinusCircle size={16} />
           <p>Please select a date</p>
         </div>
