@@ -95,12 +95,13 @@ export default function Inventory() {
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-6">
         {inventory.map((item) => {
           const editing = editState[item.itemId] || {};
-          const expanded = isExpanded(item.itemId);
+          // const expanded = isExpanded(item.itemId);
+          const expanded = expandedItemId === item.itemId;;
 
           return (
             <div
               key={item.itemId}
-              className={clsx(
+              className={clsx( "self-start",
                 "relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[2rem] px-6 py-5 shadow-md transition-all",
                 expanded ? "ring-2 ring-blue-500" : ""
               )}
