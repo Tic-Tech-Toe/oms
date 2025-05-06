@@ -11,6 +11,7 @@ import {
 import { ShoppingBag, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const ShoppingBagDialog = ({ cartState, setCartState }) => {
   const cartItems = Object.values(cartState);
@@ -55,7 +56,7 @@ const ShoppingBagDialog = ({ cartState, setCartState }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                    ₹{item.quantity * item.price}
+                    {useCurrency(item.quantity * item.price)}
                   </p>
                   <Button
                     size="icon"
