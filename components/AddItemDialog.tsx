@@ -87,7 +87,7 @@ export default function AddItemDialog({
             className="space-y-4 mt-4"
           >
             <FloatingInput name="name" label="Item Name" required />
-            <FloatingInput name="price" label="Price" type="number" required />
+            <FloatingInput name="price" label="Price" type="number" step="0.01" required />
             <FloatingInput
               name="quantity"
               label="Quantity"
@@ -126,11 +126,13 @@ function FloatingInput({
   name,
   type = "text",
   required = false,
+  step,
 }: {
   label: string;
   name: keyof FormData;
   type?: string;
   required?: boolean;
+  step?:string
 }) {
   const {
     register,
@@ -139,21 +141,22 @@ function FloatingInput({
 
   return (
     <div className="relative w-full flex flex-col gap-2">
-      <label htmlFor={name} className="text-slate-600 text-sm font-medium">
-        {label}
-      </label>
-      <input
-        {...register(name, { valueAsNumber: type === "number" })}
-        type={type}
-        placeholder={`Enter ${label.toLowerCase()}`}
-        required={required}
-        className="h-11 px-3 rounded-xl text-sm border shadow-none outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-black transition-all"
-      />
-      {errors[name] && (
-        <p className="text-xs text-red-500 mt-1">
-          {(errors[name]?.message as string) || ""}
-        </p>
-      )}
-    </div>
+    <label htmlFor={name} className="text-slate-600 text-sm font-medium">
+      {label}
+    </label>
+    <input
+      {...register(name, { valueAsNumber: type === "number" })}
+      type={type}
+      placeholder={`Enter ${label.toLowerCase()}`}
+      required={required}
+      step={step}
+      className="h-11 px-3 rounded-xl text-sm border shadow-none outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-black transition-all"
+    />
+    {errors[name] && (
+      <p className="text-xs text-red-500 mt-1">
+        {(errors[name]?.message as string) || ""}
+      </p>
+    )}
+  </div>
   );
 }
