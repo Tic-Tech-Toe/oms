@@ -318,8 +318,8 @@ const OrderDialog = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-4">
-              <OrderStatus status={status} setStatus={setStatus} />
+            <div className="grid grid-cols-1 gap-x-8 gap-y-6 max-sm:grid-cols-1 max-sm:gap-y-4 mt-4">
+              {/* <OrderStatus status={status} setStatus={setStatus} /> */}
               <OrderDate />
             </div>
 
