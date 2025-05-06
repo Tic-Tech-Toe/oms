@@ -112,7 +112,7 @@ export default function Inventory() {
                   <h2 className="text-lg font-semibold">
                     {editing.name ?? item.name}
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
                     ₹{editing.price ?? item.price}
                   </p>
                 </div>
