@@ -5,6 +5,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   updateDoc,
 } from "firebase/firestore";
@@ -74,5 +75,23 @@ export const deleteCustomer = async (
   } catch (error) {
     console.error("Error deleting customer:", error);
     throw error;
+  }
+};
+
+export const getCustomerById = async (
+  userId: string,
+  customerId: string
+): Promise<CustomerType | null> => {
+  try {
+    const customerDoc = doc(db, "users", userId, "customers", customerId);
+    const snapshot = await getDoc(customerDoc);
+    if (snapshot.exists()) {
+      return { ...(snapshot.data() as CustomerType), id: snapshot.id };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching customer by ID:", error);
+    return null;
   }
 };

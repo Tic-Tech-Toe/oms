@@ -5,6 +5,7 @@ import {
   deleteCustomer as fbDeleteCustomer,
   getCustomers as fbGetCustomers,
   updateCustomer as fbUpdateCustomer,
+  getCustomerById as fbGetCustomerById,
 } from "@/utils/customer/getFirestoreCustomers";
 
 interface CustomerAppState {
@@ -18,6 +19,7 @@ interface CustomerAppState {
     updatedFields: Partial<CustomerType>
   ) => Promise<void>;
   deleteCustomer: (userId: string, id: string) => Promise<void>;
+  getCustomerById: (userId: string, id: string) => Promise<CustomerType | null>;
 }
 
 export const useCustomerStore = create<CustomerAppState>((set, get) => ({
@@ -57,5 +59,17 @@ export const useCustomerStore = create<CustomerAppState>((set, get) => ({
     set((state) => ({
       customers: state.customers.filter((cust) => cust.id !== id),
     }));
+  },
+
+  getCustomerById: async (userId, id) => {
+    const local = get().customers.find((c) => c.id === id);
+    if (local) return local;
+    try {
+      const customer = await fbGetCustomerById(userId, id);
+      return customer || null;
+    } catch (error) {
+      console.error("Failed to fetch customer by ID:", error);
+      return null;
+    }
   },
 }));
