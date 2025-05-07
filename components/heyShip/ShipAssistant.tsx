@@ -10,9 +10,10 @@ export default function ShipAssistant() {
   const [isAlwaysActive, setIsAlwaysActive] = useState(false);
   const [open, setOpen] = useState(false)
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
     // This will open the chatbox later
-    // setOpen((prev) => !prev)
+    e.stopPropagation();
+    setOpen((prev) => !prev)
     console.log("Open AI Assistant Chat");
   };
 
@@ -40,7 +41,7 @@ export default function ShipAssistant() {
 
       {/* Chat Box */}
       {open && (
-        <div className="fixed bottom-24 left-6 !z-50 w-[360px] h-[400px] bg-background border rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="fixed bottom-24 left-6 z-50 w-[360px] h-[400px] bg-background border rounded-2xl overflow-hidden shadow-2xl flex flex-col">
           <button
             onClick={() => setOpen(false)}
             className="absolute top-2 right-2 text-muted-foreground hover:text-primary transition"
@@ -48,10 +49,10 @@ export default function ShipAssistant() {
             <X size={18} />
           </button>
 
-          <div className="flex-1 p-4 space-y-3 pt-8 ">
+          <ScrollArea className="flex-1 p-4 space-y-3 pt-8 ">
             <div className="text-sm bg-muted px-4 py-2 rounded-xl self-start">Hi! I'm Ship 👋</div>
             <div className="text-sm bg-primary text-white px-4 py-2 rounded-xl self-end">What's up?</div>
-          </div>
+          </ScrollArea>
 
           <div className="p-3 border-t border-muted flex items-center gap-2">
             <Input
