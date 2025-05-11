@@ -81,10 +81,28 @@ const OrderDialog = () => {
           variant: "destructive",
         });
       }
+      toast({
+        title: "Test Toast",
+        description: "This is a test toast",
+        action: (t) => (
+    <div className="flex gap-2">
+      {["default", "success", "destructive","loading"].map((variant) => (
+        <button
+          key={variant}
+          onClick={() => toast({...t,variant})}
+          className="px-2 py-1 text-xs rounded bg-muted hover:bg-muted/70 border border-border"
+        >
+          {variant}
+        </button>
+      ))}
+    </div>
+  ),
+      });
     };
 
     fetchData();
   }, [user?.uid]);
+
 
   const handleDialogClose = () => {
     methods.reset();
@@ -167,7 +185,7 @@ const OrderDialog = () => {
     }
 
     const newOrder: OrderType = {
-      orderDate: data.orderDate.toDateString(),
+      orderDate: data.orderDate.toISOString(),
       status,
       paymentStatus: "pending",
       totalAmount,
@@ -213,8 +231,11 @@ const OrderDialog = () => {
         toast({
           title: "Order Added!",
           description: `Order placed for ${data.customerName}. Inventory updated.`,
+          variant: "success",
         });
       }
+
+      
 
       // 🔄 Reload Zustand inventory
       const { loadInventory } = useInventoryStore.getState();
@@ -280,6 +301,7 @@ const OrderDialog = () => {
       handleDialogClose();
       // console.log("📝 New Order:", newOrder);
     }
+    
   };
 
   return (

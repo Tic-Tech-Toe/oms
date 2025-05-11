@@ -1,6 +1,6 @@
-import { auth, db } from "@/app/config/firebase";
-import { getAuth } from "firebase/auth";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+// import { auth, db } from "@/app/config/firebase";
+// import { getAuth } from "firebase/auth";
+// import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 
 
@@ -13,6 +13,8 @@ export async function sendMessage(
   templateName: string
 ) {
   const url = "https://graph.facebook.com/v21.0/506114192590854/messages";
+
+  console.log("Template",templateName, "Phone : ", phoneNumber)
 
   // Step 1: Fetch the WhatsApp API secret from Firestore
   // const whatsappSecret = await getWhatsAppSecretByEmail();
