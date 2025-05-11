@@ -167,7 +167,7 @@ const OrderDialog = () => {
     }
 
     const newOrder: OrderType = {
-      orderDate: data.orderDate.toDateString(),
+      orderDate: data.orderDate.toISOString(),
       status,
       paymentStatus: "pending",
       totalAmount,

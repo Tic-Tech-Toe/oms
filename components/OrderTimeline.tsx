@@ -7,6 +7,7 @@ import {
   FaBox,
 } from "react-icons/fa";
 import clsx from "clsx"; // optional, but nice for conditional classes
+import { format } from "date-fns";
 
 export type TimelineEntry = {
   date: string;
@@ -33,7 +34,7 @@ const OrderTimeline: React.FC<Props> = ({ timeline }) => {
 
   return (
     <div className="relative border-l-[3px] border-neutral-300 dark:border-neutral-600 pl-6 space-y-10 py-4">
-      {timeline.map((entry, idx) => {
+      {timeline.slice().reverse().map((entry, idx) => {
         const icon = iconMap[entry.label] || (
           <FaDotCircle className="text-gray-400" />
         );
@@ -51,7 +52,9 @@ const OrderTimeline: React.FC<Props> = ({ timeline }) => {
               <span className="font-semibold text-neutral-800 dark:text-white tracking-wide">
                 {entry?.action}
               </span>
-              <span className="text-sm text-neutral-500">{entry.date}</span>
+              <span className="text-sm text-neutral-500">
+                {format(new Date(entry.date), "dd/MM/yy · hh:mm a")}
+              </span>
             </div>
           </div>
         );
