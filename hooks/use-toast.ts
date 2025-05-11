@@ -8,14 +8,16 @@ import * as React from "react"
 //   ToastProps,
 // } from "@/components/ui/toast"
 
-export type ToastActionElement = React.ReactNode;
+// export type ToastActionElement = React.ReactNode;
+export type ToastActionElement = React.ReactNode | ((toast: ToasterToast) => React.ReactNode)
+
 
 export type ToastProps = {
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
 
-const TOAST_LIMIT = 2
+const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 // const TOAST_REMOVE_DELAY = 10000000000000000000
 
