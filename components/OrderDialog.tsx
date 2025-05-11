@@ -83,6 +83,8 @@ const OrderDialog = () => {
       }
     };
 
+    
+
     fetchData();
   }, [user?.uid]);
 
@@ -213,8 +215,11 @@ const OrderDialog = () => {
         toast({
           title: "Order Added!",
           description: `Order placed for ${data.customerName}. Inventory updated.`,
+          variant: "success"
         });
       }
+
+      
 
       // 🔄 Reload Zustand inventory
       const { loadInventory } = useInventoryStore.getState();

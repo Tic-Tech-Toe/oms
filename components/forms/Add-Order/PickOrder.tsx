@@ -97,6 +97,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
 
   // Add or remove item from cart
   const updateCart = (product: ItemType, isChecked: boolean) => {
+    // console.log("Toast firing for:", product.name, "checked:", isChecked);
     setCartState((prev) => {
       const updated = { ...prev };
       if (isChecked) {
@@ -110,7 +111,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
           category: product.category || "",
           itemName: product.name,
         };
-        toast({ title: `${product.name} added to cart.` });
+        toast({ title: `${product.name} added to cart.`, variant:"default" });
       } else {
         delete updated[product.itemId];
         toast({ title: `${product.name} removed from cart.` });

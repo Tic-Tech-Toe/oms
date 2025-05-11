@@ -96,26 +96,76 @@ const StatusActions: React.FC<StatusActionsProps> = ({
           description: `Send "${statusValue}" update via WhatsApp?`,
           duration: 5000,
           action: (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center  gap-2">
               <Button
                 variant="ghost"
                 size="icon"
+                // onClick={async () => {
+                //   const res = await fetch(apiRoute, {
+                //     method: "POST",
+                //     headers: { "Content-Type": "application/json" },
+                //     body: JSON.stringify(payload),
+                //   });
+                //   const data = await res.json();
+                //   if (!data.success) {
+                //     toast({
+                //       title: "WhatsApp error",
+                //       description: data.message,
+                //       variant: "destructive",
+                //     });
+                //   }
+                //   if(data.success){
+                //     toast({
+                //       title: "Message Sent",
+                //       description: data.message,
+                //       variant: "success",
+                //     });
+                //   }
+
+                //   dismiss(handle.id);
+                // }}
                 onClick={async () => {
-                  const res = await fetch(apiRoute, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                  });
-                  const data = await res.json();
-                  if (!data.success) {
-                    toast({
-                      title: "WhatsApp error",
-                      description: data.message,
-                      variant: "destructive",
-                    });
-                  }
-                  dismiss(handle.id);
-                }}
+  dismiss(handle.id); // Close the action toast first
+
+  const loadingToast = toast({
+    title: "Sending message...",
+    description: "Please wait while we contact WhatsApp API.",
+    duration: Infinity, // Keep it open until resolved
+  });
+
+  try {
+    const res = await fetch(apiRoute, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    dismiss(loadingToast.id); // Remove loading toast
+
+    if (!data.success) {
+      toast({
+        title: "WhatsApp error",
+        description: data.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Message Sent",
+        description: data.message,
+        variant: "success",
+      });
+    }
+  } catch (err) {
+    dismiss(loadingToast.id);
+    toast({
+      title: "Network Error",
+      description: "Failed to reach WhatsApp API.",
+      variant: "destructive",
+    });
+  }
+}}
+
               >
                 <Check className="w-4 h-4 text-green-600" />
               </Button>
