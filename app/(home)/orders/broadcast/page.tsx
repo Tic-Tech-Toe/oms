@@ -42,6 +42,7 @@ export default function BroadcastPage() {
       toast({
         title: "Missing fields ⚠️",
         description: "Please select contacts and a template.",
+        variant:"destructive"
       });
       return;
     }
@@ -52,8 +53,9 @@ export default function BroadcastPage() {
   
     toast({
       id: toastId,
-      title: "Uploading Image 🖼️",
+      title: "Uploading Image",
       description: "Please wait while we upload your image to WhatsApp...",
+      variation: "loading",
       duration: 999999, // keep it open until manually updated
     });
   
@@ -76,8 +78,9 @@ export default function BroadcastPage() {
     // Show sending toast
     toast({
       id: toastId,
-      title: "Sending Broadcast 📤",
+      title: "Sending Broadcast",
       description: "Sending message to WhatsApp recipients...",
+      variant: "loading",
     });
   
     // Add delay for nice animation effect
@@ -88,6 +91,7 @@ export default function BroadcastPage() {
         description: `Successfully sent to ${selectedContacts.length} contact${
           selectedContacts.length > 1 ? "s" : ""
         }.`,
+        variant: "success"
       });
     }, 800); // subtle delay after "sending"
     
