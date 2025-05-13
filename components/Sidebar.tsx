@@ -67,15 +67,15 @@ const Sidebar = React.memo(() => {
             <div
               key={item.name}
               onClick={() => router.push(item.path)}
-              className={`group flex items-center gap-4 cursor-pointer py-3 px-4 rounded-xl transition-all duration-200 ${
+              className={`group flex items-center gap-4 cursor-pointer p-4 rounded-xl transition-all duration-200 ${
                 isActive
                   ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md"
                   : "hover:bg-gray-100 dark:hover:bg-gray-800"
               } ${isCollapsed ? "justify-center" : ""}`}
             >
               <item.icon
-                size={22}
-                className={`${
+                size={26}
+                className={` ${
                   isActive
                     ? "text-white"
                     : "text-gray-600 group-hover:text-indigo-600"
