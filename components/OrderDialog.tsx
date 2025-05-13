@@ -81,23 +81,7 @@ const OrderDialog = () => {
           variant: "destructive",
         });
       }
-      toast({
-        title: "Test Toast",
-        description: "This is a test toast",
-        action: (t) => (
-    <div className="flex gap-2">
-      {["default", "success", "destructive","loading"].map((variant) => (
-        <button
-          key={variant}
-          onClick={() => toast({...t,variant})}
-          className="px-2 py-1 text-xs rounded bg-muted hover:bg-muted/70 border border-border"
-        >
-          {variant}
-        </button>
-      ))}
-    </div>
-  ),
-      });
+  
     };
 
     fetchData();
