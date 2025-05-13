@@ -128,32 +128,22 @@ export default function BroadcastPage() {
           </div>
 
           {/* Image Upload Section */}
+          {/* Image Upload Section */}
           <div>
             <Label className="mb-2 text-sm text-muted-foreground">
               Upload Image (Optional)
             </Label>
-            <div className="relative border-2 border-dashed mt-2 border-zinc-300 dark:border-zinc-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all hover:border-light-primary cursor-pointer bg-zinc-50 dark:bg-zinc-800">
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    const file = e.target.files[0];
-                    const url = URL.createObjectURL(file);
-                    setSelectedImage({ file, url });
 
-                    //Reset input value to allow re-selection of same file
-                    e.target.value="";
-                  }
-                }}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-
+            {/* Clickable Upload Card */}
+            <label
+              htmlFor="imageUpload"
+              className="relative border-2 border-dashed mt-2 border-zinc-300 dark:border-zinc-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all hover:border-light-primary cursor-pointer bg-zinc-50 dark:bg-zinc-800"
+            >
               {!selectedImage ? (
                 <>
                   <Upload className="text-zinc-400 w-10 h-10 mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Click or drag an image here to upload
+                    Click to upload or drag an image here
                   </p>
                 </>
               ) : (
@@ -165,14 +155,32 @@ export default function BroadcastPage() {
                     style={{ objectFit: "cover" }}
                   />
                   <Button
-                    onClick={() => setSelectedImage(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(null);
+                    }}
                     className="absolute top-1 right-1 text-xs bg-black/70 text-white px-2 py-1 rounded-md"
                   >
                     Remove
                   </Button>
                 </div>
               )}
-            </div>
+            </label>
+
+            <Input
+              id="imageUpload"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  const file = e.target.files[0];
+                  const url = URL.createObjectURL(file);
+                  setSelectedImage({ file, url });
+                  e.target.value = ""; // Reset input to allow re-selection
+                }
+              }}
+              className="hidden"
+            />
           </div>
 
           {/* Contacts List */}

@@ -1,6 +1,7 @@
 import { auth } from "@/app/config/firebase";
 import { fetchUserData } from "./user/fetchUseData";
 import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
+import { useCurrency } from "@/hooks/useCurrency";
 // import { useCustomerStore } from "@/store/useCustomerStore";
 
 export async function handleSendPaymentReminder(order, dueDate) {
@@ -27,7 +28,7 @@ export async function handleSendPaymentReminder(order, dueDate) {
 
   const messageBody = [
     customer?.name || "Customer",
-    `${order.totalAmount - (order?.payment?.totalPaid || 0)}`,
+    `${ order.totalAmount.toFixed(2)  - (order?.payment?.totalPaid || 0)}`,
     order.invoiceNumber || order.id,
     dueDate || "N/A",
     `${rewardEarned}`,
