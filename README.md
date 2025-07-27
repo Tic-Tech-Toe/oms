@@ -79,6 +79,7 @@ The UI is inspired by:
 - [ ] Role-based admin dashboard  
 - [ ] PDF invoice generation  
 - [ ] Multi-language support  
+- [ ] Zoho Integration  
 
 ---
 
