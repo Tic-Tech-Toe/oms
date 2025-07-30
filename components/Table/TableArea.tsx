@@ -21,8 +21,12 @@ import {
 } from "@/components/ui/table";
 import Pagination from "../pagination/Pagination";
 import { OrderType } from "@/types/orderType";
-import OrderDialog from "../OrderDialog";
+import OrderDialog from "../add-order/OrderDialog";
 import { useCurrency } from "@/hooks/useCurrency";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export interface PaginationType {
   pageIndex: number;
@@ -34,29 +38,55 @@ interface TableAreaProps {
 }
 
 const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
+
+  const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [activeTab, setActiveTab] = useState("all");
-  const [pagination, setPagination] = useState<PaginationType>({ pageIndex: 0, pageSize: 8 });
+  const [pagination, setPagination] = useState<PaginationType>({
+    pageIndex: 0,
+    pageSize: 8,
+  });
   const [showInvoice, setShowInvoice] = useState(false);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const [globalFilter, setGlobalFilter] = useState("");
 
   const tabs = [
     { value: "all", label: "All Orders", count: allOrders.length },
-    { value: "pending", label: "Pending", count: allOrders.filter(f => f.status.toLowerCase() === "pending").length },
-    { value: "shipped", label: "Shipped", count: allOrders.filter(f => f.status.toLowerCase() === "shipped").length },
-    { value: "delivered", label: "Delivered", count: allOrders.filter(f => f.status.toLowerCase() === "delivered").length },
-    { value: "cancelled", label: "Cancelled", count: allOrders.filter(f => f.status.toLowerCase() === "cancelled").length },
+    {
+      value: "pending",
+      label: "Pending",
+      count: allOrders.filter((f) => f.status.toLowerCase() === "pending")
+        .length,
+    },
+    {
+      value: "shipped",
+      label: "Shipped",
+      count: allOrders.filter((f) => f.status.toLowerCase() === "shipped")
+        .length,
+    },
+    {
+      value: "delivered",
+      label: "Delivered",
+      count: allOrders.filter((f) => f.status.toLowerCase() === "delivered")
+        .length,
+    },
+    {
+      value: "cancelled",
+      label: "Cancelled",
+      count: allOrders.filter((f) => f.status.toLowerCase() === "cancelled")
+        .length,
+    },
   ];
 
   // Filter by tab, then by search term
   const filteredData = useMemo(() => {
-    let data = activeTab === "all"
-      ? allOrders
-      : allOrders.filter(o => o.status.toLowerCase() === activeTab);
+    let data =
+      activeTab === "all"
+        ? allOrders
+        : allOrders.filter((o) => o.status.toLowerCase() === activeTab);
     const search = globalFilter.trim().toLowerCase();
     if (search) {
-      data = data.filter(o => {
+      data = data.filter((o) => {
         const invoice = o.invoiceNumber || "";
         return (
           o.id.toLowerCase().includes(search) ||
@@ -74,7 +104,7 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
         editingRowId,
         setEditingRowId,
         showInvoice,
-        toggleInvoiceVisibility: () => setShowInvoice(prev => !prev),
+        toggleInvoiceVisibility: () => setShowInvoice((prev) => !prev),
       }),
     [editingRowId, showInvoice]
   );
@@ -103,7 +133,7 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
           <Input
             placeholder="Search by order ID, customer, or invoice"
             value={globalFilter}
-            onChange={e => setGlobalFilter(e.target.value)}
+            onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-sm"
           />
         </div>
@@ -111,12 +141,12 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
         {/* Tabs and Add Order button */}
         <Tabs
           value={activeTab}
-          onValueChange={value => setActiveTab(value)}
+          onValueChange={(value) => setActiveTab(value)}
           className="mb-6 w-full"
         >
           <div className="flex items-center justify-between mb-4 mt-2">
             <TabsList className="h-10 rounded-2xl md:rounded-xl">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
@@ -125,36 +155,61 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
                   }`}
                 >
                   <span className="text-xs">{tab.label}</span>
-                  <span className="text-xs hidden md:inline-block">{tab.count}</span>
+                  <span className="text-xs hidden md:inline-block">
+                    {tab.count}
+                  </span>
                 </TabsTrigger>
               ))}
             </TabsList>
-            <OrderDialog />
+            {/* <Button className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700" onClick={() => router.push("orders/new")}>
+              <Plus className="text-xl mr-2" />
+              Add Order
+            </Button> */}
+            <Link href="/orders/new">
+  <Button className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700">
+    <Plus className="text-xl mr-2" />
+    Add Order
+  </Button>
+</Link>
+            {/* <OrderDialog /> */}
           </div>
 
-          {tabs.map(tab => (
-            <TabsContent key={tab.value} value={tab.value} className="w-full mt-9">
+          {tabs.map((tab) => (
+            <TabsContent
+              key={tab.value}
+              value={tab.value}
+              className="w-full mt-9"
+            >
               <div className="md:rounded-md rounded-none md:border">
                 <Table>
                   <TableHeader>
-                    {table.getHeaderGroups().map(headerGroup => (
+                    {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map(header => (
+                        {headerGroup.headers.map((header) => (
                           <TableHead key={header.id}>
                             {header.isPlaceholder
                               ? null
-                              : flexRender(header.column.columnDef.header, header.getContext())}
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
                           </TableHead>
                         ))}
                       </TableRow>
                     ))}
                   </TableHeader>
                   <TableBody>
-                    {table.getRowModel().rows.map(row => (
-                      <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                        {row.getVisibleCells().map(cell => (
+                    {table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                      >
+                        {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -166,7 +221,11 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
           ))}
         </Tabs>
       </div>
-      <Pagination table={table} pagination={pagination} setPagination={setPagination} />
+      <Pagination
+        table={table}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </Card>
   );
 };
