@@ -1,34 +1,22 @@
 "use client";
-import React, { useEffect } from "react";
-import StatCards from "@/components/StatCards";
+
 import TableArea from "@/components/Table/TableArea";
-import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
-import { auth } from "@/app/config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import StatCards from "@/components/StatCards/page";
+import DashboardTable from "@/components/Table/DashboardTable";
 
 const Overview = () => {
-  const { allOrders, loadAllOrders } = useOrderStore();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loadAllOrders(user.uid); // 🔥 Load into Zustand
-      } else {
-        console.warn("User not logged in.");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [loadAllOrders]);
+  
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold px-4 py-2 font-satoshi">
+    <div className="px-2 md:px-0">
+      <h1 className="md:text-3xl text-xl font-bold px-4 py-2 font-satoshi">
         Order Dashboard
       </h1>
 
-      <StatCards allOrders={allOrders} />
-      <TableArea allOrders={allOrders} />
+      {/* <StatCards allOrders={allOrders} /> */}
+      <StatCards />
+      <DashboardTable />
+      {/* <TableArea allOrders={allOrders} /> */}
     </div>
   );
 };

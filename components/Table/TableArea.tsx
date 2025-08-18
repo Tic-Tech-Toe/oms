@@ -27,6 +27,8 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import OrdersTableTabs from "./OrderTableTabs";
+import DashboardMobileOrderCards from "./DashboardsMobile";
 
 export interface PaginationType {
   pageIndex: number;
@@ -38,7 +40,6 @@ interface TableAreaProps {
 }
 
 const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
-
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -126,100 +127,21 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
   }, [showInvoice, table]);
 
   return (
-    <Card className="md:m-6 shadow-none">
+    <Card className="md:m-6 shadow-none rounded-[2.5rem] dark:bg-zinc-900 bg-neutral-100 ">
       <div className="md:p-8">
         {/* Search bar */}
-        <div className="mb-4 flex justify-end">
+        {/* <div className="mb-4 flex justify-end">
           <Input
             placeholder="Search by order ID, customer, or invoice"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-sm"
           />
-        </div>
+        </div> */}
 
         {/* Tabs and Add Order button */}
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value)}
-          className="mb-6 w-full"
-        >
-          <div className="flex items-center justify-between mb-4 mt-2">
-            <TabsList className="h-10 rounded-2xl md:rounded-xl">
-              {tabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className={`flex items-center gap-2 h-8 rounded-xl transition-all $
-                    activeTab === tab.value ? "bg-light-primary text-white" : "text-gray-600"
-                  }`}
-                >
-                  <span className="text-xs">{tab.label}</span>
-                  <span className="text-xs hidden md:inline-block">
-                    {tab.count}
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {/* <Button className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700" onClick={() => router.push("orders/new")}>
-              <Plus className="text-xl mr-2" />
-              Add Order
-            </Button> */}
-            <Link href="/orders/new">
-  <Button className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700">
-    <Plus className="text-xl mr-2" />
-    Add Order
-  </Button>
-</Link>
-            {/* <OrderDialog /> */}
-          </div>
-
-          {tabs.map((tab) => (
-            <TabsContent
-              key={tab.value}
-              value={tab.value}
-              className="w-full mt-9"
-            >
-              <div className="md:rounded-md rounded-none md:border">
-                <Table>
-                  <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                          <TableHead key={header.id}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableHeader>
-                  <TableBody>
-                    {table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        data-state={row.getIsSelected() && "selected"}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        <OrdersTableTabs tabs={tabs} setActiveTab={setActiveTab} activeTab={activeTab} table={table} />
+        <DashboardMobileOrderCards orders={filteredData} />
       </div>
       <Pagination
         table={table}

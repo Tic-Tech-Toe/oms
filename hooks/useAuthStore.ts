@@ -21,7 +21,7 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    setUser(userCredential.user);
+    // setUser(userCredential.user);
   
     // 🔐 Create a secure session cookie (optional, only if you're using sessions)
     const token = await userCredential.user.getIdToken();

@@ -26,7 +26,15 @@ const AllUsers = () => {
           id: doc.id,
           ...(doc.data() as Omit<User, "id">),
         }));
-        setUsers(data);
+
+        // ✅ Sort: admin first, then others
+        const sorted = data.sort((a, b) => {
+          if (a.email === ADMIN_EMAIL) return -1;
+          if (b.email === ADMIN_EMAIL) return 1;
+          return a.name.localeCompare(b.name); // keep rest alphabetically sorted
+        });
+
+        setUsers(sorted);
       } catch (err) {
         console.error("Failed to fetch users:", err);
       } finally {
@@ -35,7 +43,7 @@ const AllUsers = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [ADMIN_EMAIL]);
 
   if (loading) {
     return (

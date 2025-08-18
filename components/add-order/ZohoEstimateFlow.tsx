@@ -11,6 +11,10 @@ import { Separator } from "../ui/separator";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
+import { OrderItem, OrderType } from "@/types/orderType";
+import { auth } from "@/app/config/firebase";
 
 const ZohoEstimate = ({
   open,
@@ -20,11 +24,78 @@ const ZohoEstimate = ({
   onClose: () => void;
 }) => {
   const [estimateId, setEstimateId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleNext = () => {
-    // Trigger fetch logic or pass to parent
-    console.log("Zoho Estimate ID:", estimateId);
-    onClose(); // optionally close
+  const router = useRouter();
+  const { setTempOrderData } = useOrderStore();
+  const user = auth.currentUser;
+
+  const handleNext = async () => {
+    if (!estimateId.trim()) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(
+        `/api/zoho-estimate?estimate_number=${encodeURIComponent(estimateId)}`
+      );
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}: ${res.statusText}`);
+      }
+      const data = await res.json();
+      console.log("Zoho Estimate Data:", data);
+
+      // Transform Zoho API response to OrderType
+      const transformedItems: OrderItem[] = data.items.map((item: any, idx: number) => ({
+        itemId: `zoho-${idx}`,
+        quantity: item.quantity,
+        price: item.rate,
+        total: item.rate * item.quantity,
+        sku: "Unknown",
+        category: "Unknown",
+        itemName: item.item_name,
+      }));
+
+      const newOrder: OrderType = {
+        orderDate: new Date().toISOString(),
+        status: "pending",
+        paymentStatus: "pending",
+        totalAmount: data.total_amount,
+        invoiceNumber: "",
+        items: transformedItems,
+        customer: {
+          id: "zoho-contact",
+          name: data.contact_person_name || "Unknown",
+          whatsappNumber: data.contact_number || "",
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        timeline: [
+          { date: new Date().toISOString(), action: "Order placed" },
+        ],
+        payment: {
+          id: `pay-${Date.now()}`,
+          orderId: "Dy-zoho",
+          customerId: user?.uid || "unknown",
+          totalPaid: 0,
+          partialPayments: [],
+        },
+      };
+
+      // Save to Zustand
+      setTempOrderData(newOrder);
+
+      // Redirect to confirmation page
+      router.push("/orders/new/confirm-order");
+
+      onClose();
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,15 +120,18 @@ const ZohoEstimate = ({
               className="h-11 rounded-xl shadow-none"
               value={estimateId}
               onChange={(e) => setEstimateId(e.target.value)}
+              disabled={loading}
             />
           </div>
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <Button
             onClick={handleNext}
             className="h-12 w-full sm:flex-[2] rounded-xl bg-light-primary text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-semibold shadow-md"
-            disabled={!estimateId.trim()}
+            disabled={!estimateId.trim() || loading}
           >
-            Next
+            {loading ? "Fetching..." : "Next"}
           </Button>
         </div>
       </DialogContent>

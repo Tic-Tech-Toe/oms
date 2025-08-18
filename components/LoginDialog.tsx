@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +28,7 @@ import { MagicCard } from "./magicui/magic-card";
 import { useRouteChange } from "@/app/context/RouteChangeContext";
 
 const LoginDialog = () => {
-  const { login } = useAuth();
+  const { user, login, loading: authLoading } = useAuth();
   const router = useRouter();
   const theme = useTheme().theme;
 
@@ -87,6 +87,21 @@ const LoginDialog = () => {
     }
   };
 
+  useEffect((  ) => {
+    fetchUserData(user).then((data) => {
+      if (data?.role === "admin") {
+        router.push("/admin/invite");
+      } else if (data?.role === "member") {
+        router.push("/orders");
+      } else {
+        setError("Unauthorized user.");
+      }
+    }).catch((err) => {
+      console.error("Error fetching user data:", err);
+      setError("Failed to fetch user data.");
+    });
+  },[user,router])
+  
   return (
     <Dialog>
       <DialogTrigger asChild>

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const Header = () => {
   const { user, logout } = useAuth();
   const { theme } = useTheme();
-  const active = useActiveSection(["hero", "features", "genjaadu", "footer"]);
+  const active = useActiveSection(["hero", "features", "pricing", "footer"]);
 
   const navLink = (id: string, label: string) => (
     <a
@@ -44,7 +44,7 @@ const Header = () => {
       <nav className="hidden md:flex items-center gap-8">
         {navLink("hero", "Home")}
         {navLink("features", "Features")}
-        {navLink("genjaadu", "AI")}
+        {navLink("pricing", "Pricing")}
         {navLink("footer", "Contact")}
       </nav>
 

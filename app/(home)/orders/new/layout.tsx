@@ -14,7 +14,7 @@ const AddOrderLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen ">
       <div className="flex items-center justify-between mt-20">
         <div></div>
-        <h1 className="text-2xl font-semibold">Add Order</h1>
+        {/* <h1 className="text-2xl font-semibold">Add Order</h1> */}
         <Button
           variant="ghost"
           size="icon"
