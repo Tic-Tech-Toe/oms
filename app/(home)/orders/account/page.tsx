@@ -41,6 +41,8 @@ export default function AccountPage() {
     }
   }, [user]);
 
+console.log(user)
+
   async function handleSaveSecret() {
     if (!user) return;
     if (whatsappSecret.trim() === '') {

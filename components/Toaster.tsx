@@ -2,16 +2,20 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle, AlertTriangle, Info, X, LoaderCircle } from "lucide-react";
+import {
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  X,
+  LoaderCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ICON_MAP = {
   default: <Info size={18} />,
   success: <CheckCircle size={18} />,
   destructive: <AlertTriangle size={18} />,
-   loading: 
-    <LoaderCircle size={18} />,
-  
+  loading: <LoaderCircle size={18} />,
 };
 
 const getThemeStyles = (variant?: string) => {
@@ -83,58 +87,57 @@ export function Toaster() {
                 </div>
               </div> */}
               {/* Icon */}
-<div className="w-12 h-12 m-3 relative">
-  {toast.variant === "loading" ? (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <motion.svg
-        className="w-full h-full text-yellow-400"
-        viewBox="0 0 36 36"
-      >
-        <circle
-          cx="18"
-          cy="18"
-          r="16"
-          stroke="currentColor"
-          strokeWidth="4"
-          fill="transparent"
-          className="opacity-20"
-        />
-        <motion.circle
-          cx="18"
-          cy="18"
-          r="16"
-          stroke="currentColor"
-          strokeWidth="4"
-          fill="transparent"
-          strokeLinecap="round"
-          strokeDasharray={100}
-          strokeDashoffset={100}
-          animate={{ strokeDashoffset: 0 }}
-          transition={{ duration: 3, ease: "easeInOut" }}
-        />
-      </motion.svg>
-      {/* <motion.div
+              <div className="w-12 h-12 m-3 relative">
+                {toast.variant === "loading" ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.svg
+                      className="w-full h-full text-yellow-400"
+                      viewBox="0 0 36 36"
+                    >
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="16"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="transparent"
+                        className="opacity-20"
+                      />
+                      <motion.circle
+                        cx="18"
+                        cy="18"
+                        r="16"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="transparent"
+                        strokeLinecap="round"
+                        strokeDasharray={100}
+                        strokeDashoffset={100}
+                        animate={{ strokeDashoffset: 0 }}
+                        transition={{ duration: 3, ease: "easeInOut" }}
+                      />
+                    </motion.svg>
+                    {/* <motion.div
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
         className="absolute"
       >
         <LoaderCircle size={18} className="text-yellow-500" />
       </motion.div> */}
-    </div>
-  ) : (
-    <div
-      className={cn(
-        "w-12 h-12 flex items-center justify-center rounded-xl",
-        styles.iconBg
-      )}
-    >
-      <div className="text-white">
-        {ICON_MAP[toast.variant || "default"]}
-      </div>
-    </div>
-  )}
-</div>
-
+                  </div>
+                ) : (
+                  <div
+                    className={cn(
+                      "w-12 h-12 flex items-center justify-center rounded-xl",
+                      styles.iconBg
+                    )}
+                  >
+                    <div className="text-white">
+                      {ICON_MAP[toast.variant || "default"]}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Content */}
               <div className="flex-1 pr-4 py-3">

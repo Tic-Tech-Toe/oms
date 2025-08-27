@@ -11,6 +11,7 @@ import { auth } from "@/app/config/firebase";
 import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 import { sendBroadcast } from "@/app/services/whatsapp/sendBroadcast";
 import { Upload } from "lucide-react";
+import Image from "next/image";
 
 export default function BroadcastPage() {
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
@@ -42,27 +43,28 @@ export default function BroadcastPage() {
       toast({
         title: "Missing fields ⚠️",
         description: "Please select contacts and a template.",
+        variant: "destructive",
       });
       return;
     }
-  
+
     const file = selectedImage?.file;
-  
+
     const toastId = Math.random().toString(); // unique ID
-  
+
     toast({
       id: toastId,
-      title: "Uploading Image 🖼️",
+      title: "Uploading Image",
       description: "Please wait while we upload your image to WhatsApp...",
-      duration: 999999, // keep it open until manually updated
+      variation: "loading",
     });
-  
+
     const result = await sendBroadcast({
       phoneNumber: selectedContacts.map((num) => String(num)),
       templateName: template,
       file: file as File,
     });
-  
+
     if (!result.success) {
       toast({
         id: toastId,
@@ -72,30 +74,31 @@ export default function BroadcastPage() {
       });
       return;
     }
-  
+
     // Show sending toast
     toast({
       id: toastId,
-      title: "Sending Broadcast 📤",
+      title: "Sending Broadcast",
       description: "Sending message to WhatsApp recipients...",
+      variant: "loading",
     });
-  
-    // Add delay for nice animation effect
+
+    // Add delay
     setTimeout(() => {
       toast({
         id: toastId,
-        title: "Broadcast Sent ✅",
+        title: "Broadcast Sent ",
         description: `Successfully sent to ${selectedContacts.length} contact${
           selectedContacts.length > 1 ? "s" : ""
         }.`,
+        variant: "success",
       });
     }, 800); // subtle delay after "sending"
-    
+
     setSelectedContacts([]);
     setCustomMessage("");
     setSelectedImage(null);
   };
-  
 
   return (
     <div className="h-full relative p-6 mt-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
@@ -117,7 +120,7 @@ export default function BroadcastPage() {
               Template Name
             </Label>
             <Input
-            className="mt-2"
+              className="mt-2"
               placeholder="e.g. payment_reminder_3"
               value={template}
               onChange={(e) => setTemplate(e.target.value)}
@@ -125,46 +128,59 @@ export default function BroadcastPage() {
           </div>
 
           {/* Image Upload Section */}
+          {/* Image Upload Section */}
           <div>
             <Label className="mb-2 text-sm text-muted-foreground">
               Upload Image (Optional)
             </Label>
-            <div className="relative border-2 border-dashed mt-2 border-zinc-300 dark:border-zinc-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all hover:border-light-primary cursor-pointer bg-zinc-50 dark:bg-zinc-800">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    const file = e.target.files[0];
-                    const url = URL.createObjectURL(file);
-                    setSelectedImage({ file, url });
-                  }
-                }}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
+
+            {/* Clickable Upload Card */}
+            <label
+              htmlFor="imageUpload"
+              className="relative border-2 border-dashed mt-2 border-zinc-300 dark:border-zinc-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all hover:border-light-primary cursor-pointer bg-zinc-50 dark:bg-zinc-800"
+            >
               {!selectedImage ? (
                 <>
                   <Upload className="text-zinc-400 w-10 h-10 mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Click or drag an image here to upload
+                    Click to upload or drag an image here
                   </p>
                 </>
               ) : (
-                <div className="relative w-full max-w-xs">
-                  <img
+                <div className="relative w-full max-w-xs h-48 rounded-xl overflow-hidden border border-zinc-300">
+                  <Image
                     src={selectedImage.url}
                     alt="Preview"
-                    className="rounded-xl object-cover max-h-48 w-full border border-zinc-300"
+                    fill
+                    style={{ objectFit: "cover" }}
                   />
-                  <button
-                    onClick={() => setSelectedImage(null)}
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(null);
+                    }}
                     className="absolute top-1 right-1 text-xs bg-black/70 text-white px-2 py-1 rounded-md"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </div>
               )}
-            </div>
+            </label>
+
+            <Input
+              id="imageUpload"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  const file = e.target.files[0];
+                  const url = URL.createObjectURL(file);
+                  setSelectedImage({ file, url });
+                  e.target.value = ""; // Reset input to allow re-selection
+                }
+              }}
+              className="hidden"
+            />
           </div>
 
           {/* Contacts List */}

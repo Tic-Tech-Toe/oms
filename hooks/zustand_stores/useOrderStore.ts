@@ -8,13 +8,18 @@ import {
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/config/firebase";
 
+// ==============================
+// OrderAppState Interface
+// ==============================
 interface OrderAppState {
-  allOrders: OrderType[];
-  selectedOrder: OrderType | null;
-  isLoading: boolean;
-  openEditDialog: boolean;
+  allOrders: OrderType[];                        // All orders loaded from Firestore
+  selectedOrder: OrderType | null;              // Currently selected order for viewing/editing
+  tempOrderData: OrderType | null;              // 🆕 Temporary order data before confirmation
+  isLoading: boolean;                           // Loading state for async operations
+  openEditDialog: boolean;                      // Controls edit modal/dialog visibility
 
   setSelectedOrder: (order: OrderType | null) => void;
+  setTempOrderData: (order: OrderType | null) => void; // 🆕 Setter for temp order
   setOpenEditDialog: (open: boolean) => void;
 
   loadAllOrders: (userId: string) => Promise<void>;
@@ -32,19 +37,30 @@ interface OrderAppState {
   storeStatusChange: (orderId: string, newStatus: string) => void;
 }
 
+// ==============================
+// useOrderStore Implementation
+// ==============================
 export const useOrderStore = create<OrderAppState>((set, get) => ({
   allOrders: [],
   selectedOrder: null,
+  tempOrderData: null,               // 🆕 Initialize tempOrderData
   isLoading: false,
   openEditDialog: false,
 
+  // Sets selected order (used in order editing / preview)
   setSelectedOrder: (order) => set({ selectedOrder: order }),
+
+  // 🆕 Sets temporary order (used during creation flow before final confirmation)
+  setTempOrderData: (order) => set({ tempOrderData: order }),
+
+  // Controls dialog/modal visibility for editing
   setOpenEditDialog: (open) => set({ openEditDialog: open }),
 
+  // Loads all orders from Firestore for a specific user
   loadAllOrders: async (userId) => {
     set({ isLoading: true });
     try {
-      const orders = await getOrders(userId); // Fetch orders from Firestore
+      const orders = await getOrders(userId);
       set({ allOrders: orders });
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -53,6 +69,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
     set({ isLoading: false });
   },
 
+  // Adds a new order to Firestore
   addOrder: async (userId, newOrder) => {
     try {
       const orderId = await addOrderToFirestore(userId, newOrder);
@@ -66,9 +83,11 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
     }
   },
 
+  // Updates existing order (in store + Firestore)
   updateOrder: async (userId, orderId, updatedFields) => {
     const { allOrders } = get();
 
+    // Locally update the order in state
     const updatedOrders = allOrders.map((order) =>
       order.id === orderId
         ? {
@@ -86,8 +105,9 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
         : order
     );
 
-    set({ allOrders : updatedOrders });
+    set({ allOrders: updatedOrders });
 
+    // Sync changes to Firestore
     try {
       await updateOrderInFirestore(userId, orderId, updatedFields);
       console.log("✅ Firestore order update complete");
@@ -96,10 +116,12 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
     }
   },
 
+  // Filter orders by a customer ID
   getOrdersByCustomerId: (customerId: string) => {
     return get().allOrders.filter((order) => order.customerId === customerId);
   },
 
+  // Change order status (locally only, optionally sync externally if needed)
   storeStatusChange: (orderId, newStatus) => {
     const { allOrders } = get();
     const updatedOrders = allOrders.map((order) =>
@@ -109,6 +131,9 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
   },
 }));
 
+// ==============================
+// 🔻 Inventory Stock Decrease Helper
+// ==============================
 export const decreaseInventoryStock = async (
   userId: string,
   items: { itemId: string; quantity: number }[]
