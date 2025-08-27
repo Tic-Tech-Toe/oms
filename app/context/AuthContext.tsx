@@ -33,18 +33,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user || null);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser || null);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     setUser(userCredential.user);
-    return userCredential; // 👈 Must return this
+
+    // 🔐 Optional: Set secure session cookie
+    const token = await userCredential.user.getIdToken();
+    await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+
+    return userCredential;
   };
 
   const logout = async () => {
@@ -53,9 +61,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await signOut(auth);
       setUser(null);
 
-      // Also remove the session cookie on the backend
       await fetch("/api/logout", { method: "POST" });
-      await router.push("/");
+      router.push("/"); // 👈 no need for await
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

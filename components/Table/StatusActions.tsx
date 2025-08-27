@@ -126,59 +126,58 @@ const StatusActions: React.FC<StatusActionsProps> = ({
 
                 //   dismiss(handle.id);
                 // }}
-              onClick={async () => {
-  // Step 1: Create the action toast and hold the toast ID
-  const actionToast = toast({
-    title: "Ready to send?",
-    description: "Clicking this will notify the customer.",
-    variant: "info", // This is your starting state (could be "default")
-    duration: Infinity, // Keep it open until manual dismissal or update
-  });
+                onClick={async () => {
+                  // Step 1: Create the action toast and hold the toast ID
+                  const actionToast = toast({
+                    title: "Ready to send?",
+                    description: "Clicking this will notify the customer.",
+                    variant: "info", // This is your starting state (could be "default")
+                    duration: Infinity, // Keep it open until manual dismissal or update
+                  });
 
-  // Step 2: Update to loading state (still using the same toast ID)
-  toast({
-    id: actionToast.id, // Reuse the same toast ID
-    title: "Sending message...",
-    description: "", // Optional: No description for loading
-    variant: "loading", // Your custom loading variant
-    duration: Infinity, // Keep it open until fetch finishes
-  });
+                  // Step 2: Update to loading state (still using the same toast ID)
+                  toast({
+                    id: actionToast.id, // Reuse the same toast ID
+                    title: "Sending message...",
+                    description: "", // Optional: No description for loading
+                    variant: "loading", // Your custom loading variant
+                    duration: Infinity, // Keep it open until fetch finishes
+                  });
 
-  try {
-    const res = await fetch(apiRoute, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
+                  try {
+                    const res = await fetch(apiRoute, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    const data = await res.json();
 
-    // Step 3: Show success or error, still updating the same toast ID
-    if (!data.success) {
-      toast({
-        id: actionToast.id, // Reuse the same toast ID
-        title: "WhatsApp error",
-        description: data.message,
-        variant: "destructive", // Error state
-      });
-    } else {
-      toast({
-        id: actionToast.id, // Reuse the same toast ID
-        title: "Message Sent",
-        description: data.message,
-        variant: "success", // Success state
-      });
-    }
-  } catch (err) {
-    // Handle network error, update the same toast ID
-    toast({
-      id: actionToast.id, // Reuse the same toast ID
-      title: "Network Error",
-      description: "Failed to reach WhatsApp API.",
-      variant: "destructive", // Error state
-    });
-  }
-}}
-
+                    // Step 3: Show success or error, still updating the same toast ID
+                    if (!data.success) {
+                      toast({
+                        id: actionToast.id, // Reuse the same toast ID
+                        title: "WhatsApp error",
+                        description: data.message,
+                        variant: "destructive", // Error state
+                      });
+                    } else {
+                      toast({
+                        id: actionToast.id, // Reuse the same toast ID
+                        title: "Message Sent",
+                        description: data.message,
+                        variant: "success", // Success state
+                      });
+                    }
+                  } catch (err) {
+                    // Handle network error, update the same toast ID
+                    toast({
+                      id: actionToast.id, // Reuse the same toast ID
+                      title: "Network Error",
+                      description: "Failed to reach WhatsApp API.",
+                      variant: "destructive", // Error state
+                    });
+                  }
+                }}
               >
                 <Check className="w-4 h-4 text-green-600" />
               </Button>

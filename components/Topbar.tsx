@@ -1,35 +1,17 @@
 "use client";
 
-import {
-  Menu,
-  X,
-  Search,
-  LayoutGrid,
-  UserRound,
-  Layers,
-  LogOut,
-  Settings,
-  Radio,
-} from "lucide-react";
+import { Menu, X, LayoutGrid, UserRound, Layers, Radio } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import React, { useState } from "react";
 import Link from "next/link";
-import SearchBar from "./SearchBar";
-import ThemeSwitch from "./ThemeSwitch";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { Button } from "@/components/ui/button"; // shadcn button
 
-const Topbar = () => {
-  const { user, logout } = useAuth();
+const BottomNav = () => {
+  const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const initials =
     user?.displayName
@@ -46,104 +28,54 @@ const Topbar = () => {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md bg-white/80 dark:bg-[#111111]/60 border-b border-zinc-200 dark:border-zinc-800 shadow-sm md:hidden transition-all">
-      <div className="flex items-center justify-between px-4 py-3">
-        {/* Brand */}
-        <Link href="/orders">
-          <h1 className="font-bold text-lg tracking-tight text-gray-900 dark:text-white font-clash">
-            ShipTrack
-          </h1>
-        </Link>
-
-        {/* Right Controls */}
-        <div className="flex items-center gap-2">
-          {/* Search */}
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="hover:bg-black/5 dark:hover:bg-white/5 rounded-md p-2 transition"
-          >
-            <Search
-              size={20}
-              className={`transition ${
-                searchOpen ? "text-indigo-600" : "text-gray-600 dark:text-gray-300"
+    <div className="fixed bottom-6 inset-x-0 flex justify-between  gap-4 items-center px-4 z-50 md:hidden">
+      {/* Dock */}
+      <div
+        className={`flex items-center gap-4 px-5 py-3 rounded-full w-full justify-between shadow-lg border border-white/20 backdrop-blur-xl bg-white/30 dark:bg-zinc-800/30 transition-all duration-300 ${
+          menuOpen
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 translate-x-5 pointer-events-none"
+        }`}
+      >
+        {menuItems.map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <Link
+              key={item.name}
+              href={item.path}
+              className={`flex flex-col items-center justify-center  rounded-full transition hover:scale-110 ${
+                isActive
+                  ? "text-indigo-600"
+                  : "text-gray-700 dark:text-gray-300"
               }`}
-            />
-          </button>
-
-          {/* Theme Switcher */}
-          <ThemeSwitch />
-
-          {/* Profile */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="w-9 h-9 bg-gradient-to-br from-fuchsia-500 to-indigo-600 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-md cursor-pointer hover:scale-105 transition">
-                {initials}
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl shadow-xl mt-2 p-2 w-44"
             >
-              <DropdownMenuItem onClick={() => router.push("/orders/account")}>
-                <Settings size={16} className="mr-2" />
-                Account Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={logout}
-                className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30"
-              >
-                <LogOut size={16} className="mr-2" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <item.icon size={22} />
+              <span className="text-[10px] capitalize">{item.name}</span>
+            </Link>
+          );
+        })}
 
-          {/* Mobile Menu Icon */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="hover:bg-black/5 dark:hover:bg-white/5 rounded-md p-2 transition"
-          >
-            {menuOpen ? (
-              <X size={22} className="text-gray-700 dark:text-gray-300" />
-            ) : (
-              <Menu size={22} className="text-gray-700 dark:text-gray-300" />
-            )}
-          </button>
-        </div>
+        {/* Profile */}
+        {/* <Link
+          href="/orders/account"
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-600 flex items-center justify-center text-white font-semibold shadow-md hover:scale-110 transition"
+        >
+          {initials}
+        </Link> */}
       </div>
 
-      {/* Search Bar */}
-      {searchOpen && <div className="px-4 pb-2"><SearchBar /></div>}
-
-      {/* Mobile Navigation */}
-      {menuOpen && (
-        <nav className="border-t border-zinc-200 dark:border-zinc-800">
-          <ul className="flex flex-col px-4 py-3">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <li
-                  key={item.name}
-                  onClick={() => {
-                    router.push(item.path);
-                    setMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-2 p-2 text-sm transition-colors ${
-                    isActive
-                      ? "text-indigo-600 font-medium"
-                      : "text-gray-500 dark:text-gray-400 hover:text-indigo-500"
-                  }`}
-                >
-                  <item.icon size={22} />
-                  <span className="ml-2 capitalize">{item.name}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      )}
+      {/* Floating Toggle Button */}
+      <Button
+        size="icon"
+        onClick={() => setMenuOpen((prev) => !prev)}
+        className={` w-14 h-14 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-600 text-white shadow-lg transform transition-all duration-300 aspect-square ${
+          menuOpen ? "rotate-90" : ""
+        }`}
+      >
+        {menuOpen ? <X size={26} /> : <Menu size={26} />}
+      </Button>
     </div>
   );
 };
 
-export default Topbar;
+export default BottomNav;

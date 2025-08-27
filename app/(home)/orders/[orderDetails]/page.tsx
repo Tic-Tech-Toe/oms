@@ -20,8 +20,6 @@ import { auth } from "@/app/config/firebase";
 import { Check, X } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { handleSendPaymentReminder } from "@/utils/sendPaymentReminder";
-import { useAuth } from "@/app/context/AuthContext";
-import { fetchUserData } from "@/utils/user/fetchUseData";
 import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 
 const OrderDetails = () => {
@@ -46,228 +44,23 @@ const OrderDetails = () => {
   }, [allOrders]);
 
   useEffect(() => {
-    if(userId){
-      loadCustomers(userId)
+    if (userId) {
+      loadCustomers(userId);
     }
-  },[userId, loadCustomers])
-
-  const relCustomer = customers.find((c) => c.id === order?.customer?.id)
-
-  const handleOrderProcess = async (order: OrderType) => {
-    alert("Order processing");
-    if (!order || !userId) return;
-
-    const timelineEntry = {
-      date: new Date().toISOString(),
-      action: "Marked as Processing",
-    };
-
-    const updatePayload = {
-      status: "Processing",
-      timeline: [...(order.timeline ?? []), timelineEntry],
-    };
-
-    try {
-      await updateOrderInFirestore(userId, order.id, updatePayload);
-
-      // 👇 Update local order state so the badge reflects new status
-      setOrder({
-        ...order,
-        status: "Processing",
-        timeline: [...(order.timeline ?? []), timelineEntry],
-      });
-
-      const { apiRoute, getPayload } = STATUS_WHATSAPP_CONFIG["Processing"];
-      const payload = getPayload({ original: order });
-
-      const handle = toast({
-        title: "Order Marked as Processing",
-        description: "Send update via WhatsApp?",
-        duration: 5000,
-        action: (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={async () => {
-                const res = await fetch(apiRoute, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload),
-                });
-                const data = await res.json();
-                if (!data.success) {
-                  toast({
-                    title: "WhatsApp error",
-                    description: data.message,
-                    variant: "destructive",
-                  });
-                }
-                dismiss(handle.id);
-              }}
-            >
-              <Check className="w-4 h-4 text-green-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => dismiss(handle.id)}
-            >
-              <X className="w-4 h-4 text-red-500" />
-            </Button>
-          </div>
-        ),
-      });
-    } catch (error) {
-      toast({
-        title: "Failed to mark order as processing",
-        description: "Something went wrong.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // const handleSendPaymentReminder = async () => {
-  //   if (!order) {
-  //     alert("Order data is missing.");
-  //     return;
-  //   }
-
-  //   const phoneNumber = order.customer?.whatsappNumber;
-
-  //   if (!phoneNumber) {
-  //     alert("Customer WhatsApp number is missing.");
-  //     return;
-  //   }
-
-  //   const messageBody = [
-  //     order.customer?.name || "Customer",
-  //     `${useCurrency(order.totalAmount - (order?.payment?.totalPaid || 0))}`,
-  //     order.invoiceNumber || order.id,
-  //     order.orderDate || "N/A",
-  //     `${order?.payment?.totalPaid || 0}`,
-  //     `${order.totalAmount}`,
-  //   ];
-
-  //   try {
-  //     const res = await fetch("/api/payment-reminder", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ phoneNumber, messageBody }),
-  //     });
-
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       alert("✅ Payment reminder sent successfully!");
-  //     } else {
-  //       alert("❌ Failed to send reminder: " + data.message);
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("❌ Something went wrong while sending the reminder.");
-  //   }
-  // };
+  }, [userId, loadCustomers]);
 
   if (!order) return <p>Loading...</p>;
+
+  const relCustomer = customers.find((c) => c.id === order?.customer?.id);
 
   const handleNavigation = (e: any) => {
     e.preventDefault();
     router.back();
   };
 
-  const orderSummary = (
-    <div className="shadow-xl border border-light-light-gray dark:border-zinc-900 rounded-2xl overflow-hidden">
-      <div className="p-4">
-        <span className="inline-flex items-center gap-2">
-          <h3 className="text-xl font-semibold mb-2">Order Summary</h3>
-          <Badge
-            className={`rounded-full text-xs mt-1 ${getBadgeClass(order.status || "", "order")}`}
-          >
-            {order.status}
-          </Badge>
-        </span>
-        <OrderDetailComponent order={order} />
-      </div>
-      <FooterComponent
-        text="Review items"
-        order={order}
-        status={order.status}
-        buttonOneLabel="Order processed"
-        buttonTwoLabel="Update order"
-        onButtonOneClick={() => handleOrderProcess(order)}
-        onButtonTwoClick={() => console.log("Updating order", order.id)}
-      />
-    </div>
-  );
-
-  const paymentSummary = (
-    <div className="shadow-xl border border-light-light-gray dark:border-zinc-900 rounded-2xl overflow-hidden">
-      <h3 className="ml-6">Invoice No. : {order.invoiceNumber}</h3>
-      <div className="p-4">
-        <span className="inline-flex items-center gap-2">
-          <h3 className="text-xl font-semibold mb-2">Payment Summary</h3>
-          <Badge
-            className={`rounded-full text-xs mt-1 ${getBadgeClass(order.paymentStatus || "", "payment")}`}
-          >
-            {order.paymentStatus}
-          </Badge>
-        </span>
-        <OrderPaymentDetailComponent order={order} />
-      </div>
-      <FooterComponent
-        text="Review order and set payment status"
-        order={order}
-        status={order.paymentStatus}
-        buttonOneLabel="Send Payment Reminder"
-        buttonTwoLabel="Collect payment"
-        onButtonOneClick={() => {
-          let selectedDueDate = new Date().toISOString().split("T")[0]; // default today
-
-          const toastId = toast({
-            title: "Set Due Date",
-            description: (
-              <div className="flex flex-col gap-2">
-                <input
-                  type="date"
-                  id="dueDateInput"
-                  className="border rounded p-2 w-full"
-                  defaultValue={selectedDueDate}
-                  onChange={(e) => {
-                    selectedDueDate = e.target.value;
-                  }}
-                />
-                <div className="flex items-center justify-end gap-2 mt-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={async () => {
-                      // alert(selectedDueDate); //  selected date
-                      await handleSendPaymentReminder(order, selectedDueDate);
-                      dismiss(toastId.id);
-                    }}
-                  >
-                    <Check className="w-4 h-4 text-green-600" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => dismiss(toastId.id)}
-                  >
-                    <X className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
-            ),
-            duration: 999999, // until dismissed manually
-          });
-        }}
-        showDialogForButtonTwo={true}
-      />
-    </div>
-  );
-
   return (
-    <div className="px-4">
+    <div className="px-4 md:px-10 lg:px-20">
+      {/* Breadcrumb */}
       <span className="px-2 py-1 font-bold font-mono text-sm text-gray-400">
         <Link
           href="/orders"
@@ -279,33 +72,90 @@ const OrderDetails = () => {
         /#{order.id}
       </span>
 
-      <div className="w-full mt-6 flex flex-col md:flex-row justify-between gap-4">
+      {/* Header */}
+      <div className="mt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-4">
-            <span className="text-2xl font-bold">Order ID: {order.id}</span>
+            <h1 className="text-2xl font-bold">Order #{order.id}</h1>
             <Badge
-              className={`rounded-full text-xs mt-1 ${getBadgeClass(order.paymentStatus || "", "payment")}`}
+              className={`rounded-full text-xs mt-1 ${getBadgeClass(
+                order.paymentStatus || "",
+                "payment"
+              )}`}
             >
               Payment {order.paymentStatus}
             </Badge>
           </div>
-          <span className="text-sm font-semibold">{order.orderDate}</span>
+          <p className="text-sm text-gray-500">{order.orderDate}</p>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6 mt-8">
-        <div className="w-full md:w-2/3 flex flex-col gap-4">
-          {orderSummary}
-          {paymentSummary}
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        {/* Left 2/3 */}
+        <div className="col-span-2 flex flex-col gap-6">
+          {/* Order Info */}
+          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Order Information</h2>
+              <Badge
+                className={`rounded-full text-xs ${getBadgeClass(
+                  order.status || "",
+                  "order"
+                )}`}
+              >
+                {order.status}
+              </Badge>
+            </div>
+            <OrderDetailComponent order={order} />
+            <FooterComponent
+              text="Review items"
+              order={order}
+              status={order.status}
+              buttonOneLabel="Mark as Processing"
+              buttonTwoLabel="Update Order"
+              onButtonOneClick={() => console.log("Process order")}
+              onButtonTwoClick={() => console.log("Update order", order.id)}
+            />
+          </section>
+
+          {/* Payment Info */}
+          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold mb-4">
+              Payment Information
+            </h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Invoice No: {order.invoiceNumber}
+            </p>
+            <OrderPaymentDetailComponent order={order} />
+            <FooterComponent
+              text="Manage payment"
+              order={order}
+              status={order.paymentStatus}
+              buttonOneLabel="Send Reminder"
+              buttonTwoLabel="Collect Payment"
+              onButtonOneClick={() => console.log("Send reminder")}
+              onButtonTwoClick={() => console.log("Collect payment")}
+            />
+          </section>
         </div>
 
-        <div className="w-full md:w-1/3 flex flex-col gap-4">
-          <div className="p-4 border rounded-2xl shadow-xl">
-            <OrderCustomerRel customer={relCustomer || order.customer} userId={userId} />
-          </div>
-          <div className="p-4 border rounded-2xl shadow-xl">
+        {/* Right 1/3 */}
+        <div className="flex flex-col gap-6">
+          {/* Customer Info */}
+          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold mb-4">Customer Information</h2>
+            <OrderCustomerRel
+              customer={relCustomer || order.customer}
+              userId={userId}
+            />
+          </section>
+
+          {/* Timeline */}
+          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold mb-4">Timeline</h2>
             <OrderTimeline timeline={order.timeline} />
-          </div>
+          </section>
         </div>
       </div>
     </div>

@@ -68,7 +68,10 @@ export async function POST(req: NextRequest) {
         email: request.email,
         company: request.company || "",
         role: "member",
+        subscriptionStatus: "trialing", // NEW
+        trialEndsAt: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 days from now
         createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
     // 5. Delete request

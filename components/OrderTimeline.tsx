@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React from "react";
 import {
   FaCheckCircle,
   FaDotCircle,
@@ -6,7 +6,6 @@ import {
   FaTruck,
   FaBox,
 } from "react-icons/fa";
-import clsx from "clsx"; // optional, but nice for conditional classes
 import { format } from "date-fns";
 
 export type TimelineEntry = {
@@ -27,38 +26,46 @@ const iconMap: Record<string, JSX.Element> = {
 };
 
 const OrderTimeline: React.FC<Props> = ({ timeline }) => {
-  if (!timeline?.length)
+  if (!timeline?.length) {
     return (
-      <p className="text-sm text-muted-foreground">No timeline available</p>
+      <p className="text-sm text-neutral-500">No timeline available</p>
     );
+  }
 
   return (
-    <div className="relative border-l-[3px] border-neutral-300 dark:border-neutral-600 pl-6 space-y-10 py-4">
-      {timeline.slice().reverse().map((entry, idx) => {
-        const icon = iconMap[entry.label] || (
-          <FaDotCircle className="text-gray-400" />
-        );
-        return (
-          <div key={idx} className="relative group">
-            {/* Icon */}
-            <div className="absolute -left-[1.35rem] top-0">
-              <div className="bg-white dark:bg-neutral-900 rounded-full p-[2px] shadow-md">
-                {icon}
-              </div>
-            </div>
+    <div className="relative pl-6 py-2">
+      {/* Vertical line */}
+      <div className="absolute left-[10px] top-0 bottom-0 w-[2px] bg-neutral-200 dark:bg-neutral-700 rounded-full" />
 
-            {/* Content */}
-            <div className="flex flex-col text-[15px] sm:text-base transition-all duration-300 group-hover:scale-[1.01]">
-              <span className="font-semibold text-neutral-800 dark:text-white tracking-wide">
-                {entry?.action}
-              </span>
-              <span className="text-sm text-neutral-500">
-                {format(new Date(entry.date), "dd/MM/yy · hh:mm a")}
-              </span>
-            </div>
-          </div>
-        );
-      })}
+      <div className="space-y-8">
+        {timeline
+          .slice()
+          .reverse()
+          .map((entry, idx) => {
+            const icon = iconMap[entry.label] || (
+              <FaDotCircle className="text-gray-400" />
+            );
+
+            return (
+              <div key={idx} className="relative flex items-start gap-4 group">
+                {/* Icon circle */}
+                <div className="absolute -left-[1.5rem] flex items-center justify-center bg-white dark:bg-neutral-900 rounded-full shadow-md w-6 h-6">
+                  {icon}
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-col left-4">
+                  <span className="font-medium text-neutral-900 dark:text-neutral-100 group-hover:text-black dark:group-hover:text-white transition">
+                    {entry.label}
+                  </span>
+                  <span className="text-sm text-neutral-500">
+                    {format(new Date(entry.date), "dd MMM yyyy · hh:mm a")}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 };
