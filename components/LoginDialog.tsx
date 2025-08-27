@@ -40,41 +40,59 @@ const LoginDialog = () => {
 
   const { setRouteLoading } = useRouteChange();
 
-  const handleEmailLogin = async () => {
-    try {
-      // setLoading(true);
-      setRouteLoading(true);
-      setError("");
-      setResetSent(false);
+const handleEmailLogin = async () => {
+  try {
+    setRouteLoading(true);
+    setError("");
 
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      const token = await userCred.user.getIdToken();
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const token = await userCred.user.getIdToken();
 
-      await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
+    // 1️⃣ Call login and check response
+    const loginRes = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+      credentials: "include", // ✅ ensure cookies are saved
+    });
 
+    if (!loginRes.ok) {
+      throw new Error("Login API failed");
+    }
+
+    // 2️⃣ Now check subscription (cookie will be sent automatically)
+    const subRes = await fetch("/api/check-subscription", {
+      credentials: "include", // ✅ send session cookie
+    });
+
+    if (!subRes.ok) {
+      throw new Error("Subscription check failed");
+    }
+
+    const subData = await subRes.json();
+    console.log("Subscription Data:", subData);
+
+    // 3️⃣ Route based on subscription
+    if (subData.status === "expired" || subData.status === "inactive") {
+      router.push("/subscribe");
+    } else {
       const userData = await fetchUserData(userCred.user);
-      // console.log(userData)
       if (userData?.role === "admin") {
         router.push("/admin/invite");
-      } else if (userData?.role === "member") {
-        router.push("/orders");
-
-        router.refresh()
-
       } else {
-        setError("Unauthorized user.");
+        router.push("/orders");
       }
-    } catch (err) {
-      console.error(err);
-      setError("Login failed. Check credentials.");
-    } finally {
-      setRouteLoading(false);
     }
-  };
+
+  } catch (err) {
+    console.error(err);
+    setError("Login failed. Check credentials.");
+  } finally {
+    setRouteLoading(false);
+  }
+};
+
+
 
   const handlePasswordReset = async () => {
     if (!email) return setError("Please enter your email first.");

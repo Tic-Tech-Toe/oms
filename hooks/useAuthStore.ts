@@ -1,51 +1,63 @@
+"use client";
 
-
-import { useState, useEffect } from "react";
+import { create } from "zustand";
 import { auth } from "@/app/config/firebase";
-import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from "firebase/auth";
+import {
+  User,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 
-// ✅ Custom Hook for Authentication
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+type SubscriptionStatus = "free" | "monthly" | "yearly" | null;
 
-  useEffect(() => {
-    // Listen for authentication changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  subscriptionStatus: SubscriptionStatus;
+  subscriptionEnd: Date | null;
 
-    return () => unsubscribe(); // Cleanup on unmount
-  }, []);
+  // actions
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  setSubscription: (status: SubscriptionStatus, end?: Date | null) => void;
+  initAuth: () => void;
+}
 
-  const login = async (email: string, password: string) => {
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  loading: true,
+  subscriptionStatus: null,
+  subscriptionEnd: null,
+
+  // ✅ Auth methods
+  login: async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    // setUser(userCredential.user);
-  
-    // 🔐 Create a secure session cookie (optional, only if you're using sessions)
+
+    // Optional: create a session cookie
     const token = await userCredential.user.getIdToken();
-    await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
     });
-  };
-  
 
-  const logout = async () => {
-    try {
-      // Clear session cookie on the server
-      await fetch('/api/logout', { method: 'POST' });
-  
-      // Sign out from Firebase
-      await signOut(auth);
-      setUser(null);
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
-  
+    set({ user: userCredential.user });
+  },
 
-  return { user, loading, login, logout };
-}
+  logout: async () => {
+    await fetch("/api/logout", { method: "POST" });
+    await signOut(auth);
+    set({ user: null, subscriptionStatus: null, subscriptionEnd: null });
+  },
+
+  setSubscription: (status, end = null) =>
+    set({ subscriptionStatus: status, subscriptionEnd: end }),
+
+  initAuth: () => {
+    // ✅ runs once, keeps store in sync with Firebase
+    onAuthStateChanged(auth, (firebaseUser) => {
+      set({ user: firebaseUser, loading: false });
+    });
+  },
+}));

@@ -10,8 +10,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import FloatingWhatsAppDock from "@/components/FloatingWhatsAppDock";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useOrderStore, decreaseInventoryStock } from "@/hooks/zustand_stores/useOrderStore";
-import { useAuth } from "@/hooks/useAuthStore";
+// import { useAuth } from "@/hooks/useAuthStore";
 import { toast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/hooks/useAuthStore";
 
 type Charge = {
   id: string;
@@ -22,7 +23,7 @@ type Charge = {
 
 export default function ConfirmOrder() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const { tempOrderData, setTempOrderData, addOrder } = useOrderStore();
 
   const [items, setItems] = useState(tempOrderData?.items || []);
