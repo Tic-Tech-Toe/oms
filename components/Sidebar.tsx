@@ -21,7 +21,7 @@ import {
 } from "./ui/dropdown-menu";
 import Link from "next/link";
 import ThemeSwitch from "./ThemeSwitch";
-import ShipAssistant from "./heyShip/ShipAssistant";
+// import ShipAssistant from "./heyShip/ShipAssistant";
 
 const Sidebar = React.memo(() => {
   const router = useRouter();
@@ -91,7 +91,7 @@ const Sidebar = React.memo(() => {
           );
         })}
       </div>
-      <ShipAssistant />
+      {/* <ShipAssistant /> */}
       {/* User Profile */}
       <div
   className={`py-4 px-4 border-t border-gray-200 dark:border-gray-700 flex items-center ${
