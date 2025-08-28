@@ -41,14 +41,14 @@ export async function GET(req: NextRequest) {
 
     // Trial check
     if (
-      data.subscriptionStatus === "trialing" &&
+      data?.subscriptionStatus === "trialing" &&
       data.trialEndsAt &&
       data.trialEndsAt < now
     ) {
       return NextResponse.json({ status: "expired" });
     }
 
-    if (data.subscriptionStatus === "inactive") {
+    if (data?.subscriptionStatus === "inactive") {
       return NextResponse.json({ status: "inactive" });
     }
 
