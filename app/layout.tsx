@@ -33,8 +33,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${satoshi.variable} ${clashDisplay.variable} antialiased bg-light-light-gray dark:bg-dark-background`}
-      >
+        className={`${satoshi.variable} ${clashDisplay.variable}  antialiased bg-light-light-gray dark:bg-dark-background`}
+       >
         <AuthProvider>
 
         <NextThemeProvider attribute="class">

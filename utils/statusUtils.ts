@@ -23,3 +23,27 @@ export const getBadgeClass = (status: string, type: "order" | "payment") => {
     "bg-gray-500/40 border border-gray-500 text-gray-700 dark:bg-gray-500/30 dark:border-gray-500 dark:text-gray-200"
   );
 };
+
+export const getSolidStatusClass = (status: string, type: "order" | "payment") => {
+  const classes: Record<"order" | "payment", Record<string, string>> = {
+    order: {
+      pending: "bg-yellow-800",
+      processing: "bg-blue-800",
+      shipped: "bg-green-800",
+      delivered: "bg-teal-800",
+      cancelled: "bg-red-800",
+    },
+    payment: {
+      pending: "bg-yellow-800",
+      paid: "bg-green-800",
+      failed: "bg-red-800",
+      refunded: "bg-blue-800",
+    },
+  };
+
+  return (
+    classes[type]?.[status?.toLowerCase()] ??
+    "bg-gray-500"
+  );
+};
+

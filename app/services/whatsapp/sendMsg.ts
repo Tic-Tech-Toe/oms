@@ -1,33 +1,13 @@
-// import { auth, db } from "@/app/config/firebase";
-// import { getAuth } from "firebase/auth";
-// import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
-
-
-
-
-
-// Function to send a WhatsApp message using a template
+// app/services/whatsapp/sendMsg.ts
 export async function sendMessage(
   phoneNumber: string,
   messageBody: string[],
   templateName: string
 ) {
-  const url = "https://graph.facebook.com/v21.0/506114192590854/messages";
+  const wtPhoneID = process.env.WHATSAPP_PHONE_ID;
+  const url = `https://graph.facebook.com/v21.0/${wtPhoneID}/messages`;
 
   console.log("Template",templateName, "Phone : ", phoneNumber)
-
-  // Step 1: Fetch the WhatsApp API secret from Firestore
-  // const whatsappSecret = await getWhatsAppSecretByEmail();
-  // console.log(whatsappSecret)
-  // if (!whatsappSecret) {
-  //   return {
-  //     success: false,
-  //     message: "WhatsApp API secret not found.",
-  //     status: 401,
-  //   };
-  // }
-
-  // Construct the message payload
   const data = JSON.stringify({
     messaging_product: "whatsapp",
     to: phoneNumber,

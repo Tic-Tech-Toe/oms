@@ -43,6 +43,9 @@ const OrderDetails = () => {
     }
   }, [allOrders]);
 
+  console.log("Current order", order)
+  console.log("Current payment", order?.payment?.id)
+
   useEffect(() => {
     if (userId) {
       loadCustomers(userId);
@@ -57,6 +60,31 @@ const OrderDetails = () => {
     e.preventDefault();
     router.back();
   };
+
+  const handleSendInvoice = () => {
+    router.push(`/invoice/${order.id}`);
+  }
+
+  const handleSendTracking = async () => {
+  const res = await fetch("/api/send-track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      phoneNumber: order.customer?.whatsappNumber,
+      orderId: order.id,
+      eta: "Tomorrow 5PM",
+      trackingId: "12345", // could be your real tracking code
+    }),
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    alert("✅ Tracking link sent via WhatsApp!");
+  } else {
+    alert("❌ Failed to send tracking link.");
+  }
+};
+
 
   return (
     <div className="px-4 md:px-10 lg:px-20">
@@ -112,9 +140,9 @@ const OrderDetails = () => {
               text="Review items"
               order={order}
               status={order.status}
-              buttonOneLabel="Mark as Processing"
+              buttonOneLabel="Send Tracking Link"
               buttonTwoLabel="Update Order"
-              onButtonOneClick={() => console.log("Process order")}
+              onButtonOneClick={() => handleSendTracking()}
               onButtonTwoClick={() => console.log("Update order", order.id)}
             />
           </section>
@@ -132,9 +160,9 @@ const OrderDetails = () => {
               text="Manage payment"
               order={order}
               status={order.paymentStatus}
-              buttonOneLabel="Send Reminder"
+              buttonOneLabel="Send Invoice"
               buttonTwoLabel="Collect Payment"
-              onButtonOneClick={() => console.log("Send reminder")}
+              onButtonOneClick={() => handleSendInvoice()}
               onButtonTwoClick={() => console.log("Collect payment")}
             />
           </section>

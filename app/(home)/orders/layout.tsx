@@ -8,7 +8,7 @@ import React from "react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-col md:flex-row bg-light-background dark:bg-dark-dark-gray min-h-screen">
+    <div className="flex flex-col md:flex-row bg-light-background dark:bg-dark-dark-gray min-h-screen" suppressHydrationWarning>
       {/* Sidebar */}
       <Sidebar />
 

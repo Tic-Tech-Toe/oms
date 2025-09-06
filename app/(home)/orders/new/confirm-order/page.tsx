@@ -13,6 +13,7 @@ import { useOrderStore, decreaseInventoryStock } from "@/hooks/zustand_stores/us
 // import { useAuth } from "@/hooks/useAuthStore";
 import { toast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/hooks/useAuthStore";
+import { useAuth } from "@/app/context/AuthContext";
 
 type Charge = {
   id: string;
@@ -23,8 +24,10 @@ type Charge = {
 
 export default function ConfirmOrder() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { tempOrderData, setTempOrderData, addOrder } = useOrderStore();
+
+  console.log("Current User : ", user);
 
   const [items, setItems] = useState(tempOrderData?.items || []);
   const [charges, setCharges] = useState<Charge[]>(
@@ -46,7 +49,7 @@ export default function ConfirmOrder() {
       charges,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, charges]);
+  }, [items]);
 
   if (!tempOrderData || !tempOrderData.customer || items.length === 0) {
     return (

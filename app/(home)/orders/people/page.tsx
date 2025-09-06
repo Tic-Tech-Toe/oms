@@ -7,13 +7,26 @@ import AddCustomerDialog from "@/components/AddCustomerDialog";
 import EditCustomerDialog from "@/components/EditCustomerDialog";
 import { auth } from "@/app/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { MessageCircle, Phone, Edit, Trash2 } from "lucide-react";
+import { MessageCircle, Edit, Trash2, ArrowUpDown } from "lucide-react";
 import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function People() {
   const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(
     null
   );
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<keyof CustomerType>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const {
     customers,
@@ -37,7 +50,6 @@ export default function People() {
   const handleAddCustomer = async (customerData: CustomerType) => {
     const user = auth.currentUser;
     if (!user) return;
-
     try {
       await addCustomer(user.uid, customerData);
       toast({ title: "Customer added!" });
@@ -49,7 +61,6 @@ export default function People() {
   const handleUpdateCustomer = async (updatedData: CustomerType) => {
     const user = auth.currentUser;
     if (!user) return;
-
     try {
       await updateCustomer(user.uid, updatedData.id!, updatedData);
       toast({ title: "Customer updated!" });
@@ -62,7 +73,6 @@ export default function People() {
   const handleDelete = async (id: string) => {
     const user = auth.currentUser;
     if (!user) return;
-
     try {
       await deleteCustomer(user.uid, id);
       toast({ title: "Customer deleted" });
@@ -71,99 +81,184 @@ export default function People() {
     }
   };
 
+  // Filter + Sort
+  const filtered = customers.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const sorted = [...filtered].sort((a, b) => {
+    const aVal = (a[sortKey] ?? "") as string | number;
+    const bVal = (b[sortKey] ?? "") as string | number;
+
+    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (key: keyof CustomerType) => {
+    if (sortKey === key) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">People</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">People</h1>
             <p className="text-gray-500 text-sm">Your customer directory</p>
           </div>
           <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {customers.map((cust) => (
-            <div
-              key={cust.id}
-              className="relative group bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-3xl px-5 py-4 shadow-sm hover:shadow-md transition flex justify-between items-start"
-            >
-              {/* Info */}
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">{cust.name}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {cust.email || "No email"}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  +91{" "}
+        {/* Search */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+          <Input
+            placeholder="Search by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="sm:max-w-xs w-full"
+          />
+        </div>
+
+        {/* Table for desktop, cards for mobile */}
+        <div className="hidden sm:block rounded-xl border shadow-sm overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("name")}>
+                  Name <ArrowUpDown className="inline w-4 h-4 ml-1" />
+                </TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort("whatsappNumber")}>
+                  WhatsApp <ArrowUpDown className="inline w-4 h-4 ml-1" />
+                </TableHead>
+                <TableHead>Reward Points</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sorted.length > 0 ? (
+                sorted.map((cust) => (
+                  <TableRow key={cust.id}>
+                    <TableCell className="font-medium">{cust.name}</TableCell>
+                    <TableCell>{cust.email || "—"}</TableCell>
+                    <TableCell>
+                      +91{" "}
+                      {cust.whatsappNumber.length > 10 &&
+                      cust.whatsappNumber.startsWith("91")
+                        ? cust.whatsappNumber.slice(2)
+                        : cust.whatsappNumber}
+                    </TableCell>
+                    <TableCell>
+                      {cust.rewardPoint !== undefined ? (
+                        <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
+                          🎁 {cust.rewardPoint}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="flex gap-2">
+                      <a
+                        href={`https://wa.me/91${cust.whatsappNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button size="sm" variant="outline">
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      </a>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingCustomer(cust)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(cust.id!)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-gray-400 py-6">
+                    No customers found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Card List */}
+        <div className="sm:hidden space-y-3">
+          {sorted.length > 0 ? (
+            sorted.map((cust) => (
+              <div
+                key={cust.id}
+                className="rounded-xl border shadow-sm p-4 bg-white flex flex-col gap-2"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-lg">{cust.name}</h3>
+                  {cust.rewardPoint !== undefined && (
+                    <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
+                      🎁 {cust.rewardPoint}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600">{cust.email || "—"}</p>
+                <p className="text-sm text-gray-600">
+                  WhatsApp:{" "}
                   {cust.whatsappNumber.length > 10 &&
                   cust.whatsappNumber.startsWith("91")
                     ? cust.whatsappNumber.slice(2)
                     : cust.whatsappNumber}
                 </p>
-                {cust.rewardPoint !== undefined && (
-    <div className="inline-flex items-center bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 text-sm font-medium px-3 py-1 rounded-full">
-      🎁 {cust.rewardPoint} Reward Points
-    </div>
-  )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col items-end gap-3 opacity-70 group-hover:opacity-100 transition">
-                <a
-                  href={`https://wa.me/91${cust.whatsappNumber}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group/action relative hover:text-green-500"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
-                    WhatsApp
-                  </span>
-                </a>
-
-                {/* {cust.phoneNumber && (
+                <div className="flex gap-2 mt-2">
                   <a
-                    href={`tel:${cust.phoneNumber}`}
-                    className="group/action relative hover:text-blue-500"
+                    href={`https://wa.me/91${cust.whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <Phone className="w-4 h-4" />
-                    <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
-                      Call
-                    </span>
+                    <Button size="sm" variant="outline">
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
                   </a>
-                )} */}
-
-                <button
-                  onClick={() => setEditingCustomer(cust)}
-                  className="group/action relative hover:text-black dark:hover:text-white"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
-                    Edit
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleDelete(cust.id!)}
-                  className="group/action relative hover:text-red-600"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="absolute right-full mr-2 text-xs bg-black text-white px-1 py-0.5 rounded opacity-0 group-hover/action:opacity-100 transition">
-                    Delete
-                  </span>
-                </button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditingCustomer(cust)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDelete(cust.id!)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-400 text-center">No customers found.</p>
+          )}
         </div>
 
-        {customers.length === 0 && (
-          <div className="text-center text-gray-400 mt-20 text-sm">
-            No customers yet.
-          </div>
-        )}
-
+        {/* Edit Dialog */}
         {editingCustomer && (
           <EditCustomerDialog
             customer={editingCustomer}

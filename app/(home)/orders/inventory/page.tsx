@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { auth } from "@/app/config/firebase";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Edit, Trash2, ChevronDown, ChevronUp, Search } from "lucide-react";
 import { ItemType } from "@/types/orderType";
 import clsx from "clsx";
 import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
@@ -12,17 +12,17 @@ import AddItemDialog from "@/components/AddItemDialog";
 
 export default function Inventory() {
   const user = auth.currentUser;
-  const { toast } = useToast(); 
-  const {
-    inventory,
-    loadInventory,
-    updateItem,
-    deleteItem,
-  } = useInventoryStore();
+  const { toast } = useToast();
+  const { inventory, loadInventory, updateItem, deleteItem } = useInventoryStore();
 
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
   const [editState, setEditState] = useState<Record<string, Partial<ItemType>>>({});
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
+
+  // Search & Sort
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "price" | "quantity">("name");
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
 
   useEffect(() => {
     if (user?.uid) loadInventory(user.uid);
@@ -49,7 +49,7 @@ export default function Inventory() {
         const { [id]: _, ...rest } = prev;
         return rest;
       });
-    } catch (err) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update item.",
@@ -63,7 +63,7 @@ export default function Inventory() {
     try {
       await deleteItem(user.uid, id);
       toast({ title: "Deleted", description: "Item removed from inventory." });
-    } catch (err) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete item.",
@@ -78,11 +78,39 @@ export default function Inventory() {
     return "bg-green-500";
   };
 
-  const isExpanded = (id: string) => expandedItemId === id;
+  // 🔹 Filtered & Sorted inventory
+  const filteredInventory = useMemo(() => {
+    let items = [...inventory];
+
+    if (search) {
+      items = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          (item.sku ?? "").toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (categoryFilter !== "All") {
+      items = items.filter((item) => item.category === categoryFilter);
+    }
+
+    items.sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "price") return (a.price ?? 0) - (b.price ?? 0);
+      if (sortBy === "quantity") return (a.quantity ?? 0) - (b.quantity ?? 0);
+      return 0;
+    });
+
+    return items;
+  }, [inventory, search, sortBy, categoryFilter]);
+
+  // 🔹 Get unique categories
+  const categories = ["All", ...new Set(inventory.map((i) => i.category ?? ""))];
 
   return (
     <div className="p-6 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">Inventory</h1>
         <Button
           onClick={() => setShowAddItemDialog(true)}
@@ -92,17 +120,53 @@ export default function Inventory() {
         </Button>
       </div>
 
+      {/* Search & Filters */}
+      <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+        <div className="relative w-full md:w-1/3">
+          <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search by name or SKU..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border pl-9 pr-3 py-2 text-sm dark:bg-neutral-800 dark:text-white"
+          />
+        </div>
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as any)}
+          className="px-3 py-2 rounded-xl border dark:bg-neutral-800 dark:text-white"
+        >
+          <option value="name">Sort: Name</option>
+          <option value="price">Sort: Price</option>
+          <option value="quantity">Sort: Quantity</option>
+        </select>
+
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="px-3 py-2 rounded-xl border dark:bg-neutral-800 dark:text-white"
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat || "Uncategorized"}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Inventory Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-6">
-        {inventory.map((item) => {
+        {filteredInventory.map((item) => {
           const editing = editState[item.itemId] || {};
-          // const expanded = isExpanded(item.itemId);
-          const expanded = expandedItemId === item.itemId;;
+          const expanded = expandedItemId === item.itemId;
 
           return (
             <div
               key={item.itemId}
-              className={clsx( "self-start",
-                "relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[2rem] px-6 py-5 shadow-md transition-all",
+              className={clsx(
+                "self-start relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[2rem] px-6 py-5 shadow-md transition-all",
                 expanded ? "ring-2 ring-blue-500" : ""
               )}
             >
@@ -164,18 +228,24 @@ export default function Inventory() {
                     label="Price"
                     value={editing.price ?? item.price}
                     type="number"
-                    onChange={(val) => handleFieldChange(item.itemId, "price", parseFloat(val))}
+                    onChange={(val) =>
+                      handleFieldChange(item.itemId, "price", parseFloat(val))
+                    }
                   />
                   <EditableField
                     label="Quantity"
                     value={editing.quantity ?? item.quantity}
                     type="number"
-                    onChange={(val) => handleFieldChange(item.itemId, "quantity", parseFloat(val))}
+                    onChange={(val) =>
+                      handleFieldChange(item.itemId, "quantity", parseFloat(val))
+                    }
                   />
                   <EditableField
                     label="Category"
                     value={editing.category ?? item.category ?? ""}
-                    onChange={(val) => handleFieldChange(item.itemId, "category", val)}
+                    onChange={(val) =>
+                      handleFieldChange(item.itemId, "category", val)
+                    }
                   />
                   <EditableField
                     label="SKU"
@@ -189,6 +259,16 @@ export default function Inventory() {
         })}
       </div>
 
+      {/* Empty state */}
+      {filteredInventory.length === 0 && (
+        <div className="text-gray-400 mt-10 text-center">
+          {inventory.length === 0
+            ? "No inventory yet."
+            : "No items match your search/filter."}
+        </div>
+      )}
+
+      {/* Add Dialog */}
       {showAddItemDialog && (
         <AddItemDialog
           onAdd={(item) => {
@@ -199,15 +279,11 @@ export default function Inventory() {
           onClose={() => setShowAddItemDialog(false)}
         />
       )}
-
-      {inventory.length === 0 && (
-        <div className="text-gray-400 mt-10 text-center">No inventory yet.</div>
-      )}
     </div>
   );
 }
 
-// Editable Field component
+// 🔹 Editable Field
 function EditableField({
   label,
   value,
