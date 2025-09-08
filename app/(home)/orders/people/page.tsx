@@ -157,8 +157,8 @@ export default function People() {
                     </TableCell>
                     <TableCell>
                       {cust.rewardPoint !== undefined ? (
-                        <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
-                          🎁 {cust.rewardPoint}
+                        <span className=" text-amber-700 text-md font-semibold px-2 py-1 rounded-full">
+                           {cust.rewardPoint}
                         </span>
                       ) : (
                         "—"
@@ -214,7 +214,7 @@ export default function People() {
                   <h3 className="font-semibold text-lg">{cust.name}</h3>
                   {cust.rewardPoint !== undefined && (
                     <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
-                      🎁 {cust.rewardPoint}
+                       {cust.rewardPoint}
                     </span>
                   )}
                 </div>

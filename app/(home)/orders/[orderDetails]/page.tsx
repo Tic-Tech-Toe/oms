@@ -17,10 +17,13 @@ import { updateOrderInFirestore } from "@/utils/order/getFireStoreOrders";
 import { STATUS_WHATSAPP_CONFIG } from "@/utils/whatsappConfig";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/app/config/firebase";
-import { Check, X } from "lucide-react";
+import { Check, Send, X } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { handleSendPaymentReminder } from "@/utils/sendPaymentReminder";
 import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
+import SendTrackingDialog from "@/components/SendTrackingDialog";
+import { set } from "lodash";
+import { Dialog } from "@/components/ui/dialog";
 
 const OrderDetails = () => {
   const { allOrders } = useOrderStore();
@@ -31,6 +34,8 @@ const OrderDetails = () => {
 
   const { toast, dismiss } = useToast();
   const userId = auth.currentUser?.uid;
+
+  const [showLinkInp, setShowLinkInp] = useState(false);
 
   useEffect(() => {
     const storedOrder = localStorage.getItem("selectedOrder");
@@ -43,8 +48,8 @@ const OrderDetails = () => {
     }
   }, [allOrders]);
 
-  console.log("Current order", order)
-  console.log("Current payment", order?.payment?.id)
+  console.log("Current order", order);
+  console.log("Current payment", order?.payment?.id);
 
   useEffect(() => {
     if (userId) {
@@ -63,28 +68,29 @@ const OrderDetails = () => {
 
   const handleSendInvoice = () => {
     router.push(`/invoice/${order.id}`);
-  }
+  };
 
   const handleSendTracking = async () => {
-  const res = await fetch("/api/send-track", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      phoneNumber: order.customer?.whatsappNumber,
-      orderId: order.id,
-      eta: "Tomorrow 5PM",
-      trackingId: "12345", // could be your real tracking code
-    }),
-  });
+    router.push(`/tracking/${order.id}`);
 
-  const data = await res.json();
-  if (data.success) {
-    alert("✅ Tracking link sent via WhatsApp!");
-  } else {
-    alert("❌ Failed to send tracking link.");
-  }
-};
+    // const res = await fetch("/api/send-track", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     phoneNumber: order.customer?.whatsappNumber,
+    //     orderId: order.id,
+    //     eta: "Tomorrow 5PM",
+    //     trackingId: "12345", // could be your real tracking code
+    //   }),
+    // });
 
+    // const data = await res.json();
+    // if (data.success) {
+    //   alert("✅ Tracking link sent via WhatsApp!");
+    // } else {
+    //   alert("❌ Failed to send tracking link.");
+    // }
+  };
 
   return (
     <div className="px-4 md:px-10 lg:px-20">
@@ -142,16 +148,23 @@ const OrderDetails = () => {
               status={order.status}
               buttonOneLabel="Send Tracking Link"
               buttonTwoLabel="Update Order"
-              onButtonOneClick={() => handleSendTracking()}
+              onButtonOneClick={() => setShowLinkInp(true)}
               onButtonTwoClick={() => console.log("Update order", order.id)}
+            />
+            <SendTrackingDialog
+              orderId={order.id}
+              open={showLinkInp}
+              phoneNumber={order.customer?.whatsappNumber}
+              customerName={order.customer?.name || "Customer"}
+              onClose={() => setShowLinkInp(false)}
+              userId={userId}
+              onOpenChange={setShowLinkInp}
             />
           </section>
 
           {/* Payment Info */}
           <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              Payment Information
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Payment Information</h2>
             <p className="text-sm text-gray-500 mb-2">
               Invoice No: {order.invoiceNumber}
             </p>

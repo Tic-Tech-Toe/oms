@@ -32,7 +32,7 @@ const OrderUpdateDialog = ({ order, setOpen, refreshOrders }: OrderUpdateDialogP
   const [shippingAddress, setShippingAddress] = useState(order.shippingAddress || "");
   const [billingAddress, setBillingAddress] = useState(order.billingAddress || "");
   const [paymentMethod, setPaymentMethod] = useState(order.paymentMethod || "UPI");
-  const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber || "");
+  const [trackingNumber, setTrackingNumber] = useState(order.trackingLink || "");
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState<Date | null>(
     order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate) : null
   );

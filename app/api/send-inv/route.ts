@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { orderId, customerNumber, fileName, fileData } = await req.json();
+    const { orderId, customerNumber, fileName, fileData, customerName } = await req.json();
 
     if (!orderId || !customerNumber || !fileName || !fileData) {
       return NextResponse.json(
@@ -15,12 +15,8 @@ export async function POST(req: Request) {
     // 1. Upload file to WhatsApp Media API
     const uploadUrl = `https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/media`;
 
-    // Convert base64 to Buffer
-    const base64Data = fileData.split(",")[1]; // remove data:application/pdf;base64, prefix
+    const base64Data = fileData.split(",")[1]; // strip prefix
     const pdfBuffer = Buffer.from(base64Data, "base64");
-
-    
-    // Create Blob with correct MIME type
     const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
 
     const formData = new FormData();
@@ -47,16 +43,36 @@ export async function POST(req: Request) {
 
     const documentId = uploadResult.id;
 
-    // 2. Send the uploaded document to customer
+    // 2. Send using WhatsApp Template with document in header
     const sendUrl = `https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/messages`;
 
     const messagePayload = {
       messaging_product: "whatsapp",
       to: customerNumber,
-      type: "document",
-      document: {
-        id: documentId,
-        filename: fileName,
+      type: "template",
+      template: {
+        name: "purchase_receipt_3", // your template name
+        language: { code: "en_US" },
+        components: [
+          {
+            type: "header",
+            parameters: [
+              {
+                type: "document",
+                document: {
+                  id: documentId,
+                  filename: fileName,
+                },
+              },
+            ],
+          },
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: customerName || "Customer" },
+            ],
+          },
+        ],
       },
     };
 
@@ -81,7 +97,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Invoice sent successfully via WhatsApp",
+      message: "Invoice sent successfully via WhatsApp template",
       data: sendResult,
     });
   } catch (err) {

@@ -38,7 +38,7 @@ export type OrderType = {
   items: OrderItem[];
   paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery";
   payment?: PaymentType;
-  trackingNumber?: string;
+  trackingLink?: string;
   shippingDate?: string;
   estimatedDeliveryDate?: string;
   deliveredDate?: string;

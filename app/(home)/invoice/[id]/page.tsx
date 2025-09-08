@@ -24,51 +24,56 @@ export default function InvoicePage() {
   }, []);
 
   const handleSendInvoice = async () => {
-    if (!invoiceRef.current || !order) return;
+  if (!invoiceRef.current || !order) return;
 
-    try {
-      // 1. Generate PDF Blob
-      const opt = {
-        margin: 0.5,
-        filename: `invoice_${order.invoiceNumber || order.id}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-      };
+  try {
+    // 1. Generate PDF Blob
+    const opt = {
+      margin: 0.5,
+      filename: `invoice_${order.invoiceNumber || order.id}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
 
-      const pdfBlob: Blob = await html2pdf().set(opt).from(invoiceRef.current).outputPdf("blob");
+    const pdfBlob: Blob = await html2pdf()
+      .set(opt)
+      .from(invoiceRef.current)
+      .outputPdf("blob");
 
-      // 2. Convert Blob to Base64
-      const base64Pdf = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(pdfBlob);
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-      });
+    // 2. Convert Blob to Base64
+    const base64Pdf = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(pdfBlob);
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+    });
 
-      // 3. Call Send Invoice API
-      const res = await fetch("/api/send-inv", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          customerNumber: order.customer?.whatsappNumber,
-          fileName: opt.filename,
-          fileData: base64Pdf, // sending base64 pdf to backend
-        }),
-      });
+    // 3. Call Send Invoice API with template params
+    const res = await fetch("/api/send-inv", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId: order.id,
+        customerNumber: order.customer?.whatsappNumber,
+        customerName: order.customer?.name, // ✅ new field
+        fileName: opt.filename,
+        fileData: base64Pdf,
+      }),
+    });
 
-      const data = await res.json();
-      if (data.success) {
-        alert("✅ Invoice sent successfully via WhatsApp!");
-      } else {
-        alert("❌ Failed to send invoice.");
-      }
-    } catch (err) {
-      console.error("Send invoice error:", err);
-      alert("❌ Error while sending invoice.");
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ Invoice sent successfully via WhatsApp template!");
+    } else {
+      alert("❌ Failed to send invoice: " + data.message);
     }
-  };
+  } catch (err) {
+    console.error("Send invoice error:", err);
+    alert("❌ Error while sending invoice.");
+  }
+};
+
   const handleDownloadPDF = () => {
     if (!invoiceRef.current || !order) return;
 
@@ -97,9 +102,9 @@ export default function InvoicePage() {
     <div className="max-w-4xl mx-auto px-6 py-10">
       {/* Actions */}
       <div className="flex justify-end gap-4 mb-4">
-        <Button onClick={handleDownloadPDF} className="rounded-xl flex gap-2 px-4 py-2">
-          <Printer />
-          <span>Print as pdf</span>
+        <Button onClick={handleDownloadPDF} className="rounded-xl flex gap-2 px-4 py-4 hover:bg-neutral-200 dark:hover:bg-purple-800/30 aspect-square text-purple-600 border-2 border-purple-600">
+          <Printer size={18} />
+          {/* <span>Print as pdf</span> */}
         </Button>
         <Button onClick={handleSendInvoice} className="rounded-xl px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white">
           Send Invoice via WhatsApp
