@@ -17,14 +17,14 @@ interface StatusActionsProps {
   row: any;
   field: "status" | "paymentStatus";
   statuses: string[];
-  getStatusBadgeClass: (status: string) => string;
+  getSolidStatusClass: (status: string) => string;
 }
 
 const StatusActions: React.FC<StatusActionsProps> = ({
   row,
   field,
   statuses,
-  getStatusBadgeClass,
+  getSolidStatusClass,
 }) => {
   const initialValue = row.original[field] as string;
   const [newStatus, setNewStatus] = useState(initialValue);
@@ -232,29 +232,45 @@ const StatusActions: React.FC<StatusActionsProps> = ({
     <>
       <div className="flex items-center  gap-2">
         {/* Badge */}
-        <span
-          className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeClass(
+        {/* <span
+          className={`text-xs px-2 py-1 rounded-md ${getStatusBadgeClass(
             newStatus
           )}`}
         >
           {newStatus}
-        </span>
+        </span> */}
 
         {/* Dropdown */}
-        <Select
-          value={newStatus}
-          onValueChange={handleStatusChange}
-          onOpenChange={() => {}}
-        >
-          <SelectTrigger className="text-xs border-none " />
-          <SelectContent className="text-xs">
-            {statuses.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Select value={newStatus} onValueChange={handleStatusChange}>
+  <SelectTrigger
+    className={`
+      w-fit h-8 px-4 text-sm font-medium rounded-full
+      text-white
+      ${getSolidStatusClass(newStatus, "order")}
+    `}
+  >
+    {newStatus || "Select status"}
+  </SelectTrigger>
+
+  <SelectContent
+    className="rounded-xl shadow-lg border-none bg-white dark:bg-zinc-900 text-sm p-1"
+  >
+    {statuses.map((s) => (
+      <SelectItem
+        key={s}
+        value={s}
+        className={`
+          px-3 py-2 rounded-md cursor-pointer my-2 text-white font-medium
+          ${getSolidStatusClass(s, "order")}
+          hover:opacity-90 transition
+        `}
+      >
+        {s}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
       </div>
 
       {/* Delivery dialog */}

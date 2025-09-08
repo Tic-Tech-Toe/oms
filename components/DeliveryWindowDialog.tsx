@@ -13,7 +13,7 @@ type Props = {
 export default function DeliveryWindowDialog({ open, onClose, onConfirm }: Props) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm rounded-2xl p-6">
+      <DialogContent className="max-w-sm rounded-2xl p-6 text-start">
         <DialogHeader>
           <DialogTitle>Select delivery window</DialogTitle>
         </DialogHeader>

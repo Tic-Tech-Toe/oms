@@ -15,19 +15,22 @@ import {
   X,
   ChevronDown,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 import { debounce } from "lodash";
 import { useToast } from "@/hooks/use-toast";
 import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
 import ShoppingBagDialog from "@/components/ShoppingBagDialog";
 import { ItemType } from "@/types/orderType";
+import { motion, AnimatePresence } from "motion/react";
+import { useCartStore } from "@/hooks/zustand_stores/useCartStateStore";
 
 interface CartEntry {
   itemId: string;
   quantity: number;
   price: number;
   total: number;
-  sku: string ;
+  sku: string;
   category: string;
   itemName: string;
 }
@@ -96,30 +99,56 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
   }, []);
 
   // Add or remove item from cart
-  const updateCart = (product: ItemType, isChecked: boolean) => {
-    // console.log("Toast firing for:", product.name, "checked:", isChecked);
-    setCartState((prev) => {
-      const updated = { ...prev };
-      if (isChecked) {
-        const qty = quantities[product.itemId] || 1;
-        updated[product.itemId] = {
-          itemId: product.itemId,
-          quantity: qty,
-          price: product.price,
-          total: product.price * qty,
-          sku: product.sku || "",
-          category: product.category || "",
-          itemName: product.name,
-        };
-        toast({ title: `${product.name} added to cart.`, variant:"default" });
-      } else {
-        delete updated[product.itemId];
-        toast({ title: `${product.name} removed from cart.` });
-      }
-      setValue("items", Object.values(updated), { shouldDirty: true });
-      return updated;
+  const updateCart = useCallback(
+    (product: ItemType, qty: number) => {
+      setCartState((prev) => {
+        const updated = { ...prev };
+
+        if (qty > 0) {
+          updated[product.itemId] = {
+            itemId: product.itemId,
+            quantity: qty,
+            price: product.price,
+            total: product.price * qty,
+            sku: product.sku || "",
+            category: product.category || "",
+            itemName: product.name,
+          };
+        } else {
+          delete updated[product.itemId];
+        }
+
+        setValue("items", Object.values(updated), { shouldDirty: true });
+        return updated;
+      });
+    },
+    [setValue]
+  );
+
+  const handleQtyChange = (product: ItemType, newQty: number) => {
+    setQuantities((prev) => {
+      const qty = Math.max(newQty, 0);
+      const next = { ...prev, [product.itemId]: qty };
+      updateCart(product, qty);
+      return next;
     });
   };
+
+  const clearCart = () => {
+    setQuantities({});
+    setCartState({});
+    setValue("items", []);
+    toast({
+      title: "Cart cleared",
+      description: "All items have been removed from your cart.",
+    });
+  };
+
+  // Subtotal calculation
+  const subtotal = Object.values(cartState).reduce(
+    (acc, entry) => acc + entry.total,
+    0
+  );
 
   return (
     <FormField
@@ -193,7 +222,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                 >
                   <ChevronDown
                     size={18}
-                    className={`text-gray-400 transition-transform \${
+                    className={`text-gray-400 transition-transform ${
                       dropdownOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -201,79 +230,95 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
               </div>
 
               {dropdownOpen && (
-                <div className="absolute w-full mt-2 z-20 bg-background border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                <div className="absolute w-full mt-2 z-20 bg-background border rounded-lg shadow-lg max-h-96 overflow-y-auto">
                   {filteredItems.length === 0 ? (
                     <div className="text-center text-sm text-gray-500 py-3">
                       No products found.
                     </div>
                   ) : (
                     filteredItems.map((product) => {
-                      const currentQty = quantities[product.itemId] || 1;
-                      const exceedsStock = () => product.quantity;
+                      const currentQty = quantities[product.itemId] || 0;
+
                       return (
                         <div
                           key={product.itemId}
-                          className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 rounded-md"
+                          className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 rounded-md transition"
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="flex-1 text-sm font-medium">
-                              {product.name}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <Minus
-                                size={16}
-                                className="p-1 rounded-full cursor-pointer"
-                                onClick={() =>
-                                  setQuantities((prev) => ({
-                                    ...prev,
-                                    [product.itemId]: Math.max(
-                                      (prev[product.itemId] || 1) - 1,
-                                      1
-                                    ),
-                                  }))
-                                }
-                              />
-                              <input
-                                type="number"
-                                value={currentQty}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value, 10);
-                                  setQuantities((prev) => ({
-                                    ...prev,
-                                    [product.itemId]:
-                                      isNaN(val) || val < 1 ? 1 : val,
-                                  }));
-                                }}
-                                className="w-12 text-center border rounded"
-                              />
-                              <Plus
-                                size={16}
-                                className="p-1 rounded-full cursor-pointer "
-                                onClick={() =>
-                                  setQuantities((prev) => ({
-                                    ...prev,
-                                    [product.itemId]:
-                                      (prev[product.itemId] || 1) + 1,
-                                  }))
-                                }
-                              />
-                              <input
-                                type="checkbox"
-                                className="ml-2 w-4 h-4 accent-green-500"
-                                onChange={(e) =>
-                                  updateCart(product, e.target.checked)
-                                }
-                                checked={Boolean(cartState[product.itemId])}
-                              />
+                          <div className="flex items-center justify-between gap-3">
+                            {/* Product Info */}
+                            <div className="flex flex-col flex-1">
+                              <span className="text-sm font-medium">
+                                {product.name}
+                              </span>
+                              <div className="text-xs text-gray-500">
+                                ₹{product.price} · Stock: {product.quantity}
+                              </div>
+                              {currentQty > 0 && (
+                                <div className="text-xs text-green-600 font-medium">
+                                  Total: ₹{product.price * currentQty}
+                                </div>
+                              )}
                             </div>
+
+                            <AnimatePresence mode="wait" initial={false}>
+                              {currentQty === 0 ? (
+                                <motion.button
+                                  key="add-btn"
+                                  initial={{ scale: 0.8, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  exit={{ scale: 0.8, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  onClick={() => handleQtyChange(product, 1)}
+                                  className="px-4 py-2 border-2 border-light-primary text-light-primary rounded-full text-sm font-semibold shadow-md hover:scale-105 transition-transform"
+                                >
+                                  Add +
+                                </motion.button>
+                              ) : (
+                                <motion.div
+                                  key="qty-controls"
+                                  initial={{ opacity: 0, x: 20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  exit={{ opacity: 0, x: -20 }}
+                                  transition={{ duration: 0.25 }}
+                                  className="flex items-center gap-2"
+                                >
+                                  {/* Minus button */}
+                                  <motion.button
+                                    whileTap={{ scale: 0.8 }}
+                                    onClick={() =>
+                                      handleQtyChange(product, currentQty - 1)
+                                    }
+                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600 transition"
+                                  >
+                                    <Minus size={16} />
+                                  </motion.button>
+
+                                  {/* Quantity */}
+                                  <motion.span
+                                    key={`qty-${currentQty}`}
+                                    initial={{ scale: 0.6, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.6, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="w-6 text-center text-sm font-semibold"
+                                  >
+                                    {currentQty}
+                                  </motion.span>
+
+                                  {/* Plus button */}
+                                  <motion.button
+                                    whileTap={{ scale: 0.8 }}
+                                    onClick={() =>
+                                      handleQtyChange(product, currentQty + 1)
+                                    }
+                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-green-500 text-white shadow hover:bg-green-600 transition"
+                                  >
+                                    <Plus size={16} />
+                                  </motion.button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
-                          {/* {exceedsStock() && (
-                            <div className="mt-1 text-xs text-red-500 flex items-center gap-1">
-                              <AlertTriangle size={14} />
-                              Selected quantity exceeds stock (
-                              {product.quantity})
-                            </div>
-                          )} */}
                         </div>
                       );
                     })
@@ -283,6 +328,27 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
             </div>
           </FormControl>
 
+          {/* Sticky mini-cart summary */}
+          {Object.keys(cartState).length > 0 && (
+            <div className="mt-4 border rounded-lg p-3 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+              <div className="text-sm">
+                <span className="font-medium">
+                  {Object.keys(cartState).length} items
+                </span>{" "}
+                · Subtotal:{" "}
+                <span className="font-semibold text-light-primary">
+                  ₹{subtotal}
+                </span>
+              </div>
+              <button
+                onClick={clearCart}
+                className="flex items-center gap-1 text-xs px-2 py-1 border border-red-400 text-red-600 rounded-md hover:bg-red-50"
+              >
+                <Trash2 size={14} /> Clear All
+              </button>
+            </div>
+          )}
+
           <FormMessage />
         </FormItem>
       )}
@@ -290,4 +356,4 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
   );
 }
 
-export default PickOrderField
+export default PickOrderField;

@@ -57,7 +57,7 @@ export async function sendBroadcast({
 
     try {
       const response = await fetch(
-        "https://graph.facebook.com/v21.0/506114192590854/messages",
+        `https://graph.facebook.com/v21.0/${process.env.WHATSAPP_PHONE_ID}/messages`,
         {
           method: "POST",
           headers: {

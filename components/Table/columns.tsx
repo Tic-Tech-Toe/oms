@@ -138,7 +138,7 @@ export const columns = ({
         row={row}
         field="status"
         statuses={ORDER_STATUSES}
-        getStatusBadgeClass={(status) => getBadgeClass(status, "order")}
+        getSolidStatusClass={(status) => getBadgeClass(status, "order")}
       />
     ),
   },
@@ -174,7 +174,7 @@ export const columns = ({
         row={row}
         field="paymentStatus"
         statuses={PAYMENT_STATUSES}
-        getStatusBadgeClass={(status) => getBadgeClass(status, "payment")}
+        getSolidStatusClass={(status) => getBadgeClass(status, "payment")}
       />
     ),
   },

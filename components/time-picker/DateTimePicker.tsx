@@ -87,7 +87,8 @@ const DateTimePicker = ({ onConfirm }: Props) => {
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => { field.onChange(date); setDateFlag(true); }}
+
                         disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         initialFocus
                       />
@@ -107,7 +108,7 @@ const DateTimePicker = ({ onConfirm }: Props) => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="bg-light-primary rounded-full flex justify-self-end hover:bg-blue-700">
+        <Button type="submit" className="bg-light-primary text-white rounded-full flex justify-self-end hover:bg-blue-700">
           Next
         </Button>
       </form>
