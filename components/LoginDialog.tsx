@@ -22,10 +22,10 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/config/firebase";
-import { useAuth } from "@/app/context/AuthContext";
 import { fetchUserData } from "@/utils/user/fetchUseData";
 import { MagicCard } from "./magicui/magic-card";
 import { useRouteChange } from "@/app/context/RouteChangeContext";
+import { useAuth } from "@/app/context/AuthContext";
 
 const LoginDialog = () => {
   const { user, login, loading: authLoading } = useAuth();
@@ -48,7 +48,7 @@ const handleEmailLogin = async () => {
     const userCred = await signInWithEmailAndPassword(auth, email, password);
     const token = await userCred.user.getIdToken();
 
-    // 1️⃣ Call login and check response
+    // 1️⃣ Call login API
     const loginRes = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -60,28 +60,14 @@ const handleEmailLogin = async () => {
       throw new Error("Login API failed");
     }
 
-    // 2️⃣ Now check subscription (cookie will be sent automatically)
-    const subRes = await fetch("/api/check-subscription", {
-      credentials: "include", // ✅ send session cookie
-    });
+    // 2️⃣ Directly fetch user data (skip subscription check for now)
+    const userData = await fetchUserData(userCred.user);
 
-    if (!subRes.ok) {
-      throw new Error("Subscription check failed");
-    }
-
-    const subData = await subRes.json();
-    console.log("Subscription Data:", subData);
-
-    // 3️⃣ Route based on subscription
-    if (subData.status === "expired" || subData.status === "inactive") {
-      router.push("/subscribe");
+    // 3️⃣ Route based on role
+    if (userData?.role === "admin") {
+      router.push("/admin/invite");
     } else {
-      const userData = await fetchUserData(userCred.user);
-      if (userData?.role === "admin") {
-        router.push("/admin/invite");
-      } else {
-        router.push("/orders");
-      }
+      router.push("/orders");
     }
 
   } catch (err) {
@@ -91,6 +77,7 @@ const handleEmailLogin = async () => {
     setRouteLoading(false);
   }
 };
+
 
 
 
