@@ -123,7 +123,7 @@ export default function TrackingPage() {
 
         <div className="mt-4">
           <a
-            href={order.trackingUrl || "https://bluedart.com/tracking"}
+            href={order?.trackingLink || "https://bluedart.com/tracking"}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full block text-center px-4 py-2 rounded-xl bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
