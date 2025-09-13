@@ -38,7 +38,6 @@ export type OrderType = {
   items: OrderItem[];
   paymentMethod?: "credit card" | "UPI" | "bank transfer" | "cash on delivery";
   payment?: PaymentType;
-  trackingLink?: string;
   shippingDate?: string;
   estimatedDeliveryDate?: string;
   deliveredDate?: string;
@@ -46,6 +45,8 @@ export type OrderType = {
   createdAt: string;
   updatedAt: string;
   timeline?: OrderTimelineEntry[];
+  trackingLink?: string; // URL to track the order
+  shareKey?: string; // Unique key for public order tracking
 };
 
 
@@ -57,6 +58,8 @@ export type PaymentType = {
   totalPaid: number; // Sum of all partial payments
   partialPayments: { date: string; amountPaid: number }[];
 };
+
+
 
 export type CustomerType = {
   id:string;
