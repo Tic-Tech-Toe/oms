@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { phoneNumber, orderId, eta, customerName } = await req.json();
+    const { phoneNumber, orderId, eta, customerName,publicLink } = await req.json();
 
     console.table({ phoneNumber, orderId, eta });
 
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     // Build tracking link (local for now, production later)
     // const baseUrl = "http://localhost:3000";
-    const trackingLink = `/${orderId}`;
+    const trackingLink = publicLink;
 
     // WhatsApp API URL
     const url = `https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_ID}/messages`;

@@ -44,6 +44,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.469.0",
     "motion": "^12.6.0",
+    "nanoid": "^5.1.5",
     "next": "^15.4.4",
     "next-firebase-auth": "^1.4.0",
     "next-firebase-auth-edge": "^1.9.1",
