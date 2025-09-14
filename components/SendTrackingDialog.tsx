@@ -96,16 +96,9 @@ const handleSend = async () => {
       }),
     });
 
-<<<<<<< Updated upstream
-      const data = await res.json();
-
-      if (data.success) {
-        toast({ description: "✅ Tracking link sent via WhatsApp!" });
-=======
     const data = await res.json();
      if (data.success) {
         toast({ title: "Tracking Link Sent",description: "✅ Tracking link sent via WhatsApp!" });
->>>>>>> Stashed changes
         setTrackingLink('');
         setEta('');
         onClose();
