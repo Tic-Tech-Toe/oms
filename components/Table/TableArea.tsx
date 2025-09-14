@@ -24,7 +24,7 @@ import { OrderType } from "@/types/orderType";
 import OrderDialog from "../add-order/OrderDialog";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Filter, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import OrdersTableTabs from "./OrderTableTabs";
@@ -130,17 +130,26 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
     <Card className="md:m-6 shadow-none rounded-[2.5rem] dark:bg-zinc-900 bg-neutral-100 ">
       <div className="md:p-8">
         {/* Search bar */}
-        {/* <div className="mb-4 flex justify-end">
+        <div className="mb-4 mt-8  flex w-full items-center justify-center gap-2">
           <Input
             placeholder="Search by order ID, customer, or invoice"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="max-w-sm"
+            className="max-w-sm rounded-full"
           />
-        </div> */}
+          <Button className="rounded-full">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+        </div>
 
         {/* Tabs and Add Order button */}
-        <OrdersTableTabs tabs={tabs} setActiveTab={setActiveTab} activeTab={activeTab} table={table} />
+        <OrdersTableTabs
+          tabs={tabs}
+          setActiveTab={setActiveTab}
+          activeTab={activeTab}
+          table={table}
+        />
         <DashboardMobileOrderCards orders={filteredData} />
       </div>
       <Pagination

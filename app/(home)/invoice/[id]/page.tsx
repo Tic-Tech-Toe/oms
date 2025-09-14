@@ -10,13 +10,17 @@ import { OrderType } from "@/types/orderType";
 import { format } from "date-fns";
 import html2pdf from "html2pdf.js";
 import { Printer } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function InvoicePage() {
   const { id } = useParams();
   const [order, setOrder] = useState<OrderType | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
+  const {setTheme} = useTheme();
+
   useEffect(() => {
+    setTheme("light");
     const storedOrder = localStorage.getItem("selectedOrder");
     if (storedOrder) {
       setOrder(JSON.parse(storedOrder));
@@ -24,55 +28,55 @@ export default function InvoicePage() {
   }, []);
 
   const handleSendInvoice = async () => {
-  if (!invoiceRef.current || !order) return;
+    if (!invoiceRef.current || !order) return;
 
-  try {
-    // 1. Generate PDF Blob
-    const opt = {
-      margin: 0.5,
-      filename: `invoice_${order.invoiceNumber || order.id}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    };
+    try {
+      // 1. Generate PDF Blob
+      const opt = {
+        margin: 0.5,
+        filename: `invoice_${order.invoiceNumber || order.id}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+      };
 
-    const pdfBlob: Blob = await html2pdf()
-      .set(opt)
-      .from(invoiceRef.current)
-      .outputPdf("blob");
+      const pdfBlob: Blob = await html2pdf()
+        .set(opt)
+        .from(invoiceRef.current)
+        .outputPdf("blob");
 
-    // 2. Convert Blob to Base64
-    const base64Pdf = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(pdfBlob);
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-    });
+      // 2. Convert Blob to Base64
+      const base64Pdf = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(pdfBlob);
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
 
-    // 3. Call Send Invoice API with template params
-    const res = await fetch("/api/send-inv", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId: order.id,
-        customerNumber: order.customer?.whatsappNumber,
-        customerName: order.customer?.name, // ✅ new field
-        fileName: opt.filename,
-        fileData: base64Pdf,
-      }),
-    });
+      // 3. Call Send Invoice API with template params
+      const res = await fetch("/api/send-inv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.id,
+          customerNumber: order.customer?.whatsappNumber,
+          customerName: order.customer?.name, // ✅ new field
+          fileName: opt.filename,
+          fileData: base64Pdf,
+        }),
+      });
 
-    const data = await res.json();
-    if (data.success) {
-      alert("✅ Invoice sent successfully via WhatsApp template!");
-    } else {
-      alert("❌ Failed to send invoice: " + data.message);
+      const data = await res.json();
+      if (data.success) {
+        alert("✅ Invoice sent successfully via WhatsApp template!");
+      } else {
+        alert("❌ Failed to send invoice: " + data.message);
+      }
+    } catch (err) {
+      console.error("Send invoice error:", err);
+      alert("❌ Error while sending invoice.");
     }
-  } catch (err) {
-    console.error("Send invoice error:", err);
-    alert("❌ Error while sending invoice.");
-  }
-};
+  };
 
   const handleDownloadPDF = () => {
     if (!invoiceRef.current || !order) return;
@@ -99,28 +103,33 @@ export default function InvoicePage() {
   const balanceDue = order.totalAmount - (order.payment?.totalPaid || 0);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Actions */}
-      <div className="flex justify-end gap-4 mb-4">
-        <Button onClick={handleDownloadPDF} className="rounded-xl flex gap-2 px-4 py-4 hover:bg-neutral-200 dark:hover:bg-purple-800/30 aspect-square text-purple-600 border-2 border-purple-600">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 light">
+      {/* Actions: Use flex-col on mobile, flex-row on larger screens */}
+      <div className="flex flex-row justify-end gap-2 mb-4">
+        <Button
+          onClick={handleDownloadPDF}
+          className="rounded-xl flex gap-2 px-4 py-4 hover:bg-neutral-200 dark:hover:bg-purple-800/30 aspect-square text-purple-600 border-2 border-purple-600"
+        >
           <Printer size={18} />
           {/* <span>Print as pdf</span> */}
         </Button>
-        <Button onClick={handleSendInvoice} className="rounded-xl px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white">
+        <Button
+          onClick={handleSendInvoice}
+          className="rounded-xl px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
+        >
           Send Invoice via WhatsApp
         </Button>
       </div>
 
-
       {/* Invoice */}
       <div
         ref={invoiceRef}
-        className="bg-white dark:bg-zinc-950 rounded-3xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-8"
+        className="bg-white dark:bg-zinc-950 rounded-3xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8"
       >
-        {/* Header */}
-        <div className="flex justify-between items-start mb-8">
+        {/* Header: Use flex-col on mobile, flex-row on larger screens */}
+        <div className="flex flex-col sm:flex-row justify-between items-start mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Invoice</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Invoice</h1>
             <p className="text-sm text-gray-500">
               Invoice No: {order.invoiceNumber || `INV-${order.id.slice(0, 6)}`}
             </p>
@@ -128,31 +137,16 @@ export default function InvoicePage() {
               Date: {format(new Date(order.orderDate), "dd MMM yyyy")}
             </p>
           </div>
-          {/* <div className="text-right">
-            <Badge
-              className={`text-xs rounded-full ${getBadgeClass(
-                order.paymentStatus || "",
-                "payment"
-              )}`}
-            >
-              {order.paymentStatus}
-            </Badge>
-            <br />
-            <Badge
-              className={`mt-2 text-xs rounded-full ${getBadgeClass(
-                order.status || "",
-                "order"
-              )}`}
-            >
-              {order.status}
-            </Badge>
-          </div> */}
+          {/* Badges (if un-commented) would be in this div */}
+          <div className="mt-4 sm:mt-0">
+            {/* ... */}
+          </div>
         </div>
 
         <Separator className="my-6" />
 
-        {/* Parties Info */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        {/* Parties Info: Stack columns on mobile, use grid on larger screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           {/* Seller Info */}
           <div>
             <h2 className="font-semibold mb-1">From</h2>
@@ -170,9 +164,9 @@ export default function InvoicePage() {
           </div>
         </div>
 
-        {/* Items Table */}
-        <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 mb-8">
-          <table className="w-full border-collapse">
+        {/* Items Table: The table is already responsive with horizontal scrolling. */}
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800 mb-8">
+          <table className="min-w-full border-collapse">
             <thead className="bg-zinc-100 dark:bg-zinc-900">
               <tr className="text-left text-sm font-semibold">
                 <th className="p-3">Item</th>
@@ -201,9 +195,9 @@ export default function InvoicePage() {
           </table>
         </div>
 
-        {/* Totals */}
+        {/* Totals: Use space-y for vertical stacking */}
         <div className="flex justify-end">
-          <div className="w-64 space-y-2 text-sm">
+          <div className="w-full sm:w-64 space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span>₹{order.subtotal.toLocaleString()}</span>

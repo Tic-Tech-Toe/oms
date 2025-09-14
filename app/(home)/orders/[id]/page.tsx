@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { OrderType } from "@/types/orderType";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import OrderDetailComponent from "@/components/OrderDetailComponent";
@@ -13,21 +13,24 @@ import { getBadgeClass } from "@/utils/statusUtils";
 import { OrderCustomerRel } from "@/components/OrderCustomerRel";
 import FooterComponent from "@/components/FooterComponent";
 import { useToast } from "@/hooks/use-toast";
-import { updateOrderInFirestore } from "@/utils/order/getFireStoreOrders";
+import { getOrderFromFirestore, updateOrderInFirestore } from "@/utils/order/getFireStoreOrders";
 import { STATUS_WHATSAPP_CONFIG } from "@/utils/whatsappConfig";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/app/config/firebase";
-import { Check, Send, X } from "lucide-react";
+import { Check, ChevronRight, Send, X } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { handleSendPaymentReminder } from "@/utils/sendPaymentReminder";
 import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 import SendTrackingDialog from "@/components/SendTrackingDialog";
 import { set } from "lodash";
 import { Dialog } from "@/components/ui/dialog";
+import { format } from "date-fns";
 
 const OrderDetails = () => {
-  const { allOrders } = useOrderStore();
+  const { allOrders, loadOrders } = useOrderStore(); // Ensure you have loadOrders
   const { customers, loadCustomers } = useCustomerStore();
+  const { id } = useParams(); // Get the order ID from the URL
+  console.table({"Current Order" : id})
 
   const router = useRouter();
   const [order, setOrder] = useState<OrderType | null>(null);
@@ -38,26 +41,34 @@ const OrderDetails = () => {
   const [showLinkInp, setShowLinkInp] = useState(false);
 
   useEffect(() => {
-    const storedOrder = localStorage.getItem("selectedOrder");
+    if (!userId) return;
+    
+    // Attempt to find the order from the Zustand store first
+    const foundOrder = allOrders.find((o) => o.id === id);
 
-    if (storedOrder) {
-      const parsedOrder = JSON.parse(storedOrder);
-      const latestOrder =
-        allOrders.find((o) => o.id === parsedOrder.id) || parsedOrder;
-      setOrder(latestOrder);
+    if (foundOrder) {
+      setOrder(foundOrder);
+    } else {
+      // If not found in the store, fetch it directly
+      // This is the fallback for when the store is empty (e.g., on mobile)
+      const fetchOrder = async () => {
+        const orderData = await getOrderFromFirestore(userId, id); // You'll need this function
+        setOrder(orderData);
+        // You may also want to update the Zustand store with this new data
+        // For a more robust solution
+      };
+
+      fetchOrder();
     }
-  }, [allOrders]);
+    
+    // Load customers as well
+    loadCustomers(userId);
+  }, [id, userId, allOrders, loadCustomers]);
 
-  console.log("Current order", order);
-  console.log("Current payment", order?.payment?.id);
-
-  useEffect(() => {
-    if (userId) {
-      loadCustomers(userId);
-    }
-  }, [userId, loadCustomers]);
-
-  if (!order) return <p>Loading...</p>;
+  if (!order) {
+    // Correctly show loading state while data is being fetched
+    return <p>Loading...</p>;
+  }
 
   const relCustomer = customers.find((c) => c.id === order?.customer?.id);
 
@@ -95,15 +106,16 @@ const OrderDetails = () => {
   return (
     <div className="px-4 md:px-10 lg:px-20">
       {/* Breadcrumb */}
-      <span className="px-2 py-1 font-bold font-mono text-sm text-gray-400">
+      <span className="px-2 py-1 font-bold font-mono text-md text-gray-400 ">
         <Link
           href="/orders"
           onClick={handleNavigation}
-          className="hover:text-black dark:hover:text-white"
+          className="hover:text-black dark:hover:text-white underline underline-offset-4"
         >
           orders
         </Link>
-        /#{order.id}
+        <ChevronRight className="inline mx-1" size={14} />
+        #{order.id}
       </span>
 
       {/* Header */}
@@ -120,7 +132,7 @@ const OrderDetails = () => {
               Payment {order.paymentStatus}
             </Badge>
           </div>
-          <p className="text-sm text-gray-500">{order.orderDate}</p>
+          <p className="text-md font-semibold text-gray-500">{format(new Date(order.orderDate), 'MMM d, yyyy')}</p>
         </div>
       </div>
 

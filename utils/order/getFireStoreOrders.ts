@@ -7,6 +7,7 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
+  getDoc,
 } from "firebase/firestore";
 
 // 🔁 Get all orders for a user
@@ -24,6 +25,30 @@ export const getOrders = async (userId: string): Promise<OrderType[]> => {
   } catch (error) {
     console.error("❌ Error fetching orders:", error);
     return [];
+  }
+};
+
+// 🔍 Get a single order by ID for a user
+export const getOrderFromFirestore = async (
+  userId: string,
+  orderId: string
+): Promise<OrderType | null> => {
+  try {
+    const orderRef = doc(db, "users", userId, "orders", orderId);
+    const docSnap = await getDoc(orderRef);
+
+    if (docSnap.exists()) {
+      return {
+        ...(docSnap.data() as OrderType),
+        id: docSnap.id,
+      };
+    } else {
+      console.log("❌ No such order found!");
+      return null;
+    }
+  } catch (error) {
+    console.error("🔥 Error fetching single order:", error);
+    return null;
   }
 };
 
