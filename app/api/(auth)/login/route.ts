@@ -1,6 +1,5 @@
-// app/api/(auth)/login/route.ts
-import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,10 +10,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 🔑 Verify Firebase ID token
-    const decoded = await adminAuth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
 
     // 🔎 Fetch user subscription from Firestore
-    const userDoc = await adminDb.collection("users").doc(decoded.uid).get();
+    const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
     const userData = userDoc.data() || {};
     const subscriptionStatus = userData.subscriptionStatus || "inactive";
 

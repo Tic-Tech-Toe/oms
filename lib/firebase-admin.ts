@@ -15,3 +15,23 @@ if (getApps().length === 0) {
 
 export const adminAuth = getAuth();
 export const adminDb = getFirestore(); // <-- Add this
+
+    // // This is an example of what your file might look like.
+    // import admin from "firebase-admin";
+
+    // // Vercel deployment uses environment variables.
+    // // The key is stored as a JSON string and must be parsed.
+    // const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+    // if (!admin.apps.length) {
+    //   admin.initializeApp({
+    //     credential: admin.credential.cert(serviceAccount),
+    //   });
+    // }
+
+    // const adminDb = admin.firestore();
+    // const adminAuth = admin.auth();
+
+    // export { adminDb, adminAuth };
+    
+
