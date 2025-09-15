@@ -11,6 +11,11 @@ import { format } from "date-fns";
 import html2pdf from "html2pdf.js";
 import { Printer } from "lucide-react";
 import { useTheme } from "next-themes";
+import { auth } from "@/app/config/firebase";
+import { getOrderFromFirestore } from "@/utils/order/getFireStoreOrders";
+import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
+import { generateInvoiceNumber, generateUniqueInvoiceNumber } from "@/utils/invoiceUtils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function InvoicePage() {
   const { id } = useParams();
@@ -18,14 +23,54 @@ export default function InvoicePage() {
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const {setTheme} = useTheme();
+  const userId = auth.currentUser?.uid;
 
-  useEffect(() => {
+  const { allOrders, updateOrder } = useOrderStore(); // Ensure you have loadOrders
+
+  const toast = useToast();
+
+   
+ useEffect(() => {
     setTheme("light");
-    const storedOrder = localStorage.getItem("selectedOrder");
-    if (storedOrder) {
-      setOrder(JSON.parse(storedOrder));
+
+    if (!userId || !id) {
+      return;
     }
-  }, []);
+
+    const fetchOrderAndGenerateInvoice = async () => {
+      const fetchedOrder = await getOrderFromFirestore(userId, id);
+
+      if (fetchedOrder) {
+        if (!fetchedOrder.invoiceNumber) {
+          try {
+            // ✅ Use the new transaction-based function
+            const newInvoiceNumber = await generateUniqueInvoiceNumber(userId);
+
+            // Update the order in Firestore and the local state
+            await updateOrder(userId, id, { invoiceNumber: newInvoiceNumber });
+            
+            // Get the updated order from the store for local display
+            const updatedOrderFromStore = allOrders.find(o => o.id === id);
+            setOrder(updatedOrderFromStore);
+            
+
+          } catch (error) {
+            console.error("Failed to generate or update invoice number:", error);
+           
+          }
+        } else {
+          setOrder(fetchedOrder);
+        }
+      }
+    };
+
+    const foundInStore = allOrders.find(o => o.id === id);
+    if (foundInStore && foundInStore.invoiceNumber) {
+      setOrder(foundInStore);
+    } else {
+      fetchOrderAndGenerateInvoice();
+    }
+  }, [id, userId, allOrders, toast, setTheme, updateOrder]);
 
   const handleSendInvoice = async () => {
     if (!invoiceRef.current || !order) return;
