@@ -9,6 +9,7 @@ export async function GET(
   console.log("Params received:", params);
   try {
     const { shareKey } = params;
+    console.log("Share Key:", shareKey)
 
     if (!shareKey) {
       return NextResponse.json({ success: false, message: "Missing share key" }, { status: 400 });

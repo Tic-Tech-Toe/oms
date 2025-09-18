@@ -13,6 +13,8 @@ import { uniqueId } from 'lodash';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/app/config/firebase';
 
+import {getFunctions, httpsCallable} from 'firebase/functions';
+
 import { nanoid } from 'nanoid';
 
 type Props = {
@@ -41,78 +43,91 @@ export default function SendTrackingDialog({
   const { updateOrder: updateOrde } = useOrderStore();
 
 const handleSend = async () => {
-  if (!trackingLink || !eta) {
-    toast({ description: "⚠️ Please enter both tracking link and select ETA." });
-    return;
-  }
-  if (!userId) {
-    toast({ description: "❌ User not authenticated." });
-    return;
-  }
-
-  setLoading(true);
-  try {
-    // 1. Fetch the current order to check for an existing shareKey
-    const docRef = doc(db, 'users', userId, 'orders', orderId);
-    const docSnap = await getDoc(docRef);
-
-    if (!docSnap.exists()) {
-      toast({ description: "❌ Order not found." });
-      setLoading(false);
-      return;
+    if (!trackingLink || !eta) {
+        toast({ description: "⚠️ Please enter both tracking link and select ETA." });
+        return;
     }
-    
-    const currentOrder = docSnap.data();
-    let shareKey = currentOrder.shareKey;
-
-    // 2. If no shareKey exists, generate a new one
-    if (!shareKey) {
-      shareKey = nanoid(); // Use a reliable library like nanoid for unique IDs
+    if (!userId) {
+        toast({ description: "❌ User not authenticated." });
+        return;
     }
 
-    // 3. Update the order with tracking link, ETA, and the shareKey
-    const updatedData = {
-      trackingLink,
-      estimatedDeliveryDate: eta,
-      shareKey, // Add or update the shareKey
-    };
-    await updateOrde(userId, orderId, updatedData);
+    setLoading(true);
 
-    // 4. (Optional) Construct the public link
-    const publicLink = `/${shareKey}`;
-    console.log("Public Share Link:", publicLink);
-    
-    // Send WhatsApp message with the public link
-    // You can uncomment the following code and pass `publicLink` in the body
-    const res = await fetch("/api/send-track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customerName,
-        phoneNumber,
-        orderId,
-        eta,
-        publicLink, // Pass the new public link
-      }),
-    });
+    try {
+        // 1. Fetch the order to get or generate the shareKey
+        const docRef = doc(db, 'users', userId, 'orders', orderId);
+        const docSnap = await getDoc(docRef);
 
-    const data = await res.json();
-     if (data.success) {
-        toast({ title: "Tracking Link Sent",description: "✅ Tracking link sent via WhatsApp!" });
-        setTrackingLink('');
-        setEta('');
-        onClose();
-      } else {
-        toast({ description: data.message || "❌ Failed to send tracking link." });
-      }
+        if (!docSnap.exists()) {
+            toast({ description: "❌ Order not found." });
+            setLoading(false);
+            return;
+        }
+
+        const currentOrder = docSnap.data();
+        let shareKey = currentOrder.shareKey;
+        
+        // Use a flag to track if we need to create a new public order document
+        let createNewPublicOrder = false;
+
+        if (!shareKey) {
+            toast({ title: "Public Order", description: "🔍 Looking for public order... Not found." });
+            shareKey = nanoid();
+            createNewPublicOrder = true;
+            toast({ title: "Public Order", description: "✨ Creating new public order." });
+        } else {
+            toast({ title: "Public Order", description: "✅ Public order found." });
+        }
+
+        // 2. Call the Cloud Function to update/create the public order record
+        if (createNewPublicOrder) {
+            const functions = getFunctions();
+            const createPublicOrder = httpsCallable(functions, 'createPublicOrder');
+            await createPublicOrder({ userId, orderId, shareKey });
+            toast({ title: "Public Order", description: "✅ Public order created successfully." });
+        }
+
+        // 3. Update the main order with tracking info and the shareKey
+        const updatedData = {
+            trackingLink,
+            estimatedDeliveryDate: eta,
+            shareKey,
+        };
+        await updateOrde(userId, orderId, updatedData);
+        
+        // 4. Construct the public link and send the WhatsApp message
+        const publicLink = `/${shareKey}`;
+        
+        const res = await fetch("/api/send-track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                customerName,
+                phoneNumber,
+                orderId,
+                eta,
+                publicLink,
+            }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            toast({ title: "Tracking Link Sent", description: "✅ Tracking link sent via WhatsApp!" });
+            setTrackingLink('');
+            setEta('');
+            onClose();
+        } else {
+            toast({ description: data.message || "❌ Failed to send tracking link." });
+        }
     } catch (err) {
-      console.error(err);
-      toast({ description: "❌ Something went wrong." });
+        console.error(err);
+        toast({ description: "❌ Something went wrong." });
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  
 };
+
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
