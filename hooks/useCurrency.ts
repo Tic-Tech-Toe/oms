@@ -1,14 +1,9 @@
-
-export const useCurrency = function(num:any){
-    return (new Intl.NumberFormat("en-IN",{
+export const useCurrency = function(num:any) {
+    const formatted = new Intl.NumberFormat("en-IN", {
         style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 2
-    }).format(num))
-}
+        currency: "INR",
+        minimumFractionDigits: 2
+    }).format(num);
 
-// new Intl.NumberFormat("en-IN", {
-//     style: "currency",
-//     currency: "INR",
-//     minimumFractionDigits: 2
-// }).format(allOrders.reduce((sum, order) => sum + order.totalAmount, 0))
+    return formatted.replace("₹", "₹ ");
+};

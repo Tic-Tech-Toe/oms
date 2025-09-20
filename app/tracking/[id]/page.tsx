@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { OrderType } from "@/types/orderType";
 import { format } from "date-fns";
 import { Truck } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export default function TrackingPage() {
   const { id } = useParams();
@@ -123,7 +124,7 @@ export default function TrackingPage() {
 
         <div className="mt-4">
           <a
-            href={order?.trackingLink || "https://bluedart.com/tracking"}
+            href={order?.trackingLink?.startsWith('http') ? order.trackingLink : `https://${order.trackingLink}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full block text-center px-4 py-2 rounded-xl bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
@@ -171,7 +172,7 @@ export default function TrackingPage() {
                 {item.itemName} × {item.quantity}
               </span>
               <span className="font-medium">
-                ₹{item.total.toLocaleString()}
+                {useCurrency(item.total)}
               </span>
             </div>
           ))}
@@ -179,7 +180,7 @@ export default function TrackingPage() {
         <Separator className="my-4" />
         <div className="flex justify-between font-semibold text-sm">
           <span>Total:</span>
-          <span>₹{order.totalAmount.toLocaleString()}</span>
+          <span>{useCurrency(order.totalAmount)}</span>
         </div>
       </div>
 

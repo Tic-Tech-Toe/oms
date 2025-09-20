@@ -47,27 +47,27 @@ export const columns = ({
   showInvoice: boolean;
   toggleInvoiceVisibility: () => void;
 }): ColumnDef<OrderType>[] => [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="pl-4">
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="pl-4">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <div className="pl-4">
+  //       <Checkbox
+  //         checked={table.getIsAllPageRowsSelected()}
+  //         onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+  //       />
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="pl-4">
+  //       <Checkbox
+  //         checked={row.getIsSelected()}
+  //         onCheckedChange={(v) => row.toggleSelected(!!v)}
+  //       />
+  //     </div>
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
 
   // Order ID or Invoice
   {
@@ -158,7 +158,7 @@ export const columns = ({
     cell: ({ row }) => {
       const orderDate = row.original.orderDate;
       const formatDate = orderDate
-        ? format(new Date(orderDate), "dd/MM/yy")
+        ? format(new Date(orderDate), "dd/MM/yy hh:mm a")
         : "N/A";
       return <span className="text-center ml-4">{formatDate}</span>;
     },

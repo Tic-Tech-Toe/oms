@@ -24,6 +24,7 @@ import ShoppingBagDialog from "@/components/ShoppingBagDialog";
 import { ItemType } from "@/types/orderType";
 import { motion, AnimatePresence } from "motion/react";
 import { useCartStore } from "@/hooks/zustand_stores/useCartStateStore";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface CartEntry {
   itemId: string;
@@ -201,6 +202,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                 />
                 {query && (
                   <button
+                    type="button"
                     onClick={() => {
                       setQuery("");
                       setFilteredItems(inventory);
@@ -251,11 +253,11 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                                 {product.name}
                               </span>
                               <div className="text-xs text-gray-500">
-                                ₹{product.price} · Stock: {product.quantity}
+                                {useCurrency(product.price)} · Stock: {product.quantity}
                               </div>
                               {currentQty > 0 && (
                                 <div className="text-xs text-green-600 font-medium">
-                                  Total: ₹{product.price * currentQty}
+                                  Total: {useCurrency(product.price * currentQty)}
                                 </div>
                               )}
                             </div>
@@ -268,6 +270,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                                   animate={{ scale: 1, opacity: 1 }}
                                   exit={{ scale: 0.8, opacity: 0 }}
                                   transition={{ duration: 0.2 }}
+                                  type="button"
                                   onClick={() => handleQtyChange(product, 1)}
                                   className="px-4 py-2 border-2 border-light-primary text-light-primary rounded-full text-sm font-semibold shadow-md hover:scale-105 transition-transform"
                                 >
@@ -284,6 +287,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                                 >
                                   {/* Minus button */}
                                   <motion.button
+                                    type="button"
                                     whileTap={{ scale: 0.8 }}
                                     onClick={() =>
                                       handleQtyChange(product, currentQty - 1)
@@ -311,6 +315,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                                     onClick={() =>
                                       handleQtyChange(product, currentQty + 1)
                                     }
+                                    type="button"
                                     className="w-8 h-8 flex items-center justify-center rounded-full bg-green-500 text-white shadow hover:bg-green-600 transition"
                                   >
                                     <Plus size={16} />
@@ -341,6 +346,7 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                 </span>
               </div>
               <button
+                type="button"
                 onClick={clearCart}
                 className="flex items-center gap-1 text-xs px-2 py-1 border border-red-400 text-red-600 rounded-md hover:bg-red-50"
               >

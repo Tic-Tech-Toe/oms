@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, X } from "lucide-react";
 
 // Import PDF-lib
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument } from "pdf-lib";
 
 export default function InvoicePage() {
   const { id } = useParams();
@@ -35,6 +35,8 @@ export default function InvoicePage() {
 
   const { setTheme } = useTheme();
   const userId = auth.currentUser?.uid;
+  // const companyAddress = auth.currentUser?.company;
+  console.log("Current user",auth.currentUser);
 
   const { allOrders, updateOrder } = useOrderStore();
   const toast = useToast();
@@ -58,7 +60,10 @@ export default function InvoicePage() {
             const updatedOrderFromStore = allOrders.find((o) => o.id === id);
             setOrder(updatedOrderFromStore);
           } catch (error) {
-            console.error("Failed to generate or update invoice number:", error);
+            console.error(
+              "Failed to generate or update invoice number:",
+              error
+            );
           }
         } else {
           setOrder(fetchedOrder);
@@ -79,25 +84,25 @@ export default function InvoicePage() {
     const imgBytes = await file.arrayBuffer();
 
     let embeddedImage;
-    if (file.type === 'image/jpeg') {
-        embeddedImage = await pdfDoc.embedJpg(imgBytes);
-    } else if (file.type === 'image/png') {
-        embeddedImage = await pdfDoc.embedPng(imgBytes);
+    if (file.type === "image/jpeg") {
+      embeddedImage = await pdfDoc.embedJpg(imgBytes);
+    } else if (file.type === "image/png") {
+      embeddedImage = await pdfDoc.embedPng(imgBytes);
     } else {
-        throw new Error("Unsupported image format.");
+      throw new Error("Unsupported image format.");
     }
 
     const size = embeddedImage.size();
     const page = pdfDoc.addPage([size.width, size.height]);
     page.drawImage(embeddedImage, {
-        x: 0,
-        y: 0,
-        width: size.width,
-        height: size.height,
+      x: 0,
+      y: 0,
+      width: size.width,
+      height: size.height,
     });
-    
+
     const pdfBytes = await pdfDoc.save();
-    return new Blob([pdfBytes], { type: 'application/pdf' });
+    return new Blob([pdfBytes], { type: "application/pdf" });
   };
 
   const handleSendInvoice = async () => {
@@ -128,7 +133,10 @@ export default function InvoicePage() {
       if (uploadedFile.type.startsWith("image/")) {
         try {
           fileToSend = await convertImageToPdf(uploadedFile);
-          const originalName = uploadedFile.name.split('.').slice(0, -1).join('.');
+          const originalName = uploadedFile.name
+            .split(".")
+            .slice(0, -1)
+            .join(".");
           fileName = `${originalName}.pdf`;
         } catch (err) {
           console.error("Failed to convert image to PDF:", err);
@@ -196,7 +204,10 @@ export default function InvoicePage() {
           const url = URL.createObjectURL(pdfBlob);
           const link = document.createElement("a");
           link.href = url;
-          const originalName = uploadedFile.name.split('.').slice(0, -1).join('.');
+          const originalName = uploadedFile.name
+            .split(".")
+            .slice(0, -1)
+            .join(".");
           link.download = `${originalName}.pdf`;
           document.body.appendChild(link);
           link.click();
@@ -289,7 +300,8 @@ export default function InvoicePage() {
           />
           <Upload size={32} className="w-10 h-10 mb-3 text-gray-400" />
           <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-            <span className="font-semibold">Click to upload</span> or drag and drop
+            <span className="font-semibold">Click to upload</span> or drag and
+            drop
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             PDF or Image (JPG, PNG)
@@ -297,18 +309,19 @@ export default function InvoicePage() {
           {uploadedFile && (
             <p className="mt-2 text-sm text-green-600">
               File selected: {uploadedFile.name}
-              {uploadedFile.type.startsWith("image/") && " (Will be converted to PDF)"}
+              {uploadedFile.type.startsWith("image/") &&
+                " (Will be converted to PDF)"}
             </p>
           )}
         </div>
       </div>
 
-     <Button
-  onClick={handleGenerateInvoice}
-  className="mb-4 rounded-xl px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg w-full shadow-md hover:shadow-lg transition-all duration-300"
->
-  Generate Invoice
-</Button>
+      <Button
+        onClick={handleGenerateInvoice}
+        className="mb-4 rounded-xl px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg w-full shadow-md hover:shadow-lg transition-all duration-300"
+      >
+        Generate Invoice
+      </Button>
 
       {/* Popover warning */}
       {showOverrideWarning && (
@@ -316,7 +329,10 @@ export default function InvoicePage() {
           <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold">Override Warning</h3>
-              <button onClick={handleWarningReject} className="text-gray-500 hover:text-gray-700">
+              <button
+                onClick={handleWarningReject}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -331,15 +347,25 @@ export default function InvoicePage() {
                 onChange={(e) => setDontRemind(e.target.checked)}
                 className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
               />
-              <label htmlFor="dontRemind" className="ml-2 text-sm text-gray-700 dark:text-gray-400">
+              <label
+                htmlFor="dontRemind"
+                className="ml-2 text-sm text-gray-700 dark:text-gray-400"
+              >
                 Don't remind me for this session
               </label>
             </div>
             <div className="flex justify-end gap-2">
-              <Button onClick={handleWarningReject} variant="outline" className="border-gray-300 hover:bg-gray-100">
+              <Button
+                onClick={handleWarningReject}
+                variant="outline"
+                className="border-gray-300 hover:bg-gray-100"
+              >
                 Reject
               </Button>
-              <Button onClick={handleWarningAccept} className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Button
+                onClick={handleWarningAccept}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
                 Accept
               </Button>
             </div>
@@ -354,9 +380,12 @@ export default function InvoicePage() {
         >
           <div className="flex flex-col sm:flex-row justify-between items-start mb-6 sm:mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Invoice</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Invoice
+              </h1>
               <p className="text-sm text-gray-500">
-                Invoice No: {order.invoiceNumber || `INV-${order.id.slice(0, 6)}`}
+                Invoice No:{" "}
+                {order.invoiceNumber || `INV-${order.id.slice(0, 6)}`}
               </p>
               <p className="text-sm text-gray-500">
                 Date: {format(new Date(order.orderDate), "dd MMM yyyy")}
@@ -367,10 +396,11 @@ export default function InvoicePage() {
           <Separator className="my-6" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <div>
+              {/* {companyAddress} */}
               <h2 className="font-semibold mb-1">From</h2>
-              <p className="text-sm">Your Company Pvt Ltd</p>
-              <p className="text-sm">123 Street, Bangalore</p>
-              <p className="text-sm">support@yourcompany.com</p>
+               <p className="text-sm">{companyAddress}</p>
+               {/* <p className="text-sm">123 Street, Bangalore</p> */}
+               {/* <p className="text-sm">support@yourcompany.com</p> */}
             </div>
             <div>
               <h2 className="font-semibold mb-1">Bill To</h2>
@@ -397,8 +427,12 @@ export default function InvoicePage() {
                   >
                     <td className="p-3">{item.itemName}</td>
                     <td className="p-3 text-center">{item.quantity}</td>
-                    <td className="p-3 text-right">₹{item.price.toLocaleString()}</td>
-                    <td className="p-3 text-right">₹{item.total.toLocaleString()}</td>
+                    <td className="p-3 text-right">
+                      ₹{item.price.toLocaleString()}
+                    </td>
+                    <td className="p-3 text-right">
+                      ₹{item.total.toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -470,12 +504,11 @@ export default function InvoicePage() {
               <line x1="16" y1="17" x2="8" y2="17" />
               <line x1="10" y1="9" x2="8" y2="9" />
             </svg>
-            <p className="text-lg font-semibold">
-              File ready to be sent:
-            </p>
+            <p className="text-lg font-semibold">File ready to be sent:</p>
             <p className="text-md text-green-700 font-medium">
               {uploadedFile.name}
-              {uploadedFile.type.startsWith("image/") && " (Will be converted to PDF)"}
+              {uploadedFile.type.startsWith("image/") &&
+                " (Will be converted to PDF)"}
             </p>
           </div>
         )

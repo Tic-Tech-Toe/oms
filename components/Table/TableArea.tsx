@@ -41,7 +41,12 @@ interface TableAreaProps {
 
 const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
   const router = useRouter();
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+  {
+    id: "orderDate",
+    desc: true,
+  },
+]);
   const [activeTab, setActiveTab] = useState("all");
   const [pagination, setPagination] = useState<PaginationType>({
     pageIndex: 0,
@@ -135,12 +140,12 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
             placeholder="Search by order ID, customer, or invoice"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="max-w-sm rounded-full"
+            className="max-w-sm rounded-full border-2 border-light-primary"
           />
-          <Button className="rounded-full">
-            <Filter className="h-4 w-4 mr-2" />
+          {/* <Button className="rounded-full border-2 border-light-primary text-light-primary">
+            <Filter className="h-4 w-4 mr-1" />
             Filter
-          </Button>
+          </Button> */}
         </div>
 
         {/* Tabs and Add Order button */}

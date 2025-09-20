@@ -27,6 +27,7 @@ import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
 import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
 import { addCustomer, getCustomers } from "@/utils/customer/getFirestoreCustomers";
 import { ItemType, OrderItem, OrderType } from "@/types/orderType";
+import { useCurrency } from "@/hooks/useCurrency";
 
 type FormData = z.infer<typeof AddOrderSchema>;
 
@@ -218,7 +219,7 @@ const OrderDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) 
                     className="flex justify-between text-sm border-b pb-2 last:border-none last:pb-0"
                   >
                     <span>{item.name} × {item.qty}</span>
-                    <span>₹{item.total}</span>
+                    <span>{useCurrency(item.total)}</span>
                   </div>
                 ))
               ) : (
@@ -228,7 +229,7 @@ const OrderDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) 
             <Separator className="my-4" />
             <div className="flex justify-between font-semibold text-base">
               <span>Total</span>
-              <span>₹{total}</span>
+              <span>{useCurrency(total)}</span>
             </div>
           </div>
         </div>
