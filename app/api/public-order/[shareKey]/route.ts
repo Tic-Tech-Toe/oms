@@ -6,9 +6,10 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { shareKey: string } }
 ) {
-  console.log("Params received:", params);
   try {
     const { shareKey } = params;
+    console.log("Share key:", shareKey, typeof shareKey);
+
 
     if (!shareKey) {
       return NextResponse.json({ success: false, message: "Missing share key" }, { status: 400 });
@@ -17,7 +18,7 @@ export async function GET(
     // 🔎 Fetch the order using the shareKey
     const snapshot = await adminDb
       .collectionGroup("orders")
-      .where("shareKey", "==", shareKey)
+      .where("shareKey","==", shareKey)
       .get();
 
     if (snapshot.empty) {
