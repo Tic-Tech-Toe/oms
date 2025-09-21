@@ -12,11 +12,11 @@ import { db } from "@/app/config/firebase";
 // OrderAppState Interface
 // ==============================
 interface OrderAppState {
-  allOrders: OrderType[];                        // All orders loaded from Firestore
-  selectedOrder: OrderType | null;              // Currently selected order for viewing/editing
-  tempOrderData: OrderType | null;              // 🆕 Temporary order data before confirmation
-  isLoading: boolean;                           // Loading state for async operations
-  openEditDialog: boolean;                      // Controls edit modal/dialog visibility
+  allOrders: OrderType[]; // All orders loaded from Firestore
+  selectedOrder: OrderType | null; // Currently selected order for viewing/editing
+  tempOrderData: OrderType | null; // 🆕 Temporary order data before confirmation
+  isLoading: boolean; // Loading state for async operations
+  openEditDialog: boolean; // Controls edit modal/dialog visibility
 
   setSelectedOrder: (order: OrderType | null) => void;
   setTempOrderData: (order: OrderType | null) => void; // 🆕 Setter for temp order
@@ -43,7 +43,7 @@ interface OrderAppState {
 export const useOrderStore = create<OrderAppState>((set, get) => ({
   allOrders: [],
   selectedOrder: null,
-  tempOrderData: null,               // 🆕 Initialize tempOrderData
+  tempOrderData: null, // 🆕 Initialize tempOrderData
   isLoading: false,
   openEditDialog: false,
 
@@ -110,7 +110,7 @@ export const useOrderStore = create<OrderAppState>((set, get) => ({
     // Sync changes to Firestore
     try {
       await updateOrderInFirestore(userId, orderId, updatedFields);
-      console.log("✅ Firestore order update complete");
+      //console.log("✅ Firestore order update complete");
     } catch (error) {
       console.error("🔥 Failed to update order in Firestore:", error);
     }

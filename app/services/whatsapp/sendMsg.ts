@@ -7,7 +7,7 @@ export async function sendMessage(
   const wtPhoneID = process.env.WHATSAPP_PHONE_ID;
   const url = `https://graph.facebook.com/v21.0/${wtPhoneID}/messages`;
 
-  console.log("Template",templateName, "Phone : ", phoneNumber)
+  //console.log("Template",templateName, "Phone : ", phoneNumber)
   const data = JSON.stringify({
     messaging_product: "whatsapp",
     to: phoneNumber,
@@ -85,7 +85,6 @@ export async function sendOrderProcessingMessage(
   return sendMessage(phoneNumber, messageBody, "order_processing");
 }
 
-
 export async function sendPaymentReminderMsg(
   phoneNumber: string,
   customerName: string,
@@ -95,7 +94,14 @@ export async function sendPaymentReminderMsg(
   paidAmount: string,
   totalAmount: string
 ) {
-  const messageBody = [customerName, amountDue, invoiceId, dueDate, paidAmount, totalAmount];
+  const messageBody = [
+    customerName,
+    amountDue,
+    invoiceId,
+    dueDate,
+    paidAmount,
+    totalAmount,
+  ];
   return sendMessage(phoneNumber, messageBody, "payment_reminder_3");
 }
 
@@ -105,10 +111,14 @@ export async function sendPaymentReceived(
   amount: string,
   orderId: string,
   earnedRewardPoint: string,
-  newRewardPoint: string,
-){
-  const messageBody = [customerName, amount, orderId, earnedRewardPoint, newRewardPoint]
-  return sendMessage(phoneNumber,messageBody,"payment_confirmation_2")
+  newRewardPoint: string
+) {
+  const messageBody = [
+    customerName,
+    amount,
+    orderId,
+    earnedRewardPoint,
+    newRewardPoint,
+  ];
+  return sendMessage(phoneNumber, messageBody, "payment_confirmation_2");
 }
-
-

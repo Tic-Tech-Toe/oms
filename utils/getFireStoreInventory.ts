@@ -1,6 +1,11 @@
 import { db } from "@/app/config/firebase";
 import { ItemType } from "@/types/orderType";
-import { addDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export const getItems = async (userId: string): Promise<ItemType[]> => {
   try {
@@ -30,7 +35,7 @@ export const addItem = async (
       createdAt: serverTimestamp(),
     });
 
-    console.log("Item added successfully!");
+    //console.log("Item added successfully!");
   } catch (error: any) {
     console.error("Error adding item:", error.message, error.code, error);
     throw error;

@@ -17,8 +17,8 @@ export type ToastProps = {
   onOpenChange?: (open: boolean) => void
 }
 
-const TOAST_LIMIT = 3
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 3000
 // const TOAST_REMOVE_DELAY = 10000000000000000000
 
 type ToasterToast = ToastProps & {

@@ -22,7 +22,7 @@ const CustomerNameField = ({
   const [nameSuggestions, setNameSuggestions] = useState([]);
   const [userId, setUserId] = useState<string | null>(null);
   // const [customers, setCustomers] = useState();
-  // console.log(customers);
+  // //console.log(customers);
 
   const {
     register,

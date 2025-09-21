@@ -6,11 +6,11 @@ import { useCurrency } from "@/hooks/useCurrency";
 
 export async function handleSendPaymentReminder(order, dueDate) {
   const user = await fetchUserData(auth?.currentUser);
-  // console.log(user.uid)
+  // //console.log(user.uid)
   const { rewardPercentage } = user;
 
   if (!order) {
-    console.log("Order data is missing.");
+    //console.log("Order data is missing.");
     return;
   }
 
@@ -22,20 +22,20 @@ export async function handleSendPaymentReminder(order, dueDate) {
 
   const getCustomerById = useCustomerStore.getState().getCustomerById;
   const customer = await getCustomerById(user?.uid, order.customer.id);
-  // console.log(customer)
+  // //console.log(customer)
   const rewardPoint = customer?.rewardPoint ?? 0;
   const rewardEarned = (order.totalAmount / 100) * (rewardPercentage ?? 10);
 
   const messageBody = [
     customer?.name || "Customer",
-    `${ order.totalAmount.toFixed(2)  - (order?.payment?.totalPaid || 0)}`,
+    `${order.totalAmount.toFixed(2) - (order?.payment?.totalPaid || 0)}`,
     order.invoiceNumber || order.id,
     dueDate || "N/A",
     `${rewardEarned}`,
     `${rewardPoint}`,
   ];
 
-  // console.log(messageBody)
+  // //console.log(messageBody)
 
   try {
     const res = await fetch("/api/payment-reminder", {

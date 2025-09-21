@@ -21,12 +21,14 @@ import { useToast } from "@/hooks/use-toast";
 // Schema
 const AddItemSchema = z.object({
   name: z.string().min(1, "Item name is required"),
-  price: z.number().min(0.01, "Price must be greater than zero"),
+  cPrice: z.number().min(0.01, "Cost Price must be > 0"),
+  sPrice: z.number().min(0.01, "Selling Price must be > 0"),
   quantity: z.number().min(1, "Quantity must be at least 1"),
   itemImage: z.string().optional(),
   sku: z.string().optional(),
   category: z.string().optional(),
 });
+
 
 type FormData = z.infer<typeof AddItemSchema>;
 
@@ -56,6 +58,7 @@ export default function AddItemDialog({
       itemId: crypto.randomUUID(),
       ...data,
     };
+    // alert("Addign Item")
 
     onAdd(itemWithId);
     toast({
@@ -87,16 +90,20 @@ export default function AddItemDialog({
             className="space-y-4 mt-4"
           >
             <FloatingInput name="name" label="Item Name" required />
-            <FloatingInput name="price" label="Price" type="number" step="0.01" required />
+            <div className="flex gap-4 items-center">
+
+            <FloatingInput name="cPrice" label="Cost Price" type="number" step="0.01" required />
+            <FloatingInput name="sPrice" label="Selling Price" type="number" step="0.01" required />
+            </div>
             <FloatingInput
               name="quantity"
               label="Quantity"
               type="number"
               required
             />
-            <FloatingInput name="sku" label="SKU" />
-            <FloatingInput name="category" label="Category" />
-            <FloatingInput name="itemImage" label="Image URL" />
+            {/* <FloatingInput name="sku" label="SKU" /> */}
+            {/* <FloatingInput name="category" label="Category" /> */}
+            {/* <FloatingInput name="itemImage" label="Image URL" /> */}
 
             <DialogFooter className="mt-6 flex justify-between items-center">
               <Button
@@ -109,7 +116,7 @@ export default function AddItemDialog({
               </Button>
               <Button
                 type="submit"
-                className="h-10 px-6 bg-black text-white rounded-md hover:scale-[1.02]"
+                className="h-10 px-6 bg-light-primary text-white rounded-lg hover:scale-[1.02]"
               >
                 Save
               </Button>

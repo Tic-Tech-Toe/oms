@@ -48,10 +48,7 @@ const FooterComponent = ({
         {/* Button One: Regular button */}
         <Button
           onClick={() => onButtonOneClick?.()}
-          disabled={isDisabled}
-          className={`border-purple-700 border-2 text-purple-500 hover:bg-purple-800 hover:text-white rounded-xl ${
-            isDisabled ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`border-purple-700 border-2 text-purple-500 hover:bg-purple-800 hover:text-white rounded-xl `}
         >
           {buttonOneLabel}
         </Button>

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Generate password reset link
     const resetLink = await auth.generatePasswordResetLink(request.email);
-    console.log(request.email);
+    //console.log(request.email);
     // 3. Send email with reset link
     await sendPasswordSetupEmail({
       email: request.email,

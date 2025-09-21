@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import AddCustomerByCSV from "@/components/AddCustomerByCSV";
 
 export default function People() {
   const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(
@@ -51,6 +52,7 @@ export default function People() {
     const user = auth.currentUser;
     if (!user) return;
     try {
+      // alert("Adding customer...");
       await addCustomer(user.uid, customerData);
       toast({ title: "Customer added!" });
     } catch {
@@ -113,7 +115,10 @@ export default function People() {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">People</h1>
             <p className="text-gray-500 text-sm">Your customer directory</p>
           </div>
+          <div className="flex gap-2 items-center">
+            <AddCustomerByCSV handleAddCustomer = {handleAddCustomer} />
           <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
+          </div>
         </div>
 
         {/* Search */}

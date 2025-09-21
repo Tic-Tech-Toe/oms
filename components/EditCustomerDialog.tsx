@@ -53,6 +53,7 @@ export default function EditCustomerDialog({
         <Separator className="my-3" />
 
         <div className="space-y-4 mt-4">
+          <StyledInput label="Reward Point" name="rewardPoint" type="number" value={formData.rewardPoint} onChange={handleChange} />
           <StyledInput label="Full Name" name="name" value={formData.name} onChange={handleChange} required />
           <StyledInput label="WhatsApp Number" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleChange} required />
           <StyledInput label="Email" name="email" value={formData.email || ""} onChange={handleChange} type="email" />

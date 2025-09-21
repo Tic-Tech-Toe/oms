@@ -45,18 +45,20 @@ const ZohoEstimate = ({
         throw new Error(`Error ${res.status}: ${res.statusText}`);
       }
       const data = await res.json();
-      console.log("Zoho Estimate Data:", data);
+      //console.log("Zoho Estimate Data:", data);
 
       // Transform Zoho API response to OrderType
-      const transformedItems: OrderItem[] = data.items.map((item: any, idx: number) => ({
-        itemId: `zoho-${idx}`,
-        quantity: item.quantity,
-        price: item.rate,
-        total: item.rate * item.quantity,
-        sku: "Unknown",
-        category: "Unknown",
-        itemName: item.item_name,
-      }));
+      const transformedItems: OrderItem[] = data.items.map(
+        (item: any, idx: number) => ({
+          itemId: `zoho-${idx}`,
+          quantity: item.quantity,
+          price: item.rate,
+          total: item.rate * item.quantity,
+          sku: "Unknown",
+          category: "Unknown",
+          itemName: item.item_name,
+        })
+      );
 
       const newOrder: OrderType = {
         orderDate: new Date().toISOString(),
@@ -72,9 +74,7 @@ const ZohoEstimate = ({
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        timeline: [
-          { date: new Date().toISOString(), action: "Order placed" },
-        ],
+        timeline: [{ date: new Date().toISOString(), action: "Order placed" }],
         payment: {
           id: `pay-${Date.now()}`,
           orderId: "Dy-zoho",

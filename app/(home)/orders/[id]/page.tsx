@@ -13,7 +13,10 @@ import { getBadgeClass } from "@/utils/statusUtils";
 import { OrderCustomerRel } from "@/components/OrderCustomerRel";
 import FooterComponent from "@/components/FooterComponent";
 import { useToast } from "@/hooks/use-toast";
-import { getOrderFromFirestore, updateOrderInFirestore } from "@/utils/order/getFireStoreOrders";
+import {
+  getOrderFromFirestore,
+  updateOrderInFirestore,
+} from "@/utils/order/getFireStoreOrders";
 import { STATUS_WHATSAPP_CONFIG } from "@/utils/whatsappConfig";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/app/config/firebase";
@@ -25,12 +28,13 @@ import SendTrackingDialog from "@/components/SendTrackingDialog";
 import { set } from "lodash";
 import { Dialog } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import OrderPaymentCollect from "@/components/OrderPaymentCollect";
 
 const OrderDetails = () => {
   const { allOrders, loadOrders } = useOrderStore(); // Ensure you have loadOrders
   const { customers, loadCustomers } = useCustomerStore();
   const { id } = useParams(); // Get the order ID from the URL
-  console.table({"Current Order" : id})
+  //console.table({"Current Order" : id})
 
   const router = useRouter();
   const [order, setOrder] = useState<OrderType | null>(null);
@@ -39,10 +43,13 @@ const OrderDetails = () => {
   const userId = auth.currentUser?.uid;
 
   const [showLinkInp, setShowLinkInp] = useState(false);
+  const [showPaymentCollect, setShowPaymentCollect] = useState(false);
+
+  const [orderEditting, setOrderEditting] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
-    
+
     // Attempt to find the order from the Zustand store first
     const foundOrder = allOrders.find((o) => o.id === id);
 
@@ -60,7 +67,7 @@ const OrderDetails = () => {
 
       fetchOrder();
     }
-    
+
     // Load customers as well
     loadCustomers(userId);
   }, [id, userId, allOrders, loadCustomers]);
@@ -104,7 +111,7 @@ const OrderDetails = () => {
   };
 
   return (
-    <div className="px-4 md:px-10 lg:px-20">
+    <div className="px-4 md:px-10 lg:px-20 mb-8">
       {/* Breadcrumb */}
       <span className="px-2 py-1 font-bold font-mono text-md text-gray-400 ">
         <Link
@@ -114,8 +121,7 @@ const OrderDetails = () => {
         >
           orders
         </Link>
-        <ChevronRight className="inline mx-1" size={14} />
-        #{order.id}
+        <ChevronRight className="inline mx-1" size={14} />#{order.id}
       </span>
 
       {/* Header */}
@@ -132,7 +138,9 @@ const OrderDetails = () => {
               Payment {order.paymentStatus}
             </Badge>
           </div>
-          <p className="text-md font-semibold text-gray-500">{format(new Date(order.orderDate), 'MMM d, yyyy')}</p>
+          <p className="text-md font-semibold text-gray-500">
+            {format(new Date(order.orderDate), "MMM d, yyyy")}
+          </p>
         </div>
       </div>
 
@@ -163,15 +171,17 @@ const OrderDetails = () => {
               onButtonOneClick={() => setShowLinkInp(true)}
               onButtonTwoClick={() => console.log("Update order", order.id)}
             />
-            <SendTrackingDialog
-              orderId={order.id}
-              open={showLinkInp}
-              phoneNumber={order.customer?.whatsappNumber}
-              customerName={order.customer?.name || "Customer"}
-              onClose={() => setShowLinkInp(false)}
-              userId={userId}
-              onOpenChange={setShowLinkInp}
-            />
+            {showLinkInp && (
+              <SendTrackingDialog
+                orderId={order.id}
+                open={showLinkInp}
+                phoneNumber={order.customer?.whatsappNumber}
+                customerName={order.customer?.name || "Customer"}
+                onClose={() => setShowLinkInp(false)}
+                userId={userId}
+                onOpenChange={setShowLinkInp}
+              />
+            )}
           </section>
 
           {/* Payment Info */}
@@ -181,6 +191,13 @@ const OrderDetails = () => {
               Invoice No: {order.invoiceNumber}
             </p>
             <OrderPaymentDetailComponent order={order} />
+            {showPaymentCollect && (
+              <OrderPaymentCollect
+                order={order}
+                setOpen={setShowPaymentCollect}
+                refreshOrders={loadOrders}
+              />
+            )}
             <FooterComponent
               text="Manage payment"
               order={order}
@@ -188,7 +205,7 @@ const OrderDetails = () => {
               buttonOneLabel="Send Invoice"
               buttonTwoLabel="Collect Payment"
               onButtonOneClick={() => handleSendInvoice()}
-              onButtonTwoClick={() => console.log("Collect payment")}
+              onButtonTwoClick={() => setShowPaymentCollect(true)}
             />
           </section>
         </div>

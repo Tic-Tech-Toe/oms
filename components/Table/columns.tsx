@@ -123,7 +123,7 @@ export const columns = ({
     accessorKey: "totalAmount",
     cell: ({ row }) => (
       <span className="font-semibold">
-        ₹ {useCurrency(row.original.totalAmount)}
+        {useCurrency(row.original.totalAmount)}
       </span>
     ),
   },

@@ -5,7 +5,7 @@ import Razorpay from "razorpay";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log("Body:", body);
+    //console.log("Body:", body);
     const { receiptId, amount, customer } = body;
 
     if (!receiptId || !amount || !customer) {
