@@ -22,7 +22,7 @@ const AddCustomerSchema = z.object({
   // id:z.string(),
   name: z.string().min(1, "Full Name is required"),
   whatsappNumber: z.string().min(10, "WhatsApp number is required"),
-  rewardPoint:z.number(),
+  rewardPoint: z.number(),
   email: z.string().email().optional(),
   phoneNumber: z.string().optional(),
   alternatePhoneNumber: z.string().optional(),
@@ -60,7 +60,7 @@ export default function AddCustomerDialog({
   };
 
   const onSubmit = (data: FormData) => {
-    console.log("Customer form data:", data);
+    //console.log("Customer form data:", data);
     onSubmitCustomer(data);
     handleDialogClose();
   };
@@ -76,15 +76,26 @@ export default function AddCustomerDialog({
 
       <DialogContent className="p-6  border border-zinc-300/20 dark:border-white/10 shadow-2xl rounded-xl max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent scrollbar-thumb-rounded-full">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Add Customer</DialogTitle>
-          <DialogDescription>Fill the details below to add a customer</DialogDescription>
+          <DialogTitle className="text-xl font-semibold">
+            Add Customer
+          </DialogTitle>
+          <DialogDescription>
+            Fill the details below to add a customer
+          </DialogDescription>
         </DialogHeader>
         <Separator className="my-3" />
 
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form
+            onSubmit={methods.handleSubmit(onSubmit)}
+            className="space-y-4 mt-4"
+          >
             <FloatingInput label="Full Name" name="name" required />
-            <FloatingInput label="WhatsApp Number" name="whatsappNumber" required />
+            <FloatingInput
+              label="WhatsApp Number"
+              name="whatsappNumber"
+              required
+            />
             <FloatingInput label="Email" name="email" type="email" />
             {/* <FloatingInput label="Phone Number" name="phoneNumber" /> */}
             {/* <FloatingInput label="Alternate Phone" name="alternatePhoneNumber" /> */}
@@ -100,7 +111,10 @@ export default function AddCustomerDialog({
               >
                 <X className="w-5 h-5" />
               </Button>
-              <Button type="submit" className="h-10 px-6 bg-black text-white rounded-md hover:scale-[1.02]">
+              <Button
+                type="submit"
+                className="h-10 px-6 bg-black text-white rounded-md hover:scale-[1.02]"
+              >
                 Save
               </Button>
             </DialogFooter>
@@ -114,42 +128,38 @@ export default function AddCustomerDialog({
 import { useFormContext } from "react-hook-form";
 
 function FloatingInput({
-    label,
-    name,
-    type = "text",
-    required = false,
-  }: {
-    label: string;
-    name: keyof FormData;
-    type?: string;
-    required?: boolean;
-  }) {
-    const {
-      register,
-      formState: { errors },
-    } = useFormContext<FormData>();
-  
-    return (
-      <div className="relative w-full flex flex-col gap-2">
-        <label
-          htmlFor={name}
-          className="text-slate-600 text-sm font-medium"
-        >
-          {label}
-        </label>
-        <input
-          {...register(name)}
-          type={type}
-          placeholder="Enter..."
-          required={required}
-          className="h-11 px-3 rounded-xl text-sm  border  shadow-none outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus focus:border-black transition-all"
-        />
-        {errors[name] && (
-          <p className="text-xs text-red-500 mt-1">
-            {(errors[name]?.message as string) || ""}
-          </p>
-        )}
-      </div>
-    );
-  }
-  
+  label,
+  name,
+  type = "text",
+  required = false,
+}: {
+  label: string;
+  name: keyof FormData;
+  type?: string;
+  required?: boolean;
+}) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<FormData>();
+
+  return (
+    <div className="relative w-full flex flex-col gap-2">
+      <label htmlFor={name} className="text-slate-600 text-sm font-medium">
+        {label}
+      </label>
+      <input
+        {...register(name)}
+        type={type}
+        placeholder="Enter..."
+        required={required}
+        className="h-11 px-3 rounded-xl text-sm  border  shadow-none outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus focus:border-black transition-all"
+      />
+      {errors[name] && (
+        <p className="text-xs text-red-500 mt-1">
+          {(errors[name]?.message as string) || ""}
+        </p>
+      )}
+    </div>
+  );
+}

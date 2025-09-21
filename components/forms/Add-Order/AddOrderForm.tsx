@@ -44,7 +44,7 @@ const AddOrderForm = <T extends FieldValues>({
 
   const handleFormSubmit: SubmitHandler<T> = (data) => {
     // Log only the form data here
-    console.log("Form Data:", data);
+    //console.log("Form Data:", data);
 
     // You can then use the form data for any further processing, such as creating an order
     // Example (optional for logging order generation):
@@ -66,7 +66,7 @@ const AddOrderForm = <T extends FieldValues>({
     };
 
     // You can log the order if needed
-    console.log("New Order Object:", newOrder);
+    //console.log("New Order Object:", newOrder);
 
     // Call the parent component's onSubmit function
     onSubmit(newOrder);

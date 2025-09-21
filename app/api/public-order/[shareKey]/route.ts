@@ -8,21 +8,26 @@ export async function GET(
 ) {
   try {
     const { shareKey } = params;
-    console.log("Share key:", shareKey, typeof shareKey);
-
+    //console.log("Share key:", shareKey, typeof shareKey);
 
     if (!shareKey) {
-      return NextResponse.json({ success: false, message: "Missing share key" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Missing share key" },
+        { status: 400 }
+      );
     }
 
     // 🔎 Fetch the order using the shareKey
     const snapshot = await adminDb
       .collectionGroup("orders")
-      .where("shareKey","==", shareKey)
+      .where("shareKey", "==", shareKey)
       .get();
 
     if (snapshot.empty) {
-      return NextResponse.json({ success: false, message: "Order not found or not public" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Order not found or not public" },
+        { status: 404 }
+      );
     }
 
     const doc = snapshot.docs[0];
@@ -48,6 +53,9 @@ export async function GET(
     });
   } catch (err) {
     console.error("Public order fetch error:", err);
-    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

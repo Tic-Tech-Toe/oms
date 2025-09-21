@@ -3,13 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { ArrowRightCircle, CalendarSearchIcon } from "lucide-react";
@@ -38,19 +32,25 @@ const DateTimePicker = ({ onConfirm }: Props) => {
   });
 
   function onSubmit(values: FormSchemaType) {
-    const formattedDate = format(values.dateTime, "EEE, MMM d yyyy, 'at' HH:mm");
+    const formattedDate = format(
+      values.dateTime,
+      "EEE, MMM d yyyy, 'at' HH:mm"
+    );
     // setDeliveryWindow(formattedDate); // Send formatted date to parent component
-    onConfirm(formattedDate)
+    onConfirm(formattedDate);
     setOpen(false); // Close the popover
     // onClose?.(); // Close the dialog
 
     // Optionally log the result or perform additional actions
-    console.log(formattedDate);
+    //console.log(formattedDate);
   }
 
   return (
     <Form {...dateTimeForm}>
-      <form onSubmit={dateTimeForm.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={dateTimeForm.handleSubmit(onSubmit)}
+        className="space-y-8"
+      >
         <FormField
           control={dateTimeForm.control}
           name="dateTime"
@@ -87,9 +87,13 @@ const DateTimePicker = ({ onConfirm }: Props) => {
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={(date) => { field.onChange(date); setDateFlag(true); }}
-
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          setDateFlag(true);
+                        }}
+                        disabled={(date) =>
+                          date < new Date(new Date().setHours(0, 0, 0, 0))
+                        }
                         initialFocus
                       />
                       <Button
@@ -108,7 +112,10 @@ const DateTimePicker = ({ onConfirm }: Props) => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="bg-light-primary text-white rounded-full flex justify-self-end hover:bg-blue-700">
+        <Button
+          type="submit"
+          className="bg-light-primary text-white rounded-full flex justify-self-end hover:bg-blue-700"
+        >
           Next
         </Button>
       </form>

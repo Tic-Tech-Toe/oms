@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { phoneNumber, orderId, eta, customerName,publicLink } = await req.json();
+    const { phoneNumber, orderId, eta, customerName, publicLink } =
+      await req.json();
 
-    console.table({ phoneNumber, orderId, eta });
+    //console.table({ phoneNumber, orderId, eta });
 
     if (!phoneNumber || !orderId || !eta) {
       return NextResponse.json(

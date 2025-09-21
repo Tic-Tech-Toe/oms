@@ -23,6 +23,7 @@ import { Upload, X } from "lucide-react";
 
 // Import PDF-lib
 import { PDFDocument } from "pdf-lib";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function InvoicePage() {
   const { id } = useParams();
@@ -32,11 +33,19 @@ export default function InvoicePage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showOverrideWarning, setShowOverrideWarning] = useState(false);
   const [dontRemind, setDontRemind] = useState(false);
-
+  const isPaid = order?.paymentStatus === "paid";
+  const paidEvent =
+    order &&
+    order.timeline?.find((event) => event.action.includes("Payment of"));
+  const paidDate = isPaid && (paidEvent ? paidEvent.date : null);
+  // //console.log({paidDate})
   const { setTheme } = useTheme();
   const userId = auth.currentUser?.uid;
+  const { userDoc } = useAuth();
+  //console.log({userDoc});
+  // const {userDoc} = useAuth().currentUser
   // const companyAddress = auth.currentUser?.company;
-  console.log("Current user",auth.currentUser);
+  //console.log("Current user",auth.currentUser);
 
   const { allOrders, updateOrder } = useOrderStore();
   const toast = useToast();
@@ -376,8 +385,21 @@ export default function InvoicePage() {
       {isGenerated ? (
         <div
           ref={invoiceRef}
-          className="bg-white dark:bg-zinc-950 rounded-3xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8"
+          className="bg-white dark:bg-zinc-950 rounded-3xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 relative overflow-hidden"
         >
+          {isPaid && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-[-25deg] pointer-events-none">
+              <span className="text-6xl sm:text-6xl font-black text-green-600 dark:text-green-500 opacity-20">
+                PAID
+              </span>
+              {paidDate && (
+                <span className="absolute bottom-[-1.5rem] left-1/2 transform -translate-x-1/2 text-md text-green-600 dark:text-green-500 opacity-20">
+                  {format(paidDate, "dd - MMM, yyyy - hh:mm a")}
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row justify-between items-start mb-6 sm:mb-8">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -396,11 +418,9 @@ export default function InvoicePage() {
           <Separator className="my-6" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <div>
-              {/* {companyAddress} */}
               <h2 className="font-semibold mb-1">From</h2>
-               <p className="text-sm">{companyAddress}</p>
-               {/* <p className="text-sm">123 Street, Bangalore</p> */}
-               {/* <p className="text-sm">support@yourcompany.com</p> */}
+              <p className="text-sm">{userDoc?.company}</p>
+              <p className="text-sm">support - {userDoc?.email}</p>
             </div>
             <div>
               <h2 className="font-semibold mb-1">Bill To</h2>

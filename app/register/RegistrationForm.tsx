@@ -18,6 +18,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    alert("Hi Ashan")
     if (!name || !whatsappNumber || !company) {
       toast({
         title: "Please fill all fields",

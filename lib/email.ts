@@ -1,33 +1,33 @@
-import { Resend } from 'resend'
-import nodemailer from 'nodemailer';
+import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendAdminApprovalEmail({
   name,
   company,
   requestId,
 }: {
-  name: string
-  company?: string
-  requestId: string
+  name: string;
+  company?: string;
+  requestId: string;
 }) {
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL!
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL!;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-  const approvalLink = `${baseUrl}/admin/invite?requestId=${requestId}`
+  const approvalLink = `${baseUrl}/admin/invite?requestId=${requestId}`;
 
   await resend.emails.send({
-    from: 'onboarding@resend.dev',
+    from: "onboarding@resend.dev",
     to: [adminEmail],
-    subject: 'New Access Request 🚀',
+    subject: "New Access Request 🚀",
     html: `
       <h2>New Signup Request</h2>
       <p><strong>Name:</strong> ${name}</p>
-      ${company ? `<p><strong>Company:</strong> ${company}</p>` : ''}
+      ${company ? `<p><strong>Company:</strong> ${company}</p>` : ""}
       <p><a href="${approvalLink}" target="_blank">Click here to approve or reject</a></p>
     `,
-  })
+  });
 }
 
 export async function sendPasswordSetupEmail({
@@ -40,17 +40,17 @@ export async function sendPasswordSetupEmail({
   link: string;
 }) {
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER,      // Your Gmail address
-      pass: process.env.EMAIL_PASS,      // Gmail App Password (not your real password!)
+      user: process.env.EMAIL_USER, // Your Gmail address
+      pass: process.env.EMAIL_PASS, // Gmail App Password (not your real password!)
     },
   });
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: 'Welcome to ShipTrack – Set Your Password ✨',
+    subject: "Welcome to ShipTrack – Set Your Password ✨",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827; padding: 20px; background-color: #f9fafb; border-radius: 12px;">
         <h2 style="color: #6366f1;">👋 Welcome aboard, ${name}!</h2>
@@ -78,9 +78,9 @@ export async function sendPasswordSetupEmail({
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('✅ Password setup email sent to', email);
+    //console.log('✅ Password setup email sent to', email);
   } catch (err) {
-    console.error('❌ Failed to send password setup email:', err);
+    console.error("❌ Failed to send password setup email:", err);
     throw err;
   }
 }

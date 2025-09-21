@@ -43,7 +43,7 @@ export const getOrderFromFirestore = async (
         id: docSnap.id,
       };
     } else {
-      console.log("❌ No such order found!");
+      //console.log("❌ No such order found!");
       return null;
     }
   } catch (error) {
@@ -66,7 +66,7 @@ export const addOrder = async (
       updatedAt: serverTimestamp(),
     });
 
-    // console.log("✅ Order added with ID:", newDocRef.id);
+    // //console.log("✅ Order added with ID:", newDocRef.id);
     return newDocRef.id;
   } catch (error: any) {
     // console.error("🔥 Error adding order:", error.message, error.code, error);
@@ -88,7 +88,7 @@ export const updateOrderInFirestore = async (
       updatedAt: serverTimestamp(), // 🕒 Always update modified time
     });
 
-    console.log("✅ Order updated in Firestore:", orderId);
+    //console.log("✅ Order updated in Firestore:", orderId);
   } catch (error) {
     console.error("🔥 Error updating order in Firestore:", error);
     throw error;

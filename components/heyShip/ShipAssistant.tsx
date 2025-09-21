@@ -8,13 +8,13 @@ import { ScrollArea } from "../ui/scroll-area";
 
 export default function ShipAssistant() {
   const [isAlwaysActive, setIsAlwaysActive] = useState(false);
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
     // This will open the chatbox later
     e.stopPropagation();
-    setOpen((prev) => !prev)
-    console.log("Open AI Assistant Chat");
+    setOpen((prev) => !prev);
+    //console.log("Open AI Assistant Chat");
   };
 
   return (
@@ -50,8 +50,12 @@ export default function ShipAssistant() {
           </button>
 
           <ScrollArea className="flex-1 p-4 space-y-3 pt-8 ">
-            <div className="text-sm bg-muted px-4 py-2 rounded-xl self-start">Hi! I'm Ship 👋</div>
-            <div className="text-sm bg-primary text-white px-4 py-2 rounded-xl self-end">What's up?</div>
+            <div className="text-sm bg-muted px-4 py-2 rounded-xl self-start">
+              Hi! I'm Ship 👋
+            </div>
+            <div className="text-sm bg-primary text-white px-4 py-2 rounded-xl self-end">
+              What's up?
+            </div>
           </ScrollArea>
 
           <div className="p-3 border-t border-muted flex items-center gap-2">
