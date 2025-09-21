@@ -45,6 +45,8 @@ const OrderDetails = () => {
   const [showLinkInp, setShowLinkInp] = useState(false);
   const [showPaymentCollect, setShowPaymentCollect] = useState(false);
 
+  const [orderEditting, setOrderEditting] = useState(false);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -109,7 +111,7 @@ const OrderDetails = () => {
   };
 
   return (
-    <div className="px-4 md:px-10 lg:px-20">
+    <div className="px-4 md:px-10 lg:px-20 mb-8">
       {/* Breadcrumb */}
       <span className="px-2 py-1 font-bold font-mono text-md text-gray-400 ">
         <Link
@@ -169,15 +171,17 @@ const OrderDetails = () => {
               onButtonOneClick={() => setShowLinkInp(true)}
               onButtonTwoClick={() => console.log("Update order", order.id)}
             />
-            <SendTrackingDialog
-              orderId={order.id}
-              open={showLinkInp}
-              phoneNumber={order.customer?.whatsappNumber}
-              customerName={order.customer?.name || "Customer"}
-              onClose={() => setShowLinkInp(false)}
-              userId={userId}
-              onOpenChange={setShowLinkInp}
-            />
+            {orderEditting && (
+              <SendTrackingDialog
+                orderId={order.id}
+                open={showLinkInp}
+                phoneNumber={order.customer?.whatsappNumber}
+                customerName={order.customer?.name || "Customer"}
+                onClose={() => setShowLinkInp(false)}
+                userId={userId}
+                onOpenChange={setShowLinkInp}
+              />
+            )}
           </section>
 
           {/* Payment Info */}

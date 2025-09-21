@@ -145,7 +145,7 @@ const OrderUpdateDialog = ({ order, setOpen, refreshOrders }: OrderUpdateDialogP
           />
         </div>
         {/* Payment Method */}
-        <div className="flex flex-col gap-1">
+        {/* <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-foreground">Payment Method</label>
           <select
             value={paymentMethod}
@@ -157,7 +157,7 @@ const OrderUpdateDialog = ({ order, setOpen, refreshOrders }: OrderUpdateDialogP
             <option value="bank transfer">Bank Transfer</option>
             <option value="cash on delivery">Cash on Delivery</option>
           </select>
-        </div>
+        </div> */}
         {/* Shipping Address */}
         <div className="flex flex-col gap-1 md:col-span-2">
           <label className="text-sm font-medium text-foreground">Shipping Address</label>
@@ -180,16 +180,16 @@ const OrderUpdateDialog = ({ order, setOpen, refreshOrders }: OrderUpdateDialogP
         </div>
         {/* Tracking Number */}
         <div className="flex flex-col gap-1 md:col-span-2">
-          <label className="text-sm font-medium text-foreground">Tracking Number</label>
+          <label className="text-sm font-medium text-foreground">Tracking Link</label>
           <Input
-            placeholder="Enter tracking number"
+            placeholder="Enter tracking link"
             value={trackingNumber}
             onChange={(e) => setTrackingNumber(e.target.value)}
             className="rounded-xl border-2 border-purple-200 dark:border-purple-700"
           />
         </div>
         {/* Estimated Delivery Date */}
-        <div className="flex flex-col gap-1 md:col-span-2">
+        {/* <div className="flex flex-col gap-1 md:col-span-2">
           <label className="text-sm font-medium text-foreground">Estimated Delivery Date</label>
           <Popover>
             <PopoverTrigger asChild>
@@ -213,7 +213,7 @@ const OrderUpdateDialog = ({ order, setOpen, refreshOrders }: OrderUpdateDialogP
               />
             </PopoverContent>
           </Popover>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex justify-end gap-2 mt-6">

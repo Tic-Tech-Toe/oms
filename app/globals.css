@@ -275,3 +275,21 @@ html {
 }
 
 
+/* Ultra-thin custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; /* super thin */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* no arrows or track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #6b25a4; /* light-primary color (Tailwind blue-200) */
+  border-radius: 9999px; /* fully rounded */
+  border: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none; /* removes up/down arrow buttons */
+}
