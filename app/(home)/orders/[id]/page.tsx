@@ -171,7 +171,7 @@ const OrderDetails = () => {
               onButtonOneClick={() => setShowLinkInp(true)}
               onButtonTwoClick={() => console.log("Update order", order.id)}
             />
-            {orderEditting && (
+            {showLinkInp && (
               <SendTrackingDialog
                 orderId={order.id}
                 open={showLinkInp}

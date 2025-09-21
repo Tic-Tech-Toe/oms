@@ -13,10 +13,13 @@ import AddItemDialog from "@/components/AddItemDialog";
 export default function Inventory() {
   const user = auth.currentUser;
   const { toast } = useToast();
-  const { inventory, loadInventory, updateItem, deleteItem } = useInventoryStore();
+  const { inventory, loadInventory, updateItem, deleteItem } =
+    useInventoryStore();
 
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
-  const [editState, setEditState] = useState<Record<string, Partial<ItemType>>>({});
+  const [editState, setEditState] = useState<Record<string, Partial<ItemType>>>(
+    {}
+  );
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
 
   // Search & Sort
@@ -105,7 +108,10 @@ export default function Inventory() {
   }, [inventory, search, sortBy, categoryFilter]);
 
   // 🔹 Get unique categories
-  const categories = ["All", ...new Set(inventory.map((i) => i.category ?? ""))];
+  const categories = [
+    "All",
+    ...new Set(inventory.map((i) => i.category ?? "")),
+  ];
 
   return (
     <div className="p-6 min-h-screen">
@@ -166,92 +172,127 @@ export default function Inventory() {
             <div
               key={item.itemId}
               className={clsx(
-                "self-start relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[2rem] px-6 py-5 shadow-md transition-all",
+                "self-start relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-3xl px-6 py-5 shadow-md transition-all",
                 expanded ? "ring-2 ring-blue-500" : ""
               )}
             >
-              {/* Top Section */}
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <h2 className="text-lg font-semibold">
+              {/* Header Section */}
+              <div className="flex justify-between items-start">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {editing.name ?? item.name}
                   </h2>
-                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    ₹{editing.price ?? item.price}
-                  </p>
+
+                  {/* Prices */}
+                  <div className="flex flex-wrap gap-2 mt-1 text-sm font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300">
+                      Cost: ₹{editing.cPrice ?? item.cPrice}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
+                      Selling: ₹{editing.sPrice ?? item.sPrice}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Quantity Badge */}
                 <span
                   className={`text-xs text-white px-2 py-0.5 rounded-full font-medium ${getBadgeColor(
                     editing.quantity ?? item.quantity
                   )}`}
                 >
-                  {(editing.quantity ?? item.quantity)} pcs
+                  {editing.quantity ?? item.quantity} pcs
                 </span>
               </div>
 
-              {/* Always visible actions */}
-              <div className="flex justify-between items-center mt-3">
-                <div className="flex gap-4">
+              {/* Actions */}
+              <div className="flex justify-between items-center mt-4">
+                <div className="flex gap-3">
                   <button
-                    className="text-blue-600"
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
                     onClick={() =>
                       setExpandedItemId((prev) =>
                         prev === item.itemId ? null : item.itemId
                       )
                     }
                   >
-                    {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    {expanded ? (
+                      <ChevronUp size={18} />
+                    ) : (
+                      <ChevronDown size={18} />
+                    )}
                   </button>
-                  <button onClick={() => handleDelete(item.itemId)}>
+                  <button
+                    onClick={() => handleDelete(item.itemId)}
+                    className="hover:scale-110 transition"
+                  >
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
                 </div>
+
                 {expanded && (
                   <Button
                     onClick={() => handleSave(item.itemId)}
-                    className="rounded-xl text-sm py-1 px-3 dark:bg-dark-dark-gray dark:hover:bg-white dark:hover:text-black hover:bg-dark-dark-gray hover:text-white"
+                    className="rounded-xl text-sm py-1 px-4  border-2 border-light-primary dark:border-white/20 
+                   dark:bg-dark-dark-gray dark:hover:bg-white dark:hover:text-black 
+                   hover:bg-dark-dark-gray hover:text-white transition"
                   >
                     Save
                   </Button>
                 )}
               </div>
 
-              {/* Expanded Editable Fields */}
+              {/* Expanded Section */}
               {expanded && (
-                <div className="mt-4 space-y-3 text-sm">
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <EditableField
                     label="Name"
                     value={editing.name ?? item.name}
-                    onChange={(val) => handleFieldChange(item.itemId, "name", val)}
+                    onChange={(val) =>
+                      handleFieldChange(item.itemId, "name", val)
+                    }
                   />
                   <EditableField
-                    label="Price"
-                    value={editing.price ?? item.price}
+                    label="Cost Price"
                     type="number"
+                    value={editing.cPrice ?? item.cPrice}
                     onChange={(val) =>
-                      handleFieldChange(item.itemId, "price", parseFloat(val))
+                      handleFieldChange(item.itemId, "cPrice", parseFloat(val))
+                    }
+                  />
+                  <EditableField
+                    label="Selling Price"
+                    type="number"
+                    value={editing.sPrice ?? item.sPrice}
+                    onChange={(val) =>
+                      handleFieldChange(item.itemId, "sPrice", parseFloat(val))
                     }
                   />
                   <EditableField
                     label="Quantity"
-                    value={editing.quantity ?? item.quantity}
                     type="number"
+                    value={editing.quantity ?? item.quantity}
                     onChange={(val) =>
-                      handleFieldChange(item.itemId, "quantity", parseFloat(val))
+                      handleFieldChange(
+                        item.itemId,
+                        "quantity",
+                        parseFloat(val)
+                      )
                     }
                   />
-                  <EditableField
+                  {/* <EditableField
                     label="Category"
                     value={editing.category ?? item.category ?? ""}
                     onChange={(val) =>
                       handleFieldChange(item.itemId, "category", val)
                     }
-                  />
-                  <EditableField
+                  /> */}
+                  {/* <EditableField
                     label="SKU"
                     value={editing.sku ?? item.sku ?? ""}
-                    onChange={(val) => handleFieldChange(item.itemId, "sku", val)}
-                  />
+                    onChange={(val) =>
+                      handleFieldChange(item.itemId, "sku", val)
+                    }
+                  /> */}
                 </div>
               )}
             </div>

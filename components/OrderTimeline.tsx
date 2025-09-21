@@ -22,11 +22,10 @@ const OrderTimeline: React.FC<Props> = ({ timeline }) => {
   const lineHeight = useMotionValue(0); // 0 → 100% in pixels
 
   return (
-  <div
-  ref={ref}
-  className="relative pl-12 py-8 h-[400px] overflow-y-scroll mb-12 custom-scrollbar"
->
-
+    <div
+      ref={ref}
+      className="relative pl-12 py-8 h-[400px] overflow-y-scroll mb-12 custom-scrollbar"
+    >
       {/* Vertical line */}
       <motion.div
         style={{ height: lineHeight }}
@@ -37,7 +36,7 @@ const OrderTimeline: React.FC<Props> = ({ timeline }) => {
       />
 
       {/* Discs with rectangle cards */}
-      {timeline.map((entry, idx) => {
+      {timeline.slice().reverse().map((entry, idx) => {
         const positionPx = (idx / (timeline.length - 1)) * 400;
 
         return (
@@ -73,24 +72,23 @@ const OrderTimeline: React.FC<Props> = ({ timeline }) => {
 
             {/* Rectangle card */}
             <motion.div
-  initial={{ opacity: 0, x: -20 }}
-  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-  transition={{
-    type: "tween",
-    duration: 0.6,
-    delay: idx * 0.35,
-    ease: "easeOut",
-  }}
-  className="w-64 bg-gray-100 dark:bg-neutral-800 rounded-md p-3 flex flex-col justify-center shadow-sm"
->
-  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-    {entry.action}
-  </span>
-  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-    {format(new Date(entry.date), "dd/MM/yy hh:mm a")}
-  </span>
-</motion.div>
-
+              initial={{ opacity: 0, x: -20 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+              transition={{
+                type: "tween",
+                duration: 0.6,
+                delay: idx * 0.35,
+                ease: "easeOut",
+              }}
+              className="w-64 bg-gray-100 dark:bg-neutral-800 rounded-md p-3 flex flex-col justify-center shadow-sm"
+            >
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {entry.action}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {format(new Date(entry.date), "dd/MM/yy hh:mm a")}
+              </span>
+            </motion.div>
           </motion.div>
         );
       })}
