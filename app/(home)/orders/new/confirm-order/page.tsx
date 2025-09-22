@@ -252,9 +252,9 @@ const BillDetailsCard = ({ charges, setCharges, subtotal, totalAmount, fixedChar
                     </div>
 
                     <div className="flex gap-3 mt-2 w-full">
-                        <Button variant="outline" className="flex-1" onClick={() => router.push("/add-items")}>
+                        {/* <Button variant="outline" className="flex-1" onClick={() => router.push("/add-items")}>
                             Add More Items
-                        </Button>
+                        </Button> */}
                         <Button className="flex-1 bg-dark-primary text-white" onClick={onPlaceOrder} disabled={loading}>
                             {loading ? "Placing..." : "Place Order"}
                         </Button>
