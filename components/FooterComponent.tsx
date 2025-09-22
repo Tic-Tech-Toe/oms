@@ -42,7 +42,7 @@ const FooterComponent = ({
 
   return (
     <div className="bg-light-light-gray dark:bg-dark-background mt-2 p-4 flex items-center justify-between rounded-b-2xl">
-      <span className="text-sm font-semibold">{text}</span>
+      <span className="text-sm font-semibold hidden md:block">{text}</span>
 
       <div className="flex gap-2">
         {/* Button One: Regular button */}
