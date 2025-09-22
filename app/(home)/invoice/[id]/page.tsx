@@ -448,7 +448,7 @@ export default function InvoicePage() {
                     <td className="p-3">{item.itemName}</td>
                     <td className="p-3 text-center">{item.quantity}</td>
                     <td className="p-3 text-right">
-                      ₹{item.price.toLocaleString()}
+                      ₹{item.sPrice.toLocaleString()}
                     </td>
                     <td className="p-3 text-right">
                       ₹{item.total.toLocaleString()}

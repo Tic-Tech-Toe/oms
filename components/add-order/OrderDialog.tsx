@@ -96,8 +96,8 @@ const OrderDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) 
         ? {
             itemId: productData.itemId,
             quantity: item.quantity,
-            price: productData.price,
-            total: productData.price * item.quantity,
+            price: productData.sPrice,
+            total: productData.sPrice * item.quantity,
             sku: productData.sku,
             category: productData.category,
             itemName: productData.name,
@@ -150,8 +150,8 @@ const OrderDialog = ({ open, onClose }: { open: boolean; onClose: () => void }) 
     return {
       name: product?.name || "Unknown",
       qty: item.quantity,
-      price: product?.price || 0,
-      total: (product?.price || 0) * item.quantity,
+      price: product?.sPrice || 0,
+      total: (product?.sPrice || 0) * item.quantity,
     };
   }) || [];
 

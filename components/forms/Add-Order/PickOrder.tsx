@@ -109,8 +109,8 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
           updated[product.itemId] = {
             itemId: product.itemId,
             quantity: qty,
-            price: product.price,
-            total: product.price * qty,
+            price: product.sPrice,
+            total: product.sPrice * qty,
             sku: product.sku || "",
             category: product.category || "",
             itemName: product.name,
@@ -253,11 +253,11 @@ function PickOrderField({ userId }: PickOrderFieldProps) {
                                 {product.name}
                               </span>
                               <div className="text-xs text-gray-500">
-                                {useCurrency(product.price)} · Stock: {product.quantity}
+                                {useCurrency(product.sPrice)} · Stock: {product.quantity}
                               </div>
                               {currentQty > 0 && (
                                 <div className="text-xs text-green-600 font-medium">
-                                  Total: {useCurrency(product.price * currentQty)}
+                                  Total: {useCurrency(product.sPrice * currentQty)}
                                 </div>
                               )}
                             </div>

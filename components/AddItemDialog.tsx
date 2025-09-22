@@ -43,7 +43,7 @@ export default function AddItemDialog({
     resolver: zodResolver(AddItemSchema),
     defaultValues: {
       name: "",
-      price: 0,
+      sPrice: 0,
       quantity: 1,
       itemImage: "",
       sku: "",

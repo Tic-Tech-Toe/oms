@@ -99,7 +99,7 @@ export default function Inventory() {
 
     items.sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "price") return (a.price ?? 0) - (b.price ?? 0);
+      if (sortBy === "price") return (a.sPrice ?? 0) - (b.sPrice ?? 0);
       if (sortBy === "quantity") return (a.quantity ?? 0) - (b.quantity ?? 0);
       return 0;
     });

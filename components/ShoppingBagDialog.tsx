@@ -16,7 +16,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 const ShoppingBagDialog = ({ cartState, setCartState }) => {
   const cartItems = Object.values(cartState);
   const totalAmount = cartItems.reduce(
-    (sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1),
+    (sum, item) => sum + (item.sPrice ?? 0) * (item.quantity ?? 1),
     0
   );
 
@@ -51,12 +51,12 @@ const ShoppingBagDialog = ({ cartState, setCartState }) => {
                     {item.itemName}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {item.quantity} × ₹{item.price}
+                    {item.quantity} × ₹{item.sPrice}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                    {useCurrency(item.quantity * item.price)}
+                    {useCurrency(item.quantity * item.sPrice)}
                   </p>
                   <Button
                     size="icon"

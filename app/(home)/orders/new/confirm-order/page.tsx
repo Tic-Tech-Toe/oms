@@ -23,7 +23,7 @@ type OrderItem = {
   itemId: string;
   itemName: string;
   sku?: string;
-  price: number;
+  sPrice: number;
   quantity: number;
 };
 

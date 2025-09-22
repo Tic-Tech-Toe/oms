@@ -61,7 +61,7 @@ export default function OrderDetailComponent({ order }: { order: OrderType }) {
                 <span>{quantities[item.itemId] ?? 0}</span>
                
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                ₹{((quantities[item.itemId] ?? 0) * item.price).toFixed(2)}
+                ₹{((quantities[item.itemId] ?? 0) * item.sPrice).toFixed(2)}
               </p>
             </div>
           </div>
