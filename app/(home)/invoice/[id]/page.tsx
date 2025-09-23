@@ -34,19 +34,18 @@ export default function InvoicePage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showOverrideWarning, setShowOverrideWarning] = useState(false);
   const [dontRemind, setDontRemind] = useState(false);
+  
+  // --- MODIFICATION 1: Add state for loading feedback ---
+  const [isSending, setIsSending] = useState(false);
+
   const isPaid = order?.paymentStatus === "paid";
   const paidEvent =
     order &&
     order.timeline?.find((event) => event.action.includes("Payment of"));
   const paidDate = isPaid && (paidEvent ? paidEvent.date : null);
-  // //console.log({paidDate})
   const { setTheme } = useTheme();
   const userId = auth.currentUser?.uid;
   const { userDoc } = useAuth();
-  //console.log({userDoc});
-  // const {userDoc} = useAuth().currentUser
-  // const companyAddress = auth.currentUser?.company;
-  //console.log("Current user",auth.currentUser);
 
   const { allOrders, updateOrder } = useOrderStore();
   const toast = useToast();
@@ -115,86 +114,93 @@ export default function InvoicePage() {
     return new Blob([pdfBytes], { type: "application/pdf" });
   };
 
+  // --- MODIFICATION 2: Update the send invoice handler ---
   const handleSendInvoice = async () => {
-    let fileToSend = null;
-    let fileName = "";
+    setIsSending(true); // Start loading
+    try {
+      let fileToSend = null;
+      let fileName = "";
 
-    if (isGenerated) {
-      if (!invoiceRef.current || !order) return;
-      try {
-        const opt = {
-          margin: 0.5,
-          filename: `invoice_${order.invoiceNumber || order.id}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-        };
-        fileToSend = await html2pdf()
-          .set(opt)
-          .from(invoiceRef.current)
-          .outputPdf("blob");
-        fileName = `invoice_${order.invoiceNumber || order.id}.pdf`;
-      } catch (err) {
-        console.error("Failed to generate PDF:", err);
-        alert("❌ Error while generating PDF.");
-        return;
-      }
-    } else if (uploadedFile) {
-      if (uploadedFile.type.startsWith("image/")) {
+      if (isGenerated) {
+        if (!invoiceRef.current || !order) return;
         try {
-          fileToSend = await convertImageToPdf(uploadedFile);
-          const originalName = uploadedFile.name
-            .split(".")
-            .slice(0, -1)
-            .join(".");
-          fileName = `${originalName}.pdf`;
+          const opt = {
+            margin: 0.5,
+            filename: `invoice_${order.invoiceNumber || order.id}.pdf`,
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+          };
+          fileToSend = await html2pdf()
+            .set(opt)
+            .from(invoiceRef.current)
+            .outputPdf("blob");
+          fileName = `invoice_${order.invoiceNumber || order.id}.pdf`;
         } catch (err) {
-          console.error("Failed to convert image to PDF:", err);
-          alert("❌ Error while converting image to PDF.");
+          console.error("Failed to generate PDF:", err);
+          alert("❌ Error while generating PDF.");
           return;
         }
-      } else {
-        fileToSend = uploadedFile;
-        fileName = uploadedFile.name;
-      }
-    } else {
-      alert("Please upload a file or generate an invoice first.");
-      return;
-    }
-
-    if (fileToSend) {
-      try {
-        const base64File = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(fileToSend);
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-        });
-
-        const res = await fetch("/api/send-inv", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: order.id,
-            customerNumber: order.customer?.whatsappNumber,
-            customerName: order.customer?.name,
-            fileName: fileName,
-            fileData: base64File,
-          }),
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          alert("✅ Invoice sent successfully via WhatsApp!");
+      } else if (uploadedFile) {
+        if (uploadedFile.type.startsWith("image/")) {
+          try {
+            fileToSend = await convertImageToPdf(uploadedFile);
+            const originalName = uploadedFile.name
+              .split(".")
+              .slice(0, -1)
+              .join(".");
+            fileName = `${originalName}.pdf`;
+          } catch (err) {
+            console.error("Failed to convert image to PDF:", err);
+            alert("❌ Error while converting image to PDF.");
+            return;
+          }
         } else {
-          alert("❌ Failed to send invoice: " + data.message);
+          fileToSend = uploadedFile;
+          fileName = uploadedFile.name;
         }
-      } catch (err) {
-        console.error("Send invoice error:", err);
-        alert("❌ Error while sending invoice.");
+      } else {
+        alert("Please upload a file or generate an invoice first.");
+        return;
       }
+
+      if (fileToSend) {
+        try {
+          const base64File = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(fileToSend);
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+          });
+
+          const res = await fetch("/api/send-inv", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              orderId: order.id,
+              customerNumber: order.customer?.whatsappNumber,
+              customerName: order.customer?.name,
+              fileName: fileName,
+              fileData: base64File,
+            }),
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            alert("✅ Invoice sent successfully via WhatsApp!");
+          } else {
+            alert("❌ Failed to send invoice: " + data.message);
+          }
+        } catch (err) {
+          console.error("Send invoice error:", err);
+          alert("❌ Error while sending invoice.");
+        }
+      }
+    } finally {
+      setIsSending(false); // Stop loading, regardless of the outcome
     }
   };
+
 
   const handleDownloadPDF = async () => {
     if (isGenerated) {
@@ -286,14 +292,45 @@ export default function InvoicePage() {
         >
           <Printer size={18} />
         </Button>
+
+        {/* --- MODIFICATION 3: Update the Button to show loading state --- */}
         <Button
           onClick={handleSendInvoice}
-          className="rounded-xl px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
+          disabled={isSending}
+          className="rounded-xl px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto flex items-center justify-center gap-2"
         >
-          Send Invoice via WhatsApp
+          {isSending ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Sending...
+            </>
+          ) : (
+            "Send Invoice via WhatsApp"
+          )}
         </Button>
       </div>
 
+      {/* ... The rest of your component's JSX remains the same ... */}
+        
       <div className="mb-6">
         <h2 className="text-sm font-semibold text-gray-500 mb-2">
           Upload invoice
@@ -325,15 +362,12 @@ export default function InvoicePage() {
           )}
         </div>
       </div>
-
       <Button
         onClick={handleGenerateInvoice}
         className="mb-4 rounded-xl px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg w-full shadow-md hover:shadow-lg transition-all duration-300"
       >
         Generate Invoice
       </Button>
-
-      {/* Popover warning */}
       {showOverrideWarning && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto">
@@ -382,7 +416,6 @@ export default function InvoicePage() {
           </div>
         </div>
       )}
-
       {isGenerated ? (
         <div
           ref={invoiceRef}
@@ -400,7 +433,6 @@ export default function InvoicePage() {
               )}
             </div>
           )}
-
           <div className="flex flex-col sm:flex-row justify-between items-start mb-6 sm:mb-8">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -452,7 +484,7 @@ export default function InvoicePage() {
                       {useCurrency(item.price)}
                     </td>
                     <td className="p-3 text-right">
-                      ₹{item.total.toLocaleString()}
+                      {useCurrency(item.total)}
                     </td>
                   </tr>
                 ))}
