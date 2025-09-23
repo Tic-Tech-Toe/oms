@@ -24,6 +24,7 @@ import { Upload, X } from "lucide-react";
 // Import PDF-lib
 import { PDFDocument } from "pdf-lib";
 import { useAuth } from "@/app/context/AuthContext";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export default function InvoicePage() {
   const { id } = useParams();
@@ -448,7 +449,7 @@ export default function InvoicePage() {
                     <td className="p-3">{item.itemName}</td>
                     <td className="p-3 text-center">{item.quantity}</td>
                     <td className="p-3 text-right">
-                      ₹{item.sPrice.toLocaleString()}
+                      {useCurrency(item.price)}
                     </td>
                     <td className="p-3 text-right">
                       ₹{item.total.toLocaleString()}
