@@ -147,7 +147,7 @@ const ThemeSwitch = () => {
                     d: sunPath,
                     rotate: 0,
                     stroke: "#CA8A04",
-                    fill: "#CA8A0",
+                    fill: "#D9E76C",
                     fillOpacity: 0.35,
                     strokeOpacity: 1,
                   }

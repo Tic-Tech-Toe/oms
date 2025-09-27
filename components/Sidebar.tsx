@@ -29,6 +29,7 @@ const Sidebar = React.memo(() => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const { user, logout } = useAuth();
 
+
   const initials =
     user?.displayName
       ?.split(" ")
@@ -98,7 +99,7 @@ const Sidebar = React.memo(() => {
     isCollapsed ? "justify-center flex-col" : "justify-between "
   }`}
 >
-  <ThemeSwitch />
+  {/* <ThemeSwitch /> */}
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <div

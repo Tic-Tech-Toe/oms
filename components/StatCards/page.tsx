@@ -6,8 +6,9 @@ const StatCards = () => {
   return (
   <div className="md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8 ">
     {/* First Card - Square Profit Card */}
-    <div className="w-full aspect-square rounded-[2.5rem]  flex flex-col items-center justify-center">
-      <ProfitCard />
+    <div className="w-full md:col-span-1 rounded-[2.5rem] dark:bg-zinc-900 flex items-center justify-center bg-neutral-100">
+      {/* <ProfitCard /> */}
+      <SalesChart />
     </div>
 
     {/* Second Card - Wide Chart Card */}

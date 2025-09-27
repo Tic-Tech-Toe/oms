@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { ItemType, OrderItem, OrderType } from "@/types/orderType";
 import { useInventoryStore } from "@/hooks/zustand_stores/useInventoryStore";
 import { useOrderStore } from "@/hooks/zustand_stores/useOrderStore";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export default function OrderDetailComponent({ order }: { order: OrderType }) {
   const inventory = useInventoryStore((state) => state.inventory);
@@ -61,7 +62,7 @@ export default function OrderDetailComponent({ order }: { order: OrderType }) {
                 <span>{quantities[item.itemId] ?? 0}</span>
                
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                ₹{((quantities[item.itemId] ?? 0) * item.sPrice).toFixed(2)}
+                {useCurrency((quantities[item.itemId] ?? 0) * item.price)}
               </p>
             </div>
           </div>
