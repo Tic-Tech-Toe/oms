@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     const request = requestSnap.data();
+    console.table({request})
 
     // 1. Create Firebase Auth user
     let userRecord;
@@ -39,6 +40,7 @@ export async function POST(req: NextRequest) {
         email: request?.email,
         displayName: request?.name,
         emailVerified: false,
+        phoneNumber: "+91"+request?.phone,
         disabled: false,
       });
     } catch (error) {
@@ -67,7 +69,9 @@ export async function POST(req: NextRequest) {
         name: request.name,
         email: request.email,
         company: request.company || "",
+        phone: request.phone || "",
         role: "member",
+        connections:[{"whatsapp":false},{"zoho":false},{"google":false}],
         subscriptionStatus: "trialing", // NEW
         trialEndsAt: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 days from now
         createdAt: new Date(),
