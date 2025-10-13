@@ -245,7 +245,7 @@ export default function NotificationBell({ endpoint = "/api/mock-hook", pollInte
       {/* Container is fixed to the top right of the viewport */}
       <div 
         ref={containerRef} 
-        className="fixed right-10 top-6 z-[100] text-left font-inter"
+        className="fixed right-10 top-3 z-[100] text-left font-inter"
       >
         <div className="flex items-center gap-4 border-2 p-2 rounded-full liquid-glass">
                 <ThemeSwitch />

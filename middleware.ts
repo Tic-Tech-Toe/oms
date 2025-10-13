@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
     if (pathname === "/invite" && email !== adminEmail) {
-      return NextResponse.redirect(new URL("/orders", request.url));
+      return NextResponse.redirect(new URL("/welcome", request.url));
     }
   }
 

@@ -72,8 +72,8 @@ export async function POST(req: NextRequest) {
         phone: request.phone || "",
         role: "member",
         connections:[{"whatsapp":false},{"zoho":false},{"google":false}],
-        subscriptionStatus: "trialing", // NEW
-        trialEndsAt: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 days from now
+        subscription: {status: "trialing"},
+        trialEndsAt: Date.now() + 3 * 24 * 60 * 60 * 1000, 
         createdAt: new Date(),
         updatedAt: new Date(),
       });

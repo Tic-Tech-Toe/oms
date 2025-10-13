@@ -14,8 +14,9 @@ export async function POST(req: NextRequest) {
 
     // 🔎 Fetch user subscription from Firestore
     const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
-    const userData = userDoc.data() || {};
-    const subscriptionStatus = userData.subscriptionStatus || "inactive";
+    const userData = userDoc.data();
+    console.table({userData})
+    const subscriptionStatus = userData?.subscription?.status || "inactive";
 
     // 🍪 Save session in cookies (for middleware checks)
     const res = NextResponse.json({
