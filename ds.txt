@@ -2,7 +2,7 @@
   "uid": "abc123",
   "email": "user@example.com",
   "name": "John Doe",
-  "subscriptionStatus": "trialing",  // "trialing" | "active" | "inactive"
+  "subscription.status": "trialing",  // "trialing" | "active" | "inactive"
   "trialEndsAt": 1693497600000,      // timestamp in ms
   "subscriptionEndsAt": null,        // timestamp if paid sub ends
   "createdAt": 1692892800000,        // user signup
