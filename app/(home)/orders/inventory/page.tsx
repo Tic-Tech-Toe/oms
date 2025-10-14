@@ -116,14 +116,9 @@ export default function Inventory() {
   return (
     <div className="p-6 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+      <div className="flex flex-col md:flex-row  items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">Inventory</h1>
-        <Button
-          onClick={() => setShowAddItemDialog(true)}
-          className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700"
-        >
-          + Add Item
-        </Button>
+        
       </div>
 
       {/* Search & Filters */}
@@ -160,6 +155,12 @@ export default function Inventory() {
             </option>
           ))}
         </select>
+        <Button
+          onClick={() => setShowAddItemDialog(true)}
+          className="bg-light-primary text-white px-4 py-2 rounded-2xl hover:bg-blue-700"
+        >
+          + Add Item
+        </Button>
       </div>
 
       {/* Inventory Grid */}
@@ -196,7 +197,7 @@ export default function Inventory() {
 
                 {/* Quantity Badge */}
                 <span
-                  className={`text-xs text-white px-2 py-0.5 rounded-full font-medium ${getBadgeColor(
+                  className={`text-xs text-white px-2 py-0.5 rounded-full font-medium text-nowrap ${getBadgeColor(
                     editing.quantity ?? item.quantity
                   )}`}
                 >
