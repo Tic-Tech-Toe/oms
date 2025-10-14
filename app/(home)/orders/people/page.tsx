@@ -110,25 +110,26 @@ export default function People() {
     <div className="min-h-screen p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between md:justify-start mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">People</h1>
             <p className="text-gray-500 text-sm">Your customer directory</p>
           </div>
-          <div className="flex gap-2 items-center">
-            <AddCustomerByCSV handleAddCustomer = {handleAddCustomer} />
-          <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
-          </div>
+          
         </div>
 
         {/* Search */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between md:justify-start sm:items-center mb-4 gap-2">
           <Input
             placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="sm:max-w-xs w-full"
           />
+          <div className="flex gap-2 items-center">
+            <AddCustomerByCSV handleAddCustomer = {handleAddCustomer} />
+          <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
+          </div>
         </div>
 
         {/* Table for desktop, cards for mobile */}
