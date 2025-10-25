@@ -259,7 +259,7 @@ const WelcomePage = () => {
                 ) : (
                   <Button
                     onClick={() => router.push("/orders")}
-                    className="text-lg px-10 py-6 bg-purple-600 hover:bg-purple-700 shadow-xl font-semibold"
+                    className="text-lg px-10 py-6 bg-purple-600 hover:bg-purple-700 shadow-xl font-semibold text-white"
                   >
                     Go to Orders
                     <ArrowRight className="w-5 h-5 ml-2" />

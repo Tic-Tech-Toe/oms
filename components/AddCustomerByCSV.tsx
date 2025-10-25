@@ -53,19 +53,19 @@ const AddCustomerByCSV = ({
         const dataLines = lines.slice(1); // skip header
 
         const parsedRows: CustomerType[] = dataLines.map((line) => {
-  const values = line.split(",").map((v) => v.trim());
-  return {
-    name: values[1] || "",
-    whatsappNumber: values[2] || "",
-    rewardPoint: 0,
-    email: values[3] || "",
-    phoneNumber: "",
-    alternatePhoneNumber: "",
-    shippingAddress: "",
-    billingAddress: "",
-  };
-});
-
+          const values = line.split(",").map((v) => v.trim());
+          return {
+            name: values[1] || "",
+            whatsappNumber: values[2] || "",
+            GSTNumber: values[3] || "No GST",
+            shippingAddress: values[4] || "No Address!",
+            email: values[5] || "",
+            rewardPoint: 0,
+            phoneNumber: "",
+            alternatePhoneNumber: "",
+            billingAddress: "",
+          };
+        });
 
         setRows(parsedRows);
         // console.log({parsedRows})
@@ -136,10 +136,26 @@ const AddCustomerByCSV = ({
       <DialogContent className="sm:max-w-md">
         <DialogTitle>Add by CSV</DialogTitle>
         <hr className="my-2" />
-        <DialogDescription>
+        <DialogDescription className="text-center">
           Upload a CSV file with the format: <br />
-          <code>Counter, Name, Number, Email(optional)</code>
+          <code className="text-wrap flex flex-col">
+            Counter, Name, Number, GST, Address, Email
+            <strong className="border rounded-lg mt-2 border-blue-500 bg-blue-100">Don't use any comma</strong>
+          </code>
+          {/* Horizontal line */}
+          <hr className="my-3 border-gray-300 w-3/4 mx-auto" />
+          {/* Centered, small pill-style button */}
+          <Button
+            onClick={() =>
+              window.open("/Customer_Details_Template.xlsx", "_blank")
+            }
+            className="mt-3 px-3 py-1 text-sm italic bg-blue-600 text-white rounded-full 
+               hover:bg-blue-700 transition-all shadow-sm mx-auto block"
+          >
+            Download Template to Edit
+          </Button>
         </DialogDescription>
+
         <div className="flex flex-col space-y-4">
           {/* File Input */}
           <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -195,7 +211,7 @@ const AddCustomerByCSV = ({
           {/* Final summary */}
           {addedCount !== null && !isLoading && (
             <p className="text-md text-green-600 dark:text-green-400">
-               Successfully added {addedCount}/{rowCount} customers
+              Successfully added {addedCount}/{rowCount} customers
             </p>
           )}
         </div>

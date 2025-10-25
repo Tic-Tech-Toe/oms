@@ -10,7 +10,7 @@ import { auth, db } from "@/app/config/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 
 export default function AccountPage() {
-  const [whatsappSecret, setWhatsappSecret] = useState("");
+  // const [whatsappSecret, setWhatsappSecret] = useState("");
   const [isEditingSecret, setIsEditingSecret] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
 
@@ -44,7 +44,7 @@ export default function AccountPage() {
         );
       }
       setCompany(userDoc.company || "N/a");
-      setWhatsappSecret(userDoc.whatsappSecret || "");
+      // setWhatsappSecret(userDoc.whatsappSecret || "");
       // Ensure the value is a string for the input field
       setRewardPercentage(userDoc.rewardPercentage?.toString() || "");
     }
@@ -52,32 +52,32 @@ export default function AccountPage() {
 
   // //console.log(userDoc); // Use this to inspect the data from Firestore
 
-  async function handleSaveSecret() {
-    // Ensure both user and userDoc are available
-    if (!user || !userDoc) return;
-    if (whatsappSecret.trim() === "") {
-      setIsEditingSecret(false);
-      setShowSecret(false);
-      return;
-    }
-    try {
-      await updateDoc(doc(db, "users", user.uid), {
-        whatsappSecret: whatsappSecret.trim(),
-      });
-      toast({
-        title: "Secret updated ✅",
-        description: "Your WhatsApp secret has been saved.",
-      });
-    } catch (error) {
-      console.error("Error saving secret:", error);
-      toast({
-        title: "Error ❌",
-        description: "Could not save your secret. Please try again.",
-      });
-    }
-    setIsEditingSecret(false);
-    setShowSecret(false);
-  }
+  // async function handleSaveSecret() {
+  //   // Ensure both user and userDoc are available
+  //   if (!user || !userDoc) return;
+  //   if (whatsappSecret.trim() === "") {
+  //     setIsEditingSecret(false);
+  //     setShowSecret(false);
+  //     return;
+  //   }
+  //   try {
+  //     await updateDoc(doc(db, "users", user.uid), {
+  //       whatsappSecret: whatsappSecret.trim(),
+  //     });
+  //     toast({
+  //       title: "Secret updated ✅",
+  //       description: "Your WhatsApp secret has been saved.",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error saving secret:", error);
+  //     toast({
+  //       title: "Error ❌",
+  //       description: "Could not save your secret. Please try again.",
+  //     });
+  //   }
+  //   setIsEditingSecret(false);
+  //   setShowSecret(false);
+  // }
 
   async function handleSaveCompany() {
     if (!user || !userDoc) return;
@@ -212,7 +212,7 @@ export default function AccountPage() {
             </div>
 
             {/* WhatsApp Secret */}
-            <div className="bg-slate-100 dark:bg-zinc-800 p-4 rounded-xl relative">
+            {/* <div className="bg-slate-100 dark:bg-zinc-800 p-4 rounded-xl relative">
               <p className="text-sm text-muted-foreground mb-1">
                 WhatsApp Secret
               </p>
@@ -240,7 +240,7 @@ export default function AccountPage() {
                   {isEditingSecret ? "Save" : "Edit"}
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Reward Percentage */}
             <div className="bg-slate-100 dark:bg-zinc-800 p-4 rounded-xl relative">

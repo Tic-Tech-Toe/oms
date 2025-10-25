@@ -52,7 +52,6 @@ export default function People() {
     const user = auth.currentUser;
     if (!user) return;
     try {
-      // alert("Adding customer...");
       await addCustomer(user.uid, customerData);
       toast({ title: "Customer added!" });
     } catch {
@@ -84,8 +83,10 @@ export default function People() {
   };
 
   // Filter + Sort
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = customers.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.shippingAddress?.toLowerCase().includes(search.toLowerCase())
   );
 
   const sorted = [...filtered].sort((a, b) => {
@@ -112,10 +113,11 @@ export default function People() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between md:justify-start mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">People</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              People
+            </h1>
             <p className="text-gray-500 text-sm">Your customer directory</p>
           </div>
-          
         </div>
 
         {/* Search */}
@@ -127,8 +129,8 @@ export default function People() {
             className="sm:max-w-xs w-full"
           />
           <div className="flex gap-2 items-center">
-            <AddCustomerByCSV handleAddCustomer = {handleAddCustomer} />
-          <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
+            <AddCustomerByCSV handleAddCustomer={handleAddCustomer} />
+            <AddCustomerDialog onSubmitCustomer={handleAddCustomer} />
           </div>
         </div>
 
@@ -137,13 +139,22 @@ export default function People() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("name")}>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("name")}
+                >
                   Name <ArrowUpDown className="inline w-4 h-4 ml-1" />
                 </TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("whatsappNumber")}>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("whatsappNumber")}
+                >
                   WhatsApp <ArrowUpDown className="inline w-4 h-4 ml-1" />
                 </TableHead>
+                {/* === ADDED HEADERS HERE === */}
+                <TableHead>GST Number</TableHead>
+                <TableHead>Shipping Address</TableHead>
                 <TableHead>Reward Points</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -154,17 +165,26 @@ export default function People() {
                   <TableRow key={cust.id}>
                     <TableCell className="font-medium">{cust.name}</TableCell>
                     <TableCell>{cust.email || "—"}</TableCell>
+                    <TableCell className="text-md">
+                      <span className="text-[14px] font-semibold">
+                        +91{"-"}
+                        {cust.whatsappNumber.length > 10 &&
+                        cust.whatsappNumber.startsWith("91")
+                          ? cust.whatsappNumber.slice(2)
+                          : cust.whatsappNumber}
+                      </span>
+                    </TableCell>
+                    {/* === ADDED CELLS HERE === */}
+                    <TableCell className="font-mono">
+                      {cust.GSTNumber || "—"}
+                    </TableCell>
                     <TableCell>
-                      +91{" "}
-                      {cust.whatsappNumber.length > 10 &&
-                      cust.whatsappNumber.startsWith("91")
-                        ? cust.whatsappNumber.slice(2)
-                        : cust.whatsappNumber}
+                      {cust.shippingAddress?.replaceAll("|", ",") || "—"}
                     </TableCell>
                     <TableCell>
                       {cust.rewardPoint !== undefined ? (
                         <span className=" text-amber-700 text-md font-semibold px-2 py-1 rounded-full">
-                           {cust.rewardPoint}
+                          {cust.rewardPoint}
                         </span>
                       ) : (
                         "—"
@@ -199,7 +219,11 @@ export default function People() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-400 py-6">
+                  {/* === UPDATED COLSPAN HERE (from 5 to 7) === */}
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-gray-400 py-6"
+                  >
                     No customers found.
                   </TableCell>
                 </TableRow>
@@ -209,58 +233,90 @@ export default function People() {
         </div>
 
         {/* Mobile Card List */}
-        <div className="sm:hidden space-y-3">
+        <div className="sm:hidden space-y-2">
           {sorted.length > 0 ? (
             sorted.map((cust) => (
               <div
                 key={cust.id}
-                className="rounded-xl border shadow-sm p-4 bg-white flex flex-col gap-2"
+                className="rounded-lg border shadow-sm p-3 
+                   bg-white dark:bg-gray-900 
+                   border-gray-200 dark:border-gray-700 
+                   text-gray-800 dark:text-gray-100 
+                   transition-colors"
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="font-semibold text-lg">{cust.name}</h3>
+                  <h3 className="font-semibold text-base truncate">
+                    {cust.name}
+                  </h3>
                   {cust.rewardPoint !== undefined && (
-                    <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
-                       {cust.rewardPoint}
+                    <span
+                      className="bg-amber-100 text-amber-700 
+                         dark:bg-amber-900/40 dark:text-amber-300 
+                         text-[11px] px-2 py-0.5 rounded-full"
+                    >
+                      {cust.rewardPoint}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600">{cust.email || "—"}</p>
-                <p className="text-sm text-gray-600">
-                  WhatsApp:{" "}
-                  {cust.whatsappNumber.length > 10 &&
-                  cust.whatsappNumber.startsWith("91")
-                    ? cust.whatsappNumber.slice(2)
-                    : cust.whatsappNumber}
-                </p>
-                <div className="flex gap-2 mt-2">
+
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 space-y-0.5">
+                  <p>{cust.email || "—"}</p>
+                  <p>
+                    <span className="font-medium">WhatsApp:</span>{" "}
+                    {cust.whatsappNumber.length > 10 &&
+                    cust.whatsappNumber.startsWith("91")
+                      ? cust.whatsappNumber.slice(2)
+                      : cust.whatsappNumber}
+                  </p>
+                  <p>
+                    <span className="font-medium">GST:</span>{" "}
+                    {cust.GSTNumber || "—"}
+                  </p>
+                  <p className="truncate">
+                    <span className="font-medium">Address:</span>{" "}
+                    {cust.shippingAddress?.replaceAll("|", ",") || "—"}
+                  </p>
+                </div>
+
+                <div className="flex gap-1.5 mt-2 justify-end">
                   <a
                     href={`https://wa.me/91${cust.whatsappNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm" variant="outline">
-                      <MessageCircle className="w-4 h-4" />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7 p-0 hover:bg-green-50 dark:hover:bg-green-950/30"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
                     </Button>
                   </a>
+
                   <Button
-                    size="sm"
+                    size="icon"
                     variant="outline"
                     onClick={() => setEditingCustomer(cust)}
+                    className="h-7 w-7 p-0 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="w-3.5 h-3.5" />
                   </Button>
+
                   <Button
-                    size="sm"
+                    size="icon"
                     variant="destructive"
                     onClick={() => handleDelete(cust.id!)}
+                    className="h-7 w-7 p-0 hover:bg-red-600/80 dark:hover:bg-red-900"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-gray-400 text-center">No customers found.</p>
+            <p className="text-gray-400 dark:text-gray-600 text-center text-sm">
+              No customers found.
+            </p>
           )}
         </div>
 
