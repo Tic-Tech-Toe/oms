@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "my_secret_token"; // choose yourself
+const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN; // choose yourself
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {

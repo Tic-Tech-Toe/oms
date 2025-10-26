@@ -7,6 +7,7 @@ import {
   Layers,
   LayoutGrid,
   LogOut,
+  MessageCircle,
   Radio,
   Settings,
   UserRound,
@@ -42,6 +43,7 @@ const Sidebar = React.memo(() => {
     { name: "people", icon: UserRound, path: "/orders/people" },
     { name: "inventory", icon: Layers, path: "/orders/inventory" },
     { name: "broadcast", icon: Radio, path: "/orders/broadcast" },
+    // { name: "chat", icon: MessageCircle, path: "/orders/chat" },
   ];
 
   return (

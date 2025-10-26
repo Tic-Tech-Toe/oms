@@ -1,0 +1,140 @@
+{open && (
+          <div 
+            className={`
+              absolute right-0 mt-3 w-80 md:w-96 shadow-2xl z-50 transform origin-top-right transition-all duration-300 p-0 border-none
+              ${open ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"}
+              liquid-glass
+              rounded-[2rem] /* UPDATED: Increased rounding for a droplet/liquid shape */
+            `}
+          >
+            {/* CardHeader (Replaced with styled div) */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/50 dark:border-slate-700/50">
+              {/* CardTitle (Replaced with styled strong tag) */}
+              <strong className="text-xl font-semibold text-gray-800 dark:text-white">Messages</strong>
+              <div className="flex items-center gap-2">
+                {/* Refresh Button (Now using GlassButton) */}
+                <GlassButton
+                  onClick={() => fetchMessages()} 
+                  className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-slate-700/50 shadow-none text-sm"
+                  title="Refresh"
+                  disabled={loading}
+                >
+                  <RotateCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                </GlassButton>
+                
+                {/* Mark All Read Button (Now using GlassButton) */}
+                <GlassButton
+                  onClick={markAllRead}
+                  className="text-sm px-3 py-1 rounded-full text-blue-600 dark:text-blue-400 bg-blue-100/50 dark:bg-blue-900/50 shadow-none"
+                  title="Mark all read"
+                  disabled={unreadCount === 0}
+                >
+                  <CheckCheck className="h-4 w-4 mr-1" />
+                  Read All
+                </GlassButton>
+              </div>
+            </div>
+            {/* Separator (Replaced with <hr>) */}
+            <hr className="border-t border-gray-200/50 dark:border-slate-700/50 opacity-0 m-0" />
+
+            {/* CardContent (Replaced with styled div) */}
+            <div className="p-0">
+              {/* ScrollArea (Replaced with styled div with overflow) */}
+              <div className="max-h-80 overflow-y-auto custom-scroll">
+                {loading && (
+                  <div className="p-4 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+                    <RotateCw className="h-4 w-4 mr-2 animate-spin" /> Loading...
+                  </div>
+                )}
+                {error && (
+                  <div className="p-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
+                    <X className="h-4 w-4" /> Error: {error}
+                  </div>
+                )}
+                {!loading && messages.length === 0 && (
+                  <div className="p-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                    <p>✨ All clear! You have no new messages.</p>
+                  </div>
+                )}
+
+                {/* Message Items */}
+                {messages.map((m) => {
+                  const isUnread = !seenIds[m.id];
+                  return (
+                    <div
+                      key={m.id}
+                      // Use liquid-item-hover for glass-like hover transition
+                      className={`
+                        p-4 border-b border-gray-200/50 dark:border-slate-700/50 last:border-b-0 cursor-pointer liquid-item-hover
+                        ${isUnread ? "bg-blue-50/50 dark:bg-blue-950/50" : "bg-transparent"}
+                      `}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className={`text-sm ${isUnread ? "font-bold text-gray-900 dark:text-white" : "font-semibold text-gray-700 dark:text-gray-200"} truncate`}>
+                            {m.contactName ?? m.from}
+                          </div>
+                          <div className={`text-sm mt-0.5 break-words whitespace-pre-wrap ${isUnread ? "text-gray-800 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+                            {m.body}
+                          </div>
+                        </div>
+                        {/* Timestamp */}
+                        <div className="flex-shrink-0 text-xs text-gray-400 dark:text-gray-500 mt-0.5 ml-2">
+                          {formatTimestamp(m.timestamp)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Separator (Replaced with <hr>) */}
+            <hr className="border-t border-gray-200/50 dark:border-slate-700/50 opacity-0 m-0" />
+            
+            {/* Footer */}
+            <div className="px-4 py-2 border-t border-gray-200/50 dark:border-slate-700/50 text-xs text-center text-gray-500 dark:text-gray-400 rounded-b-xl">
+              Powered by Shiptrack
+            </div>
+          </div>
+        )}
+
+
+
+
+
+
+         const fetchMessages = async (opts?: { markSeen?: boolean }) => {
+    setLoading(true);
+    setError(null);
+    const controller = new AbortController();
+    try {
+      const res = await fetch(endpoint, { signal: controller.signal });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const data = await res.json();
+      const parsed = parse(data);
+
+      // merge new messages (dedupe by id) keeping newest first
+      setMessages((prev) => {
+        const byId = new Map(prev.map((p) => [p.id, p]));
+        for (const p of parsed) byId.set(p.id, p);
+        // Sort by timestamp descending
+        const merged = Array.from(byId.values()).sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0));
+        return merged;
+      });
+
+      if (opts?.markSeen) {
+        setSeenIds((prev) => {
+          const copy = { ...prev };
+          for (const m of parsed) copy[m.id] = true;
+          return copy;
+        });
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
+      console.error(err);
+      setError(err.message || "Failed to fetch");
+    } finally {
+      setLoading(false);
+    }
+  };
