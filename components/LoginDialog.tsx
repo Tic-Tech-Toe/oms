@@ -240,7 +240,7 @@ const LoginDialog = () => {
                       <Button
                         onClick={handleSendOtp}
                         disabled={loading}
-                        className=" bg-light-primary"
+                        className=" bg-light-primary text-white w-2/5"
                       >
                         {loading ? (
                           <Loader2 className="animate-spin w-4 h-4 mr-2" />
@@ -323,7 +323,7 @@ const LoginDialog = () => {
                   <Button
                     onClick={handleEmailLogin}
                     disabled={loading}
-                    className="bg-light-primary"
+                    className="bg-light-primary text-white w-2/5"
                   >
                     {loading ? (
                       <Loader2 className="animate-spin w-4 h-4 mr-2" />

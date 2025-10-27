@@ -11,12 +11,16 @@ export type ItemType = {
 
 export type OrderItem = {
   itemId?: string; // Link to ItemType by itemId
-  quantity: number; // Quantity ordered
-  price: number; // Price of the item in the current order
-  total?: number; // Total cost for this item (quantity * price)
-  sku?: string; // Optional SKU for the order item
-  category?: string; // Optional category for the order item
   itemName: string;
+  sku?: string; // Optional SKU for the order item
+  price: number; // Price of the item in the current order
+  quantity: number; // Quantity ordered
+  total?: number; // Total cost for this item (quantity * price)
+  category?: string; // Optional category for the order item
+  hsnCode?: string;
+  gstType?: "GST" | "IGST";
+  gstRate?: number;
+  gstAmount?: number;
 };
 
 
@@ -69,6 +73,7 @@ export type CustomerType = {
   rewardPoint?: number;
   shippingAddress?: string; // Shipping address
   billingAddress?: string; // Billing address
+  GSTNumber?: string; // Optional GST number for business customers
   email?: string; // Optional email address
   phoneNumber?: string; // Optional phone number
   alternatePhoneNumber?: string; // Optional alternate contact number

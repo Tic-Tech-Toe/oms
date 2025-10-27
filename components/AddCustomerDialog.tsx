@@ -18,6 +18,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Schema
+
+// Regex for GST number validation
+const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
 const AddCustomerSchema = z.object({
   // id:z.string(),
   name: z.string().min(1, "Full Name is required"),
@@ -28,6 +32,10 @@ const AddCustomerSchema = z.object({
   alternatePhoneNumber: z.string().optional(),
   shippingAddress: z.string().optional(),
   billingAddress: z.string().optional(),
+  GSTNumber: z
+    .string()
+    .regex(gstRegex, "Invalid GST number format")
+    .optional(),
 });
 
 type FormData = z.infer<typeof AddCustomerSchema>;
@@ -51,6 +59,7 @@ export default function AddCustomerDialog({
       alternatePhoneNumber: "",
       shippingAddress: "",
       billingAddress: "",
+      GSTNumber: "",
     },
   });
 
@@ -99,7 +108,9 @@ export default function AddCustomerDialog({
             <FloatingInput label="Email" name="email" type="email" />
             {/* <FloatingInput label="Phone Number" name="phoneNumber" /> */}
             {/* <FloatingInput label="Alternate Phone" name="alternatePhoneNumber" /> */}
-            {/* <FloatingInput label="Shipping Address" name="shippingAddress" /> */}
+            <FloatingInput label="Shipping Address" name="shippingAddress" placeholder="Format : 123 Address 1 | City | State | Pincode" />
+            <FloatingInput label="GST Number" name="GSTNumber" />
+            {/* <FloatingInput label="Reward Points
             {/* <FloatingInput label="Billing Address" name="billingAddress" /> */}
 
             <DialogFooter className="mt-6 flex justify-between items-center">
@@ -132,11 +143,13 @@ function FloatingInput({
   name,
   type = "text",
   required = false,
+  placeholder,
 }: {
   label: string;
   name: keyof FormData;
   type?: string;
   required?: boolean;
+  placeholder?: string;
 }) {
   const {
     register,
@@ -151,7 +164,7 @@ function FloatingInput({
       <input
         {...register(name)}
         type={type}
-        placeholder="Enter..."
+        placeholder={placeholder || "Enter..."}
         required={required}
         className="h-11 px-3 rounded-xl text-sm  border  shadow-none outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus focus:border-black transition-all"
       />
