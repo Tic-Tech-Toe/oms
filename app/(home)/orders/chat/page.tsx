@@ -92,7 +92,7 @@ const ChatPage = () => {
           {chats.map((chat) => (
             <div
               key={chat.id}
-              className="flex items-center gap-3 p-3 hover:bg-primary/10 rounded-xl transition cursor-pointer"
+              className="flex items-center gap-3 p-3 hover:bg-primary/10 rounded-xl transition cursor-pointer hover:bg-muted/40"
             >
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/30 to-primary/70 text-white flex items-center justify-center font-bold">
                 {getInitials(chat.name)}
