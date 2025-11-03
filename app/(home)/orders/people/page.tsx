@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CustomerType } from "@/types/orderType";
-import { useToast } from "@/hooks/use-toast";
-import AddCustomerDialog from "@/components/AddCustomerDialog";
-import EditCustomerDialog from "@/components/EditCustomerDialog";
-import { auth } from "@/app/config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { MessageCircle, Edit, Trash2, ArrowUpDown } from "lucide-react";
-import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
+export const dynamic = "force-dynamic"; // ✅ Prevents static build crashes
+
+import React, { useEffect, useState } from "react";
+import clsx from "clsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -17,96 +14,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { ArrowUpDown, Edit, MessageCircle, Trash2 } from "lucide-react";
 import AddCustomerByCSV from "@/components/AddCustomerByCSV";
-import clsx from "clsx";
+import AddCustomerDialog from "@/components/AddCustomerDialog";
+import EditCustomerDialog from "@/components/EditCustomerDialog";
+import { CustomerType } from "@/types/orderType";
 
-export default function People() {
-  const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(
-    null
-  );
-  const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<keyof CustomerType>("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+interface PeoplePageProps {
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  sorted: CustomerType[] | undefined;
+  handleSort: (key: keyof CustomerType) => void;
+  handleAddCustomer: () => void;
+  handleDelete: (id: string) => void;
+  handleUpdateCustomer: (id: string, updatedData: Partial<CustomerType>) => void;
+  setEditingCustomer: React.Dispatch<React.SetStateAction<CustomerType | null>>;
+  editingCustomer: CustomerType | null;
+}
 
-  const {
-    customers,
-    loadCustomers,
-    addCustomer,
-    updateCustomer,
-    deleteCustomer,
-  } = useCustomerStore();
+const PeoplePage: React.FC<PeoplePageProps> = ({
+  search,
+  setSearch,
+  sorted,
+  handleSort,
+  handleAddCustomer,
+  handleDelete,
+  handleUpdateCustomer,
+  setEditingCustomer,
+  editingCustomer,
+}) => {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  const { toast } = useToast();
+  if (!mounted) return null; // ✅ Avoid SSR rendering issues during build
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await loadCustomers(user.uid);
-      }
-    });
-    return () => unsubscribe();
-  }, [loadCustomers]);
-
-  const handleAddCustomer = async (customerData: CustomerType) => {
-    const user = auth.currentUser;
-    if (!user) return;
-    try {
-      await addCustomer(user.uid, customerData);
-      toast({ title: "Customer added!" });
-    } catch {
-      toast({ title: "Failed to add customer", variant: "destructive" });
-    }
-  };
-
-  const handleUpdateCustomer = async (updatedData: CustomerType) => {
-    const user = auth.currentUser;
-    if (!user) return;
-    try {
-      await updateCustomer(user.uid, updatedData.id!, updatedData);
-      toast({ title: "Customer updated!" });
-      setEditingCustomer(null);
-    } catch {
-      toast({ title: "Update failed", variant: "destructive" });
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const user = auth.currentUser;
-    if (!user) return;
-    try {
-      await deleteCustomer(user.uid, id);
-      toast({ title: "Customer deleted" });
-    } catch {
-      toast({ title: "Delete failed", variant: "destructive" });
-    }
-  };
-
-  // Filter + Sort
-  const filtered = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.shippingAddress?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const sorted = [...filtered].sort((a, b) => {
-    const aVal = (a[sortKey] ?? "") as string | number;
-    const bVal = (b[sortKey] ?? "") as string | number;
-
-    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
-    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const handleSort = (key: keyof CustomerType) => {
-    if (sortKey === key) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortOrder("asc");
-    }
-  };
+  const safeSorted = sorted ?? []; // ✅ Prevent undefined access
 
   return (
     <div className="min-h-screen p-4 sm:p-6">
@@ -135,7 +77,7 @@ export default function People() {
           </div>
         </div>
 
-        {/* Table for desktop, cards for mobile */}
+        {/* Table for desktop */}
         <div className="hidden sm:block rounded-xl border shadow-sm overflow-x-auto">
           <Table>
             <TableHeader>
@@ -153,29 +95,29 @@ export default function People() {
                 >
                   WhatsApp <ArrowUpDown className="inline w-4 h-4 ml-1" />
                 </TableHead>
-                {/* === ADDED HEADERS HERE === */}
                 <TableHead>GST Number</TableHead>
                 <TableHead>Shipping Address</TableHead>
                 <TableHead>Reward Points</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {sorted.length > 0 ? (
-                sorted.map((cust) => (
+              {safeSorted.length > 0 ? (
+                safeSorted.map((cust) => (
                   <TableRow key={cust.id}>
                     <TableCell className="font-medium">{cust.name}</TableCell>
                     <TableCell>{cust.email || "—"}</TableCell>
                     <TableCell className="text-md">
                       <span className="text-[14px] font-semibold">
                         +91{"-"}
-                        {cust.whatsappNumber.length > 10 &&
+                        {cust.whatsappNumber?.length > 10 &&
                         cust.whatsappNumber.startsWith("91")
                           ? cust.whatsappNumber.slice(2)
-                          : cust.whatsappNumber}
+                          : cust.whatsappNumber ?? "—"}
                       </span>
                     </TableCell>
-                    {/* === ADDED CELLS HERE === */}
+
                     <TableCell
                       className={clsx(
                         "font-mono",
@@ -185,18 +127,21 @@ export default function People() {
                     >
                       {cust.GSTNumber || "—"}
                     </TableCell>
+
                     <TableCell>
                       {cust.shippingAddress?.replaceAll("|", ",") || "—"}
                     </TableCell>
+
                     <TableCell>
                       {cust.rewardPoint !== undefined ? (
-                        <span className=" text-amber-700 text-md font-semibold px-2 py-1 rounded-full">
+                        <span className="text-amber-700 text-md font-semibold px-2 py-1 rounded-full">
                           {cust.rewardPoint}
                         </span>
                       ) : (
                         "—"
                       )}
                     </TableCell>
+
                     <TableCell className="flex gap-2">
                       <a
                         href={`https://wa.me/91${cust.whatsappNumber}`}
@@ -226,11 +171,7 @@ export default function People() {
                 ))
               ) : (
                 <TableRow>
-                  {/* === UPDATED COLSPAN HERE (from 5 to 7) === */}
-                  <TableCell
-                    colSpan={7}
-                    className="text-center text-gray-400 py-6"
-                  >
+                  <TableCell colSpan={7} className="text-center text-gray-400 py-6">
                     No customers found.
                   </TableCell>
                 </TableRow>
@@ -239,17 +180,17 @@ export default function People() {
           </Table>
         </div>
 
-        {/* Mobile Card List */}
+        {/* Mobile card list */}
         <div className="sm:hidden space-y-2">
-          {sorted.length > 0 ? (
-            sorted.map((cust) => (
+          {safeSorted.length > 0 ? (
+            safeSorted.map((cust) => (
               <div
                 key={cust.id}
                 className="rounded-lg border shadow-sm p-3 
-                   bg-white dark:bg-gray-900 
-                   border-gray-200 dark:border-gray-700 
-                   text-gray-800 dark:text-gray-100 
-                   transition-colors"
+                  bg-white dark:bg-gray-900 
+                  border-gray-200 dark:border-gray-700 
+                  text-gray-800 dark:text-gray-100 
+                  transition-colors"
               >
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold text-base truncate">
@@ -258,8 +199,8 @@ export default function People() {
                   {cust.rewardPoint !== undefined && (
                     <span
                       className="bg-amber-100 text-amber-700 
-                         dark:bg-amber-900/40 dark:text-amber-300 
-                         text-[11px] px-2 py-0.5 rounded-full"
+                        dark:bg-amber-900/40 dark:text-amber-300 
+                        text-[11px] px-2 py-0.5 rounded-full"
                     >
                       {cust.rewardPoint}
                     </span>
@@ -270,31 +211,10 @@ export default function People() {
                   <p>{cust.email || "—"}</p>
                   <p>
                     <span className="font-medium">WhatsApp:</span>{" "}
-                    {cust.whatsappNumber.length > 10 &&
+                    {cust.whatsappNumber?.length > 10 &&
                     cust.whatsappNumber.startsWith("91")
                       ? cust.whatsappNumber.slice(2)
-                      : cust.whatsappNumber}
-                  </p>
-                  <p>
-                    <span className="font-medium">GST:</span>{" "}
-                    {cust.GSTNumber || "—"}
-                  </p>
-                  <p className="truncate">
-                    <span className="font-medium">Address:</span>{" "}
-                    {cust.shippingAddress?.replaceAll("|", ",") || "—"}
-                  </p>
-                </div>
-
-                <div className="flex gap-1.5 mt-2 justify-end">
-
-                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 space-y-0.5">
-                  <p>{cust.email || "—"}</p>
-                  <p>
-                    <span className="font-medium">WhatsApp:</span>{" "}
-                    {cust.whatsappNumber.length > 10 &&
-                    cust.whatsappNumber.startsWith("91")
-                      ? cust.whatsappNumber.slice(2)
-                      : cust.whatsappNumber}
+                      : cust.whatsappNumber ?? "—"}
                   </p>
                   <p>
                     <span className="font-medium">GST:</span>{" "}
@@ -320,7 +240,6 @@ export default function People() {
                       <MessageCircle className="w-3.5 h-3.5" />
                     </Button>
                   </a>
-
                   <Button
                     size="icon"
                     variant="outline"
@@ -329,7 +248,6 @@ export default function People() {
                   >
                     <Edit className="w-3.5 h-3.5" />
                   </Button>
-
                   <Button
                     size="icon"
                     variant="destructive"
@@ -360,4 +278,6 @@ export default function People() {
       </div>
     </div>
   );
-}
+};
+
+export default PeoplePage;
