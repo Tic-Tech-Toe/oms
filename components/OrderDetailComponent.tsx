@@ -37,7 +37,7 @@ export default function OrderDetailComponent({ order }: { order: OrderType }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
      {/* Header: Edit Order Button */}
 <div className="flex justify-between items-center">
   <h4 className="text-xl font-semibold">Items</h4>

@@ -40,6 +40,7 @@ export const useInventoryStore = create<InventoryAppState>((set, get) => ({
   },
 
   updateItem: async (userId, itemId, updatedFields) => {
+    console.log("Updating item:", itemId, updatedFields);
     await fbUpdateItem(userId, itemId, updatedFields);
     set((state) => ({
       inventory: state.inventory.map((item) =>

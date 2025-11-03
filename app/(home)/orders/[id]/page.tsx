@@ -149,11 +149,13 @@ const OrderDetails = () => {
         {/* Left 2/3 */}
         <div className="col-span-2 flex flex-col gap-6">
           {/* Order Info */}
-          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Order Information</h2>
+          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm ">
+            <div className="flex items-center justify-between mb-4 ">
+              <h2 className="text-lg font-semibold pl-6 pt-6">
+                Order Information
+              </h2>
               <Badge
-                className={`rounded-full text-xs ${getBadgeClass(
+                className={`rounded-full text-xs mr-6 ${getBadgeClass(
                   order.status || "",
                   "order"
                 )}`}
@@ -185,19 +187,34 @@ const OrderDetails = () => {
           </section>
 
           {/* Payment Info */}
-          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Payment Information</h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Invoice No: {order.invoiceNumber}
-            </p>
-            <OrderPaymentDetailComponent order={order} />
-            {showPaymentCollect && (
-              <OrderPaymentCollect
-                order={order}
-                setOpen={setShowPaymentCollect}
-                refreshOrders={loadOrders}
-              />
-            )}
+          <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm ">
+            <div className="p-6">
+              <div className="flex justify-between ">
+                <h2 className="text-lg font-semibold mb-4">
+                  Payment Information
+                </h2>
+                {/* <Badge
+                  className={`rounded-full text-xs mr-6 ${getBadgeClass(
+                    order.status || "",
+                    "order"
+                  )}`}
+                >
+                  {order.paymentStatus}
+                </Badge> */}
+              </div>
+
+              <p className="text-sm text-gray-500 mb-2">
+                Invoice No: {order.invoiceNumber}
+              </p>
+              <OrderPaymentDetailComponent order={order} />
+              {showPaymentCollect && (
+                <OrderPaymentCollect
+                  order={order}
+                  setOpen={setShowPaymentCollect}
+                  refreshOrders={loadOrders}
+                />
+              )}
+            </div>
             <FooterComponent
               text="Manage payment"
               order={order}

@@ -135,12 +135,12 @@ const TableArea: React.FC<TableAreaProps> = ({ allOrders }) => {
     <Card className="md:m-6 shadow-none rounded-[2.5rem] dark:bg-zinc-900 bg-neutral-100 ">
       <div className="md:p-8">
         {/* Search bar */}
-        <div className="mb-4 mt-8  flex w-full items-center justify-center gap-2">
+        <div className="mb-4 mt-8  flex w-full items-center justify-center md:justify-start gap-2">
           <Input
             placeholder="Search by order ID, customer, or invoice"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="max-w-sm rounded-full border-2 border-light-primary"
+            className="max-w-sm rounded-full border-2 border-light-primary mx-2 px-2"
           />
           {/* <Button className="rounded-full border-2 border-light-primary text-light-primary">
             <Filter className="h-4 w-4 mr-1" />

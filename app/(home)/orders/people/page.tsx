@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import AddCustomerByCSV from "@/components/AddCustomerByCSV";
+import clsx from "clsx";
 
 export default function People() {
   const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(
@@ -153,12 +154,27 @@ export default function People() {
                   <TableRow key={cust.id}>
                     <TableCell className="font-medium">{cust.name}</TableCell>
                     <TableCell>{cust.email || "—"}</TableCell>
+                    <TableCell className="text-md">
+                      <span className="text-[14px] font-semibold">
+                        +91{"-"}
+                        {cust.whatsappNumber.length > 10 &&
+                        cust.whatsappNumber.startsWith("91")
+                          ? cust.whatsappNumber.slice(2)
+                          : cust.whatsappNumber}
+                      </span>
+                    </TableCell>
+                    {/* === ADDED CELLS HERE === */}
+                    <TableCell
+                      className={clsx(
+                        "font-mono",
+                        cust.GSTNumber === "No GST" &&
+                          "text-orange-700 font-semibold border-2 border-orange-700 rounded-lg"
+                      )}
+                    >
+                      {cust.GSTNumber || "—"}
+                    </TableCell>
                     <TableCell>
-                      +91{" "}
-                      {cust.whatsappNumber.length > 10 &&
-                      cust.whatsappNumber.startsWith("91")
-                        ? cust.whatsappNumber.slice(2)
-                        : cust.whatsappNumber}
+                      {cust.shippingAddress?.replaceAll("|", ",") || "—"}
                     </TableCell>
                     <TableCell>
                       {cust.rewardPoint !== undefined ? (
@@ -223,15 +239,27 @@ export default function People() {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600">{cust.email || "—"}</p>
-                <p className="text-sm text-gray-600">
-                  WhatsApp:{" "}
-                  {cust.whatsappNumber.length > 10 &&
-                  cust.whatsappNumber.startsWith("91")
-                    ? cust.whatsappNumber.slice(2)
-                    : cust.whatsappNumber}
-                </p>
-                <div className="flex gap-2 mt-2">
+
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 space-y-0.5">
+                  <p>{cust.email || "—"}</p>
+                  <p>
+                    <span className="font-medium">WhatsApp:</span>{" "}
+                    {cust.whatsappNumber.length > 10 &&
+                    cust.whatsappNumber.startsWith("91")
+                      ? cust.whatsappNumber.slice(2)
+                      : cust.whatsappNumber}
+                  </p>
+                  <p>
+                    <span className="font-medium">GST:</span>{" "}
+                    {cust.GSTNumber || "—"}
+                  </p>
+                  <p className="truncate">
+                    <span className="font-medium">Address:</span>{" "}
+                    {cust.shippingAddress?.replaceAll("|", ",") || "—"}
+                  </p>
+                </div>
+
+                <div className="flex gap-1.5 mt-2 justify-end">
                   <a
                     href={`https://wa.me/91${cust.whatsappNumber}`}
                     target="_blank"

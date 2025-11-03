@@ -12,6 +12,11 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useOrderStore, decreaseInventoryStock } from "@/hooks/zustand_stores/useOrderStore";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/app/context/AuthContext";
+import OrderItemsCard from "./OrderItemCard";
+import CollapsibleWrapper from "./CollapsibleWrapper";
+import ChargesEditor, { Charge } from "./ChargesEditor";
+import QuickSummaryCard from "./QuickSummaryCard";
+import BillDetailsCard from "./BillDetailsCard";
 
 // --- TYPE DEFINITIONS ---
 type Customer = {
