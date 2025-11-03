@@ -126,7 +126,7 @@ const InviteAdminPage = () => {
             onClick={generateInvite}
             disabled={generating}
             variant="default"
-            className="bg-light-primary"
+            className="bg-light-primary text-white"
           >
             {generating ? (
               <>

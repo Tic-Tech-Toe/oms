@@ -19,9 +19,9 @@ const db = getFirestore()
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { secret, name, company, whatsappNumber } = body
-
-    if (!secret || !name || !whatsappNumber) {
+    const { secret, name, company, phone } = body
+    console.table({body})
+    if (!secret || !name || !phone) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     const requestRef = await db.collection('access_requests').add({
       name,
       company,
-      whatsappNumber,
+      phone,
       inviteId,
       email: inviteData.email,
       approved: false,

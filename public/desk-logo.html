@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ShipTrack — SVG favicon prototypes</title>
+  <style>
+    body{font-family:Inter,system-ui,Arial;margin:28px;background:#f7fbfd;color:#0b1220}
+    h1{font-size:20px;margin-bottom:8px}
+    .grid{display:flex;gap:20px;align-items:flex-start}
+    .card{background:white;padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(12,34,56,0.06);width:210px}
+    svg{width:120px;height:120px;display:block;margin:0 auto}
+    button{margin-top:10px;padding:8px 10px;border-radius:8px;border:0;background:#0078FF;color:white;cursor:pointer}
+    small{display:block;margin-top:8px;color:#556}
+    pre{background:#eef6ff;padding:10px;border-radius:8px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h1>ShipTrack — SVG favicon prototypes</h1>
+  <p>Three clean, export-ready SVG favicon variants. Use the <strong>Download SVG</strong> buttons to save the raw SVG, or use <strong>Export PNG</strong> to create 512/192/32 px PNGs.</p>
+
+  <div class="grid">
+    <!-- Variant 1: S Logo (route-gap) -->
+    <div class="card">
+      <svg id="s-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#0078FF"/>
+            <stop offset="100%" stop-color="#00D2A8"/>
+          </linearGradient>
+        </defs>
+        <!-- Upper S piece -->
+        <path d="M20 20 C36 20, 64 20, 80 20 C80 20, 80 20, 80 32 C80 44, 60 44, 54 44 C40 44, 36 46, 28 52 C20 58, 20 66, 20 76 C20 86, 36 86, 52 86 C68 86, 80 86, 80 86" fill="none" stroke="url(#g1)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Lower S piece (offset to create gap feel) -->
+        <path d="M20 76 C36 76, 64 76, 80 76" fill="none" stroke="url(#g1)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,0)"/>
+        <!-- diagonal cut to imply a route cut (thin white shape) -->
+        <rect x="8" y="46" width="84" height="6" fill="white" transform="rotate(-12 50 49)" opacity="0.98"/>
+      </svg>
+      <button onclick="downloadSVG('s-logo','shiptrack-s-logo.svg')">Download SVG</button>
+      <button onclick="exportPNG('s-logo',512,'shiptrack-s-512.png')">Export PNG 512</button>
+      <small>S-shaped mark with a diagonal route cut — premium & geometric.</small>
+    </div>
+
+    <!-- Variant 2: Pin + Route -->
+    <div class="card">
+      <svg id="pin-route" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g2" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#0078FF"/>
+            <stop offset="100%" stop-color="#00D2A8"/>
+          </linearGradient>
+        </defs>
+        <!-- pin body -->
+        <path d="M50 6 C34 6,20 22,20 38 C20 56,50 88,50 88 C50 88,80 56,80 38 C80 22,66 6,50 6 Z" fill="url(#g2)"/>
+        <!-- inner route: an S-like path -->
+        <path d="M40 38 C44 30,56 30,60 38 C64 46,46 50,44 58" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <button onclick="downloadSVG('pin-route','shiptrack-pin-route.svg')">Download SVG</button>
+      <button onclick="exportPNG('pin-route',512,'shiptrack-pin-512.png')">Export PNG 512</button>
+      <small>Map pin with an internal route — explicit tracking metaphor.</small>
+    </div>
+
+    <!-- Variant 3: Wave / Route Badge -->
+    <div class="card">
+      <svg id="wave-badge" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g3" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#0078FF"/>
+            <stop offset="100%" stop-color="#00D2A8"/>
+          </linearGradient>
+        </defs>
+        <rect x="6" y="6" width="88" height="88" rx="18" fill="url(#g3)"/>
+        <path d="M18 60 C30 46,42 46,54 60 C66 74,78 74,82 60" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="24" cy="64" r="3" fill="white" />
+      </svg>
+      <button onclick="downloadSVG('wave-badge','shiptrack-wave-badge.svg')">Download SVG</button>
+      <button onclick="exportPNG('wave-badge',512,'shiptrack-wave-512.png')">Export PNG 512</button>
+      <small>Badge-style wave — compact, app-icon friendly.</small>
+    </div>
+  </div>
+
+  <hr style="margin:24px 0" />
+  <h2>How to tweak</h2>
+  <p>Open the downloaded SVG in Figma / Illustrator / VS Code. The gradient stops are <code>#0078FF</code> → <code>#00D2A8</code>. To change the palette, edit the <code>stop-color</code> values inside each <code>&lt;linearGradient&gt;</code>.</p>
+  <pre>&lt;linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"&gt;
+  &lt;stop offset="0%" stop-color="#0078FF"/&gt;
+  &lt;stop offset="100%" stop-color="#00D2A8"/&gt;
+&lt;/linearGradient&gt;</pre>
+
+  <script>
+    function downloadSVG(id, filename){
+      const svg = document.getElementById(id);
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+      // add XML declaration
+      source = '<?xml version="1.0" encoding="utf-8"?>\n' + source;
+      const blob = new Blob([source], {type: 'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportPNG(id, size, filename){
+      const svg = document.getElementById(id);
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+      source = '<?xml version="1.0" encoding="utf-8"?>\n' + source;
+      const svgBlob = new Blob([source], {type: 'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = function(){
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // white background
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        // draw the svg
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function(blob){
+          const a = document.createElement('a');
+          const url2 = URL.createObjectURL(blob);
+          a.href = url2; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url2);
+        }, 'image/png');
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = function(e){ alert('Failed to export PNG — try opening the SVG and exporting from a vector editor.'); };
+      img.src = url;
+    }
+  </script>
+
+</body>
+</html>

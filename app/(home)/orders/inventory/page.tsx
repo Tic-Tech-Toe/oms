@@ -16,12 +16,8 @@ export default function InventoryPage() {
   const { inventory, loadInventory, updateItem, deleteItem, addItem } = useInventoryStore();
 
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
-  const [editState, setEditState] = useState<Record<string, Partial<ItemType>>>(
-    {}
-  );
+  const [editState, setEditState] = useState<Record<string, any>>({});
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
-
-  // Search & Sort
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "price" | "quantity">("name");
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
@@ -30,22 +26,18 @@ export default function InventoryPage() {
     if (user?.uid) loadInventory(user.uid);
   }, [user]);
 
-  const handleFieldChange = (id: string, key: keyof ItemType, value: any) => {
+  const handleFieldChange = (id: string, key: string, value: any) =>
     setEditState((prev) => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        [key]: value,
-      },
+      [id]: { ...prev[id], [key]: value },
     }));
-  };
 
   const handleSave = async (id: string) => {
     if (!user?.uid) return;
     const updates = editState[id];
     try {
       await updateItem(user.uid, id, updates);
-      toast({ title: "Success", description: "Item updated successfully." });
+      toast({ title: "Saved", description: "Item updated successfully." });
       setExpandedItemId(null);
       setEditState((prev) => {
         const { [id]: _, ...rest } = prev;
@@ -54,7 +46,7 @@ export default function InventoryPage() {
     } catch {
       toast({
         title: "Error",
-        description: "Failed to update item.",
+        description: "Could not update item.",
         variant: "destructive",
       });
     }
@@ -64,7 +56,7 @@ export default function InventoryPage() {
     if (!user?.uid) return;
     try {
       await deleteItem(user.uid, id);
-      toast({ title: "Deleted", description: "Item removed from inventory." });
+      toast({ title: "Deleted", description: "Item removed." });
     } catch {
       toast({
         title: "Error",
@@ -90,18 +82,15 @@ export default function InventoryPage() {
 
   const filteredInventory = useMemo(() => {
     let items = [...inventory];
-
     if (search) {
       items = items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(search.toLowerCase()) ||
-          (item.sku ?? "").toLowerCase().includes(search.toLowerCase())
+        (i) =>
+          i.name.toLowerCase().includes(search.toLowerCase()) ||
+          (i.sku ?? "").toLowerCase().includes(search.toLowerCase())
       );
     }
-
-    if (categoryFilter !== "All") {
-      items = items.filter((item) => item.category === categoryFilter);
-    }
+    if (categoryFilter !== "All")
+      items = items.filter((i) => i.category === categoryFilter);
 
     items.sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name);
@@ -109,18 +98,13 @@ export default function InventoryPage() {
       if (sortBy === "quantity") return (a.quantity ?? 0) - (b.quantity ?? 0);
       return 0;
     });
-
     return items;
   }, [inventory, search, sortBy, categoryFilter]);
 
-  // 🔹 Get unique categories
-  const categories = [
-    "All",
-    ...new Set(inventory.map((i) => i.category ?? "")),
-  ];
+  const categories = ["All", ...new Set(inventory.map((i) => i.category ?? ""))];
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="p-6 min-h-screen dark:bg-neutral-950 transition-colors">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -131,13 +115,13 @@ export default function InventoryPage() {
       {/* Search & Filters */}
       <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
         <div className="relative w-full md:w-1/3">
-          <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search by name or SKU..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border pl-9 pr-3 py-2 text-sm dark:bg-neutral-800 dark:text-white"
+            className="w-full rounded-xl border border-gray-300 dark:border-neutral-700 pl-9 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 dark:text-gray-100"
           />
         </div>
 

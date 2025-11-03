@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, X, LayoutGrid, UserRound, Layers, Radio } from "lucide-react";
+import { Menu, X, LayoutGrid, UserRound, Layers, Radio, MessageCircle } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import React, { useState } from "react";
@@ -25,6 +25,7 @@ const BottomNav = () => {
     { name: "people", icon: UserRound, path: "/orders/people" },
     { name: "inventory", icon: Layers, path: "/orders/inventory" },
     { name: "broadcast", icon: Radio, path: "/orders/broadcast" },
+    // { name: "chat", icon: MessageCircle, path: "/orders/chat" },
   ];
 
   return (

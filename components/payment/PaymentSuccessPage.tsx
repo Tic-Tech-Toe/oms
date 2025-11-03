@@ -37,7 +37,7 @@ export default function PaymentSuccessPage() {
                 : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
             await updateDoc(userRef, {
-              subscriptionStatus: plan,
+              subscription.status: plan,
               subscriptionEndDate: endDate,
             });
           }

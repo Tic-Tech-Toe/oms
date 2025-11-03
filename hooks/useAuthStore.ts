@@ -9,25 +9,25 @@ import {
   signOut,
 } from "firebase/auth";
 
-type SubscriptionStatus = "free" | "monthly" | "yearly" | null;
+type subscription.status = "free" | "monthly" | "yearly" | null;
 
 interface AuthState {
   user: User | null;
   loading: boolean;
-  subscriptionStatus: SubscriptionStatus;
+  subscription.status: subscription.status;
   subscriptionEnd: Date | null;
 
   // actions
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  setSubscription: (status: SubscriptionStatus, end?: Date | null) => void;
+  setSubscription: (status: subscription.status, end?: Date | null) => void;
   initAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: true,
-  subscriptionStatus: null,
+  subscription.status: null,
   subscriptionEnd: null,
 
   // ✅ Auth methods
@@ -48,11 +48,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: async () => {
     await fetch("/api/logout", { method: "POST" });
     await signOut(auth);
-    set({ user: null, subscriptionStatus: null, subscriptionEnd: null });
+    set({ user: null, subscription.status: null, subscriptionEnd: null });
   },
 
   setSubscription: (status, end = null) =>
-    set({ subscriptionStatus: status, subscriptionEnd: end }),
+    set({ subscription.status: status, subscriptionEnd: end }),
 
   initAuth: () => {
     // ✅ runs once, keeps store in sync with Firebase

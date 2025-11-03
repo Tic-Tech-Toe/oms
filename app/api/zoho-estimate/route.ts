@@ -1,3 +1,4 @@
+import { useAuth } from "@/app/context/AuthContext";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -12,6 +13,8 @@ export async function GET(req: Request) {
         { status: 400 }
       );
     }
+
+
 
     const CLIENT_ID = process.env.ZOHO_CLIENT_ID!;
     const CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET!;

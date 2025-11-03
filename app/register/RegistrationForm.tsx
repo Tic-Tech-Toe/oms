@@ -5,21 +5,26 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Briefcase, User, Loader2, Phone } from "lucide-react"; // Only use necessary icons
 
 export default function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
   const { toast } = useToast();
 
-  const secret = params.get("secret");
+  const inviteToken = params.get("secret");
+  
+  // Form states (kept as is, including phone state)
+  const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [company, setCompany] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // NOTE: The decodeEmailFromSecret function is unused in this final version,
+  // but keeping it here for completeness if you decide to use it later.
 
   const handleSubmit = async () => {
-    alert("Hi Ashan")
-    if (!name || !whatsappNumber || !company) {
+    if (!name || !company || !phone) {
       toast({
         title: "Please fill all fields",
         variant: "destructive",
@@ -29,27 +34,32 @@ export default function RegisterForm() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/request-access", {
+      // Endpoint is /api/request-access
+      const res = await fetch("/api/request-access", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          secret,
+          secret: inviteToken, 
+          phone,
           name,
-          whatsappNumber,
           company,
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
+        // 🚀 SUCCESS ACTION: Redirect to the pending approval page
         toast({
-          title: "Request sent!",
-          description: "Waiting for admin approval ✅",
+          title: "Request Submitted!",
+          description: "Your account is awaiting administrator approval. ✅",
         });
-        router.push("/thank-you");
+        
+        // Redirect to a specific "waiting" page
+        router.push("/thank-you"); 
+        
       } else {
         toast({
-          title: "Error",
+          title: "Submission Error",
           description: data.error,
           variant: "destructive",
         });
@@ -63,56 +73,75 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-24 p-8 rounded-2xl border border-muted bg-card shadow-md space-y-6">
+    <div className="max-w-md mx-auto mt-24 p-8 rounded-2xl border border-muted bg-card shadow-lg space-y-6">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">
-          Welcome to, <span className="text-light-primary">ShipTrack</span>
+          Welcome to <span className="text-[#4f46e5]">ShipTrack</span>
         </h1>
         <p className="text-muted-foreground text-sm">
-          Finish your signup to start tracking like a pro.
+          Please fill up details to get your login credentials.
         </p>
       </div>
 
       <div className="space-y-4">
+        
+        {/* Phone field to allow my register users to login with otp */}
         <div>
-          <label className="block text-sm font-medium mb-1">Full Name</label>
+          <label className="block text-sm font-medium mb-1 flex items-center">
+            <Phone className="w-4 h-4 mr-1 text-muted-foreground" />
+            Phone Number (For OTP Login)
+          </label>
+          <Input
+            value={phone}
+            placeholder="Your phone number"
+            // Note: Removed the disabled/read-only styling to allow input
+            onChange={(e) => setPhone(e.target.value)}
+            className="focus-visible:ring-2 focus-visible:ring-[#4f46e5]"
+          />
+        </div>
+
+        {/* Full Name */}
+        <div>
+          <label className="block text-sm font-medium mb-1 flex items-center">
+            <User className="w-4 h-4 mr-1 text-muted-foreground" />
+            Full Name
+          </label>
           <Input
             placeholder="Your full name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="focus-visible:ring-2 focus-visible:ring-light-primary"
+            className="focus-visible:ring-2 focus-visible:ring-[#4f46e5]"
           />
         </div>
 
+        {/* Company */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            WhatsApp Number
+          <label className="block text-sm font-medium mb-1 flex items-center">
+            <Briefcase className="w-4 h-4 mr-1 text-muted-foreground" />
+            Company
           </label>
-          <Input
-            placeholder="Enter your WhatsApp number"
-            value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(e.target.value)}
-            className="focus-visible:ring-2 focus-visible:ring-light-primary"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Company</label>
           <Input
             type="text"
             placeholder="Your company or startup"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="focus-visible:ring-2 focus-visible:ring-light-primary"
+            className="focus-visible:ring-2 focus-visible:ring-[#4f46e5]"
           />
         </div>
 
         <Button
           onClick={handleSubmit}
-          disabled={loading}
-          className="w-full bg-light-primary hover:bg-light-primary/90 transition"
+          disabled={loading || !name || !company || !phone}
+          className="w-full bg-[#4f46e5] hover:bg-[#4f46e5]/90 transition text-white"
         >
-          {loading ? "Submitting..." : "Submit Request"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting Request...
+            </>
+          ) : (
+            "Submit Access Request"
+          )}
         </Button>
       </div>
     </div>

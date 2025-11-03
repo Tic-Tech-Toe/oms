@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useState } from "react";
 import CountUp from "react-countup";
 import { Check } from "lucide-react";
+import Link from "next/link";
 
 const plans = [
   {
@@ -90,14 +91,14 @@ export default function Pricing() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="mt-14 flex flex-col items-center gap-6 lg:flex-row lg:justify-center">
+        <div className="mt-14 flex flex-col items-center gap-6 md:gap-0 lg:flex-row lg:justify-center">
           {plans.map((plan, idx) => (
             <div
               key={plan.id}
               className={clsx(
                 "relative flex flex-col rounded-2xl border bg-white p-8 shadow-md transition dark:bg-gray-800 dark:border-gray-700",
                 plan.highlight
-                  ? "lg:scale-110 border-indigo-600 shadow-xl"
+                  ? "lg:scale-110 border-4 border-indigo-600 shadow-xl z-10" // <-- Add z-10 here
                   : "lg:scale-95",
                 idx === 0 && "lg:rounded-r-none",
                 idx === 2 && "lg:rounded-l-none"
@@ -139,9 +140,18 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              <button className="mt-8 w-full rounded-xl bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700">
+              <Link
+                className="mt-8 w-full rounded-xl bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700"
+                href={{
+                  pathname: "/subscribe",
+                  query: {
+                    planId: plan.id,
+                    cycle: monthly ? "monthly" : "yearly",
+                  },
+                }}
+              >
                 Get Started
-              </button>
+              </Link>
             </div>
           ))}
         </div>
