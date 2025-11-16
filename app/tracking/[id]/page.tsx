@@ -47,6 +47,8 @@ export default function TrackingPage() {
     if (id) fetchOrder();
   }, [id]);
 
+  console.log(order)
+
   // Load the Razorpay script dynamically
   useEffect(() => {
     const script = document.createElement("script");
@@ -151,150 +153,147 @@ export default function TrackingPage() {
 
   return (
     <>
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 max-w-sm mx-auto text-center">
-            <XCircle className="w-10 h-10 text-red-500 mx-auto mb-4" />
-            <p className="text-lg font-semibold">{modalMessage}</p>
-            <Button
-              onClick={() => setShowModal(false)}
-              className="mt-4 px-6 py-2 rounded-xl bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Track Your Order</h1>
-          <p className="text-sm text-gray-500">
-            Order ID: {order.invoiceNumber || id}
-          </p>
-        </div>
-
-        {/* Progress Tracker */}
-        <div className="flex justify-between items-center mb-6 relative">
-          {steps.map((step, index) => (
-            <div key={step} className="flex-1 text-center">
-              <div
-                className={`w-9 h-9 mx-auto rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  index <= currentStep
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                    : "bg-gray-200 text-gray-500"
-                }`}
-              >
-                {index + 1}
-              </div>
-              <p
-                className={`mt-2 text-xs font-medium ${
-                  index <= currentStep ? "text-purple-600" : "text-gray-400"
-                }`}
-              >
-                {step}
-              </p>
-            </div>
-          ))}
-          <div className="absolute top-4 left-0 w-full h-0.5 bg-gray-200 -z-10">
-            <div
-              className="h-0.5 bg-gradient-to-r from-purple-500 to-pink-500"
-              style={{
-                width: `${(currentStep / (steps.length - 1)) * 100}%`,
-              }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          {/* Delivery Info Card */}
-          <div className="bg-white flex-1 dark:bg-zinc-950 rounded-2xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-800">
-            <div className="flex items-center gap-2 mb-4">
-              <Truck className="w-5 h-5 text-purple-600" />
-              <h2 className="text-lg font-semibold">Delivery Details</h2>
-            </div>
-            <p className="text-sm">Customer: {order.customer?.name}</p>
-            <p className="text-sm">Phone: +91 {order.customer?.whatsappNumber}</p>
-            <p className="text-sm">
-              Date: {format(new Date(order.orderDate), "dd MMM yyyy")}
-            </p>
-            <Badge
-              className={`mt-3 px-3 py-1 rounded-full text-xs font-medium ${
-                order.status === "Delivered"
-                  ? "bg-green-100 text-green-600"
-                  : "bg-yellow-100 text-yellow-600"
-              }`}
-            >
-              {order.status}
-            </Badge>
-
-            <div className="mt-4">
-              <a
-                href={
-                  order?.trackingLink?.startsWith("http")
-                    ? order.trackingLink
-                    : `https://${order.trackingLink}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full block text-center px-4 py-2 rounded-xl bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
-              >
-                Track Package
-              </a>
-            </div>
-          </div>
-          {/* Payment Card */}
-          <div className="bg-white flex flex-col justify-between dark:bg-zinc-950 rounded-2xl shadow-lg p-6 border border-zinc-200 dark:border-zinc-800">
-            <div className="flex items-center gap-2 mb-4">
-              <CreditCard className="w-5 h-5 text-green-600" />
-              <h2 className="text-lg font-semibold">Payment</h2>
-            </div>
-            <div>
-              <p className="text-sm mb-2">Total Payable</p>
-              <p className="text-xl font-bold text-green-600 mb-4">
-                {formatCurrency(order.totalAmount)}
-              </p>
-            </div>
-            <Button
-              onClick={handlePayment}
-              disabled={isPaying}
-              className="px-6 py-2 rounded-xl bg-green-600 text-white font-medium shadow hover:bg-green-700 transition"
-            >
-              {isPaying ? "Processing..." : "Pay Now"}
-            </Button>
-          </div>
-        </div>
-
-        {/* Order Items */}
-        <div className="bg-white dark:bg-zinc-950 rounded-2xl shadow-md p-6 border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold mb-4">Items</h2>
-          <Separator className="mb-4" />
-          <div className="space-y-3">
-            {order.items.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex justify-between items-center text-sm"
-              >
-                <span>
-                  {item.itemName} × {item.quantity}
-                </span>
-                <span className="font-medium">{formatCurrency(item.total)}</span>
-              </div>
-            ))}
-          </div>
-          <Separator className="my-4" />
-          <div className="flex justify-between font-semibold text-sm">
-            <span>Total:</span>
-            <span>{formatCurrency(order.totalAmount)}</span>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 text-center text-xs text-gray-500">
-          🚀 Powered by Shiptrack
-        </div>
+  {/* ====== iOS Style Modal ====== */}
+  {showModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/40">
+      <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-xl w-80 text-center">
+        <XCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+        <p className="text-base font-medium text-zinc-800 dark:text-zinc-200">
+          {modalMessage}
+        </p>
+        <Button
+          onClick={() => setShowModal(false)}
+          className="mt-5 w-full py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700"
+        >
+          Close
+        </Button>
       </div>
-    </>
+    </div>
+  )}
+
+  {/* ====== Main Container ====== */}
+  <div className="max-w-2xl mx-auto px-5 py-8 space-y-8">
+
+    {/* -------- Header -------- */}
+    <div className="text-center space-y-1">
+      <h1 className="text-2xl font-bold tracking-tight">Order Tracking</h1>
+      <p className="text-xs text-gray-500">
+        Invoice: {order.invoiceNumber}
+      </p>
+    </div>
+
+    {/* -------- Delivery Details Card -------- */}
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Truck className="w-5 h-5 text-blue-600" />
+        <h2 className="text-lg font-semibold">Delivery Details</h2>
+      </div>
+
+      <div className="space-y-1 text-sm">
+        <p><span className="font-medium">Customer:</span> {order.customer?.name}</p>
+        <p>
+          <span className="font-medium">Phone:</span> +91 {order.customer?.whatsappNumber}
+        </p>
+        <p>
+          <span className="font-medium">Order Date:</span>{" "}
+          {format(new Date(order.orderDate), "dd MMM yyyy")}
+        </p>
+      </div>
+
+      {/* Status Badge */}
+      <div className="mt-3">
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-medium ${
+            order.status.toLowerCase() === "delivered"
+              ? "bg-green-100 text-green-600"
+              : "bg-yellow-100 text-yellow-600"
+          }`}
+        >
+          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+        </span>
+      </div>
+
+      {/* Tracking Link Button */}
+      <a
+        href={
+          order.trackingLink?.startsWith("http")
+            ? order.trackingLink
+            : `https://${order.trackingLink}`
+        }
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-5 w-full block text-center py-2 rounded-xl bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition"
+      >
+        Track Package
+      </a>
+    </div>
+
+    {/* -------- Payment Card -------- */}
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <CreditCard className="w-5 h-5 text-green-600" />
+        <h2 className="text-lg font-semibold">Payment</h2>
+      </div>
+
+      <p className="text-sm mb-1">Total Payable</p>
+      <p className="text-2xl font-bold text-green-600 mb-4">
+        {formatCurrency(order.totalAmount)}
+      </p>
+
+      <Button
+        onClick={handlePayment}
+        disabled={isPaying}
+        className="w-full py-2 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+      >
+        {isPaying ? "Processing..." : "Pay Now"}
+      </Button>
+    </div>
+
+    {/* -------- Items -------- */}
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+      <h2 className="text-lg font-semibold mb-3">Order Items</h2>
+
+      <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        {order.items.map((item, idx) => (
+          <div key={idx} className="py-3 flex justify-between text-sm">
+            <span>{item.itemName} × {item.quantity}</span>
+            <span className="font-medium">{formatCurrency(item.total)}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex justify-between pt-4 mt-4 border-t border-zinc-200 dark:border-zinc-800 font-semibold text-sm">
+        <span>Total</span>
+        <span>{formatCurrency(order.totalAmount)}</span>
+      </div>
+    </div>
+
+    {/* -------- Timeline (Clean Apple Style) -------- */}
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-5">
+      <h2 className="text-lg font-semibold mb-4">Order Timeline</h2>
+
+      <div className="space-y-4 relative">
+        {order.timeline?.map((t, i) => (
+          <div key={i} className="flex gap-3 items-start">
+            <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+            <div>
+              <p className="text-sm font-medium">{t.action}</p>
+              <p className="text-xs text-gray-500">
+                {format(new Date(t.date), "dd MMM yyyy, hh:mm a")}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Footer */}
+    <p className="pt-6 text-center text-xs text-gray-400">
+      🚀 Powered by ShipTrack
+    </p>
+  </div>
+</>
+
+
   );
 }

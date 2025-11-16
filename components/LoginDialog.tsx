@@ -83,9 +83,13 @@ const LoginDialog = () => {
 
   const routeUser = async (firebaseUser: any) => {
     const userData = await fetchUserData(firebaseUser);
+    console.log(userData)
     if (userData?.role === "admin") {
       router.push("/admin/invite");
-    } else {
+    }else if(userData?.consent.agreed && userData?.connections.zoho.connected && userData?.connections.whatsapp.connected ){
+      router.push("/orders")
+     } 
+    else {
       router.push("/welcome");
     }
   };

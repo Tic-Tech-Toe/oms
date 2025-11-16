@@ -90,24 +90,6 @@ const OrderDetails = () => {
 
   const handleSendTracking = async () => {
     router.push(`/tracking/${order.id}`);
-
-    // const res = await fetch("/api/send-track", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     phoneNumber: order.customer?.whatsappNumber,
-    //     orderId: order.id,
-    //     eta: "Tomorrow 5PM",
-    //     trackingId: "12345", // could be your real tracking code
-    //   }),
-    // });
-
-    // const data = await res.json();
-    // if (data.success) {
-    //   alert("✅ Tracking link sent via WhatsApp!");
-    // } else {
-    //   alert("❌ Failed to send tracking link.");
-    // }
   };
 
   return (

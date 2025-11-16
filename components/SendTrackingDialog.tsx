@@ -17,7 +17,7 @@ import { Input } from "./ui/input";
 import { Cross, X } from "lucide-react";
 import { uniqueId } from "lodash";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/app/config/firebase";
+import { auth, db } from "@/app/config/firebase";
 
 import { nanoid } from "nanoid";
 
@@ -92,9 +92,15 @@ export default function SendTrackingDialog({
 
       // Send WhatsApp message with the public link
       // You can uncomment the following code and pass `publicLink` in the body
+      const user = auth.currentUser;
+      const token = await auth.currentUser?.getIdToken()
+
       const res = await fetch("/api/send-track", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
         body: JSON.stringify({
           customerName,
           phoneNumber,

@@ -36,11 +36,13 @@ const ZohoEstimate = ({
 
     setLoading(true);
     setError("");
-
+    const token = await auth.currentUser?.getIdToken()
     try {
-      const res = await fetch(
-        `/api/zoho-estimate?estimate_number=${encodeURIComponent(estimateId)}`
-      );
+      const res = await fetch(`/api/zoho-estimate?estimate_number=${estimateId}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
       if (!res.ok) {
         throw new Error(`Error ${res.status}: ${res.statusText}`);
       }

@@ -176,17 +176,24 @@ export default function InvoicePage() {
             reader.onerror = reject;
           });
 
-          const res = await fetch("/api/send-inv", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              orderId: order.id,
-              customerNumber: order.customer?.whatsappNumber,
-              customerName: order.customer?.name,
-              fileName: fileName,
-              fileData: base64File,
-            }),
-          });
+          const user = auth.currentUser;
+const token = await user?.getIdToken();
+
+const res = await fetch("/api/send-inv", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    orderId: order.id,
+    customerNumber: order.customer?.whatsappNumber,
+    customerName: order.customer?.name,
+    fileName: fileName,
+    fileData: base64File
+  })
+});
+
 
           const data = await res.json();
           if (data.success) {

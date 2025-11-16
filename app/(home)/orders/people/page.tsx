@@ -1,6 +1,5 @@
 "use client";
-
-export const dynamic = "force-dynamic"; // ✅ Prevents static build crashes
+export const dynamic = "force-dynamic"; // ensures no static caching
 
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
@@ -19,37 +18,103 @@ import AddCustomerByCSV from "@/components/AddCustomerByCSV";
 import AddCustomerDialog from "@/components/AddCustomerDialog";
 import EditCustomerDialog from "@/components/EditCustomerDialog";
 import { CustomerType } from "@/types/orderType";
+import { auth } from "@/app/config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
+import { useCustomerStore } from "@/hooks/zustand_stores/useCustomerStore";
 
-interface PeoplePageProps {
-  search: string;
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
-  sorted: CustomerType[] | undefined;
-  handleSort: (key: keyof CustomerType) => void;
-  handleAddCustomer: () => void;
-  handleDelete: (id: string) => void;
-  handleUpdateCustomer: (id: string, updatedData: Partial<CustomerType>) => void;
-  setEditingCustomer: React.Dispatch<React.SetStateAction<CustomerType | null>>;
-  editingCustomer: CustomerType | null;
-}
-
-const PeoplePage: React.FC<PeoplePageProps> = ({
-  search,
-  setSearch,
-  sorted,
-  handleSort,
-  handleAddCustomer,
-  handleDelete,
-  handleUpdateCustomer,
-  setEditingCustomer,
-  editingCustomer,
-}) => {
+const PeoplePage: React.FC = () => {
+  const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(null);
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<keyof CustomerType>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [mounted, setMounted] = useState(false);
+
+  const {
+    customers,
+    loadCustomers,
+    addCustomer,
+    updateCustomer,
+    deleteCustomer,
+  } = useCustomerStore();
+
+  const { toast } = useToast();
+
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return null; // ✅ Avoid SSR rendering issues during build
+  // ✅ Load customers after user is authenticated
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await loadCustomers(user.uid);
+      }
+    });
+    return () => unsubscribe();
+  }, [loadCustomers]);
 
-  const safeSorted = sorted ?? []; // ✅ Prevent undefined access
+  if (!mounted) return null; // prevents SSR hydration issues
 
+  // ✅ CRUD Handlers
+  const handleAddCustomer = async (customerData: CustomerType) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      await addCustomer(user.uid, customerData);
+      toast({ title: "Customer added!" });
+    } catch {
+      toast({ title: "Failed to add customer", variant: "destructive" });
+    }
+  };
+
+  const handleUpdateCustomer = async (updatedData: CustomerType) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      await updateCustomer(user.uid, updatedData.id!, updatedData);
+      toast({ title: "Customer updated!" });
+      setEditingCustomer(null);
+    } catch {
+      toast({ title: "Update failed", variant: "destructive" });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      await deleteCustomer(user.uid, id);
+      toast({ title: "Customer deleted" });
+    } catch {
+      toast({ title: "Delete failed", variant: "destructive" });
+    }
+  };
+
+  // ✅ Filter + Sort logic
+  const filtered = customers.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.shippingAddress?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const sorted = [...filtered].sort((a, b) => {
+    const aVal = (a[sortKey] ?? "") as string | number;
+    const bVal = (b[sortKey] ?? "") as string | number;
+
+    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (key: keyof CustomerType) => {
+    if (sortKey === key) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  // ✅ UI Rendering
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
@@ -101,10 +166,9 @@ const PeoplePage: React.FC<PeoplePageProps> = ({
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {safeSorted.length > 0 ? (
-                safeSorted.map((cust) => (
+              {sorted.length > 0 ? (
+                sorted.map((cust) => (
                   <TableRow key={cust.id}>
                     <TableCell className="font-medium">{cust.name}</TableCell>
                     <TableCell>{cust.email || "—"}</TableCell>
@@ -117,7 +181,6 @@ const PeoplePage: React.FC<PeoplePageProps> = ({
                           : cust.whatsappNumber ?? "—"}
                       </span>
                     </TableCell>
-
                     <TableCell
                       className={clsx(
                         "font-mono",
@@ -127,9 +190,15 @@ const PeoplePage: React.FC<PeoplePageProps> = ({
                     >
                       {cust.GSTNumber || "—"}
                     </TableCell>
-
-                    <TableCell>
-                      {cust.shippingAddress?.replaceAll("|", ",") || "—"}
+                    <TableCell
+                      className={clsx(
+                        cust.shippingAddress === "No Address!" &&
+                          "text-orange-700 font-semibold"
+                      )}
+                    >
+                      {cust.shippingAddress === "No Address!"
+                        ? "No Address!"
+                        : cust.shippingAddress?.replaceAll("|", ",") || "—"}
                     </TableCell>
 
                     <TableCell>
@@ -141,7 +210,6 @@ const PeoplePage: React.FC<PeoplePageProps> = ({
                         "—"
                       )}
                     </TableCell>
-
                     <TableCell className="flex gap-2">
                       <a
                         href={`https://wa.me/91${cust.whatsappNumber}`}
@@ -182,26 +250,18 @@ const PeoplePage: React.FC<PeoplePageProps> = ({
 
         {/* Mobile card list */}
         <div className="sm:hidden space-y-2">
-          {safeSorted.length > 0 ? (
-            safeSorted.map((cust) => (
+          {sorted.length > 0 ? (
+            sorted.map((cust) => (
               <div
                 key={cust.id}
-                className="rounded-lg border shadow-sm p-3 
-                  bg-white dark:bg-gray-900 
-                  border-gray-200 dark:border-gray-700 
-                  text-gray-800 dark:text-gray-100 
-                  transition-colors"
+                className="rounded-lg border shadow-sm p-3 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-100 transition-colors"
               >
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold text-base truncate">
                     {cust.name}
                   </h3>
                   {cust.rewardPoint !== undefined && (
-                    <span
-                      className="bg-amber-100 text-amber-700 
-                        dark:bg-amber-900/40 dark:text-amber-300 
-                        text-[11px] px-2 py-0.5 rounded-full"
-                    >
+                    <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-[11px] px-2 py-0.5 rounded-full">
                       {cust.rewardPoint}
                     </span>
                   )}
@@ -216,14 +276,40 @@ const PeoplePage: React.FC<PeoplePageProps> = ({
                       ? cust.whatsappNumber.slice(2)
                       : cust.whatsappNumber ?? "—"}
                   </p>
-                  <p>
-                    <span className="font-medium">GST:</span>{" "}
-                    {cust.GSTNumber || "—"}
-                  </p>
-                  <p className="truncate">
-                    <span className="font-medium">Address:</span>{" "}
-                    {cust.shippingAddress?.replaceAll("|", ",") || "—"}
-                  </p>
+                  <p
+  className={clsx(
+    "flex items-center gap-1",
+    cust.GSTNumber === "No GST" && "text-orange-700 font-semibold"
+  )}
+>
+  <span className="font-medium">GST:</span>{" "}
+  {cust.GSTNumber === "No GST" ? (
+    <>
+      <span>No GST</span>
+      <span className="w-2 h-2 bg-orange-700 rounded-full inline-block ml-1" />
+    </>
+  ) : (
+    cust.GSTNumber || "—"
+  )}
+</p>
+
+<p
+  className={clsx(
+    "truncate flex items-center gap-1",
+    cust.shippingAddress === "No Address!" && "text-orange-700 font-semibold"
+  )}
+>
+  <span className="font-medium">Address:</span>{" "}
+  {cust.shippingAddress === "No Address!" ? (
+    <>
+      <span>No Address!</span>
+      <span className="w-2 h-2 bg-orange-700 rounded-full inline-block ml-1" />
+    </>
+  ) : (
+    cust.shippingAddress?.replaceAll("|", ",") || "—"
+  )}
+</p>
+
                 </div>
 
                 <div className="flex gap-1.5 mt-2 justify-end">

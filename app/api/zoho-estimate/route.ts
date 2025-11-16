@@ -1,28 +1,61 @@
-import { useAuth } from "@/app/context/AuthContext";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    // Extract query parameters
+    // 0) Read the estimate_number
     const { searchParams } = new URL(req.url);
     const estimateNumber = searchParams.get("estimate_number");
 
     if (!estimateNumber) {
       return NextResponse.json(
-        { success: false, message: "estimate_number is required" },
+        { error: "estimate_number is required" },
         { status: 400 }
       );
     }
 
+    // 1) GET TOKEN FROM HEADER
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : null;
 
+    if (!token) {
+      return NextResponse.json(
+        { error: "Unauthorized: No token provided" },
+        { status: 401 }
+      );
+    }
 
-    const CLIENT_ID = process.env.ZOHO_CLIENT_ID!;
-    const CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET!;
-    const REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN!;
-    const ORG_ID = process.env.ZOHO_ORG_ID!;
-    const API_DOMAIN = process.env.ZOHO_API_DOMAIN!;
+    // 2) VERIFY TOKEN
+    const decoded = await adminAuth.verifyIdToken(token);
 
-    // Step 1: Refresh access token
+    // 3) FETCH USER DATA
+    const userDoc = await adminDb.collection("users").doc(decoded.uid).get();
+    if (!userDoc.exists) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const user = userDoc.data();
+    const zoho = user?.connections?.zoho;
+
+    if (!zoho?.connected) {
+      return NextResponse.json(
+        { error: "Zoho not connected for this user" },
+        { status: 400 }
+      );
+    }
+
+    const CLIENT_ID = zoho["zoho-client-id"];
+    const CLIENT_SECRET = zoho["zoho-client-secret"];
+    const REFRESH_TOKEN = zoho["zoho-refresh-token"];
+    const ORG_ID = zoho["zoho-org-id"];
+    const API_DOMAIN = "https://www.zohoapis.in";
+
+    // 4) Refresh access token
     const tokenRes = await fetch(`https://accounts.zoho.in/oauth/v2/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -44,7 +77,7 @@ export async function GET(req: Request) {
 
     const accessToken = tokenData.access_token;
 
-    // Step 2: Fetch all estimates
+    // 5) Get all estimates
     const listRes = await fetch(
       `${API_DOMAIN}/books/v3/estimates?organization_id=${ORG_ID}`,
       {
@@ -61,7 +94,7 @@ export async function GET(req: Request) {
       );
     }
 
-    // Step 3: Find estimate with partial number match
+    // 6) Find match
     const match = listData.estimates.find((e: any) =>
       e.estimate_number
         ?.toLowerCase()
@@ -77,7 +110,7 @@ export async function GET(req: Request) {
 
     const foundEstimateId = match.estimate_id;
 
-    // Step 4: Fetch estimate details
+    // 7) Fetch estimate details
     const estimateRes = await fetch(
       `${API_DOMAIN}/books/v3/estimates/${foundEstimateId}?organization_id=${ORG_ID}`,
       {
@@ -97,7 +130,6 @@ export async function GET(req: Request) {
     const est = estimateData.estimate;
     const contactPerson = est.contact_persons_details?.[0] || {};
 
-    // Step 5: Build final response
     return NextResponse.json(
       {
         contact_person_name: `${contactPerson.first_name || ""} ${
