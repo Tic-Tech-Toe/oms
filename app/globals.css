@@ -293,3 +293,11 @@ html {
 .custom-scrollbar::-webkit-scrollbar-button {
   display: none; /* removes up/down arrow buttons */
 }
+
+
+/* AI Button  */
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+  }

@@ -36,6 +36,7 @@ const OrderItemsCard = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [gstType, setGstType] = useState<"GST" | "IGST">("GST");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const [isAIProcessing, setIsAIProcessing] = useState(false);
 
   // Horizontal scrolling with mouse wheel
   useEffect(() => {
@@ -89,6 +90,56 @@ const OrderItemsCard = ({
     [computedItems]
   );
 
+  // get hsn
+ const getHsn = async () => {
+  try {
+    setIsAIProcessing(true);
+
+    // Prepare items to send to API
+    const payload = {
+      items: items.map((item) => ({
+        name: item.itemName,
+        category: item.category || "",
+        description: item.description || "",
+      })),
+    };
+
+    // Call your API
+    const res = await fetch("/api/hsn", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error(data.error || "HSN fetch failed");
+      return;
+    }
+
+    // Auto-fill HSN + GST
+    if (data?.items) {
+      data.items.forEach((aiItem: any, index: number) => {
+        if (aiItem?.hsn) {
+          onItemChange(index, "hsnCode", aiItem.hsn);
+        }
+        if (aiItem?.gst !== undefined) {
+          onItemChange(index, "gstRate", aiItem.gst);
+        }
+      });
+    }
+  } catch (err) {
+    console.error("HSN Error:", err);
+  } finally {
+    setIsAIProcessing(false);
+  }
+};
+
+
+
+  
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -96,6 +147,53 @@ const OrderItemsCard = ({
           <ShoppingCart className="h-5 w-5 text-muted-foreground" />
           <CardTitle>Items</CardTitle>
         </div>
+        
+      {/* ====== GET HSN =============== */}
+      <Button
+  onClick={getHsn}
+  className="
+    group relative overflow-hidden rounded-xl px-5 py-2 font-medium
+    bg-white dark:bg-zinc-900
+    border border-zinc-300 dark:border-zinc-700
+    shadow-sm hover:shadow-md
+    transition-all duration-300
+    text-black dark:text-white
+  "
+>
+  <div className="flex items-center gap-2">
+    <div
+      className="
+        w-5 h-5 rounded-full
+        bg-gradient-to-r from-purple-500 to-blue-500
+        flex items-center justify-center text-[10px] text-white shadow
+      "
+    >
+      AI
+    </div>
+
+    {isAIProcessing ? (
+      <span className="flex items-center gap-1">
+        <span className="animate-spin h-3 w-3 border-2 border-gray-300 border-t-transparent rounded-full"></span>
+        Getting HSN...
+      </span>
+    ) : (
+      <span className="relative">
+        Get HSN
+        <span
+          className="
+            absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent
+            opacity-0 group-hover:opacity-100
+            transition-all duration-700
+            animate-[shine_1.8s_ease-in-out_infinite]
+          "
+        />
+      </span>
+    )}
+  </div>
+</Button>
+
+
+
         <SwitchGST value={gstType} onChange={setGstType} />
       </CardHeader>
 
