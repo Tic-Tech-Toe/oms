@@ -268,7 +268,7 @@ const OrderItemsCard = ({
                       onChange={(e) =>
                         onQuantityChange(idx, parseInt(e.target.value || "1"))
                       }
-                      className="w-14 text-center mx-auto"
+                      className="w-24 text-center mx-auto"
                     />
                   </td>
 
