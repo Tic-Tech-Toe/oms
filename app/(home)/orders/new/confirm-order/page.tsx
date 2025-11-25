@@ -68,9 +68,7 @@ export default function ConfirmOrder() {
   const { tempOrderData, setTempOrderData, addOrder } = useOrderStore();
 
   const [items, setItems] = useState(tempOrderData?.items || []);
-  const [charges, setCharges] = useState<Charge[]>([
-    { id: `c-${Date.now()}`, name: "GST", type: "percent", value: 0 },
-  ]);
+  const [charges, setCharges] = useState<Charge[]>([]);
 
   const [showDock, setShowDock] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
@@ -259,6 +257,8 @@ export default function ConfirmOrder() {
               onQuantityChange={handleQuantityChange}
               onDelete={handleDelete}
               onItemChange={handleItemChange}
+              charges={charges}
+              setCharges={setCharges}
             />
           </div>
 

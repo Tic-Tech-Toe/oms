@@ -18,7 +18,7 @@ const Overview = () => {
       </div>
 
       {/* <StatCards allOrders={allOrders} /> */}
-      <StatCards />
+      {/* <StatCards /> */}
       <DashboardTable />
       {/* <TableArea allOrders={allOrders} /> */}
     </div>

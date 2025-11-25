@@ -27,34 +27,21 @@ const OrderItemsCard = ({
   onQuantityChange,
   onDelete,
   onItemChange,
+  charges,
+  setCharges
 }: {
   items: OrderItem[];
   onQuantityChange: (idx: number, newQty: number) => void;
   onDelete: (idx: number) => void;
   onItemChange: (idx: number, field: string, value: any) => void;
+  charges:[],
+  setCharges:()=>void
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [gstType, setGstType] = useState<"GST" | "IGST">("GST");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
-  // Horizontal scrolling with mouse wheel
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onWheel = (e: WheelEvent) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        el.scrollTo({
-          left: el.scrollLeft + e.deltaY * 2,
-          behavior: "smooth",
-        });
-      }
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, []);
-
-  const calculateOrderTotals = (items: OrderItem[]) => {
+   const calculateOrderTotals = (items: OrderItem[]) => {
   let subtotal = 0;
   let gstTotal = 0;
 
@@ -88,6 +75,56 @@ const OrderItemsCard = ({
     () => computedItems.reduce((sum, i) => sum + i.totalWithGST, 0),
     [computedItems]
   );
+
+  // Horizontal scrolling with mouse wheel
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        el.scrollTo({
+          left: el.scrollLeft + e.deltaY * 2,
+          behavior: "smooth",
+        });
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Whenever gstType changes → update charges
+// useEffect(() => {
+//   if (!charges || !setCharges) return;
+
+//   const gstPercent = computedItems.reduce((acc, item) => acc + ((item.gstRate || 0)), 0) / items.length || 0;
+
+//   const newCharge = {
+//     id: "gst-charge",
+//     name: gstType, // "GST" or "IGST"
+//     type: "percent",
+//     value: gstPercent
+//   };
+
+//   // Replace existing GST/IGST charge OR add new one
+//   setCharges(prev =>
+//     prev.some(c => c.id === "gst-charge")
+//       ? prev.map(c => (c.id === "gst-charge" ? newCharge : c))
+//       : [...prev, newCharge]
+//   );
+// }, [gstType, items]);
+
+  // 🔥 Always sync computed GST values back into item-level state
+// useEffect(() => {
+//   computedItems.forEach((computed, idx) => {
+//     // We only update the fields that depend on calculations
+//     onItemChange(idx, "gstAmount", computed.gstAmount);
+//     onItemChange(idx, "totalWithGST", computed.totalWithGST);
+//     onItemChange(idx, "gstType", gstType); // GST or IGST from switch
+//   });
+// }, [computedItems, gstType]);
+
+ 
 
   return (
     <Card className="overflow-hidden">
