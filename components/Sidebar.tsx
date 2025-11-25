@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/app/context/AuthContext";
 import {
+  ChartColumnBig,
   ChevronsLeftRight,
   ChevronsUpDown,
   Layers,
@@ -43,12 +44,13 @@ const Sidebar = React.memo(() => {
     { name: "people", icon: UserRound, path: "/orders/people" },
     { name: "inventory", icon: Layers, path: "/orders/inventory" },
     { name: "broadcast", icon: Radio, path: "/orders/broadcast" },
+    { name: "analytics", icon: ChartColumnBig, path: "/orders/analytics" },
     // { name: "chat", icon: MessageCircle, path: "/orders/chat" },
   ];
 
   return (
     <div
-      className={`bg-light-light-gray dark:bg-dark-background hidden  backdrop-blur-xl shadow-xl   h-screen md:flex flex-col justify-between transition-all duration-300 ${
+      className={`bg-light-light-gray dark:bg-dark-background hidden  backdrop-blur-xl shadow-xl h-screen md:flex flex-col justify-between transition-all duration-300 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >

@@ -27,11 +27,15 @@ const OrderItemsCard = ({
   onQuantityChange,
   onDelete,
   onItemChange,
+  charges,
+  setCharges
 }: {
   items: OrderItem[];
   onQuantityChange: (idx: number, newQty: number) => void;
   onDelete: (idx: number) => void;
   onItemChange: (idx: number, field: string, value: any) => void;
+  charges:[],
+  setCharges:()=>void
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [gstType, setGstType] = useState<"GST" | "IGST">("GST");
@@ -55,7 +59,7 @@ const OrderItemsCard = ({
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  const calculateOrderTotals = (items: OrderItem[]) => {
+   const calculateOrderTotals = (items: OrderItem[]) => {
   let subtotal = 0;
   let gstTotal = 0;
 
