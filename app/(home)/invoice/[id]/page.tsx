@@ -41,10 +41,15 @@ export default function InvoicePage() {
   // --- MODIFICATION 1: Add state for loading feedback ---
   const [isSending, setIsSending] = useState(false);
 
-  const isPaid = order?.paymentStatus === "paid";
-  const paidEvent =
-    order &&
-    order.timeline?.find((event) => event.action.includes("Payment of"));
+  const isPaid = order?.paymentStatus === "Paid" || "paid";
+ const paidEvent =
+  order &&
+  order.timeline?.find((event) =>
+    event.action.includes("Payment of") ||
+    event.action.includes("Paid") ||
+    event.action.toLowerCase().includes("paid")
+  );
+
   const paidDate = isPaid && (paidEvent ? paidEvent.date : null);
   const { setTheme } = useTheme();
   const userId = auth.currentUser?.uid;

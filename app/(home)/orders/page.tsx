@@ -13,7 +13,7 @@ const Overview = () => {
       <div className="w-full flex justify-between md:pr-8 items-center mb-6 md:mb-0">
 
       <h1 className="md:text-3xl text-xl font-bold px-4 py-2 font-satoshi">
-        Order Dashboard
+        Order History
       </h1>
       </div>
 

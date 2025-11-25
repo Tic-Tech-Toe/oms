@@ -118,7 +118,7 @@ export default function InventoryPage() {
           <Search className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
           <input
             type="text"
-            placeholder="Search by name or SKU..."
+            placeholder="Search by name"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-gray-300 dark:border-neutral-700 pl-9 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 dark:text-gray-100"

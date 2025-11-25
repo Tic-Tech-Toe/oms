@@ -14,6 +14,7 @@ import { Upload } from "lucide-react";
 import Image from "next/image";
 
 export default function BroadcastPage() {
+  const [search, setSearch] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
   const [template, setTemplate] = useState("");
   const [customMessage, setCustomMessage] = useState("");
@@ -49,6 +50,8 @@ export default function BroadcastPage() {
     }
 
     const file = selectedImage?.file;
+   
+
 
     const toastId = Math.random().toString(); // unique ID
 
@@ -100,8 +103,21 @@ export default function BroadcastPage() {
     setSelectedImage(null);
   };
 
+  const term = search.trim().toLowerCase();
+
+const filteredCustomers = customers
+  .filter((c) => {
+    if (!term) return true;
+    return (
+      c.name.toLowerCase().includes(term) ||
+      c.shippingAddress?.toLowerCase().includes(term)
+    );
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+
   return (
-    <div className="h-full relative p-6 mt-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
+    <div className="relative p-6 mt-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-background dark:to-gray-900">
       {/* Main Card */}
       <Card className="w-full max-w-4xl mx-auto shadow-xl border-none rounded-3xl bg-white dark:bg-zinc-900">
         <CardHeader className="text-center">
@@ -127,7 +143,6 @@ export default function BroadcastPage() {
             />
           </div>
 
-          {/* Image Upload Section */}
           {/* Image Upload Section */}
           <div>
             <Label className="mb-2 text-sm text-muted-foreground">
@@ -207,31 +222,45 @@ export default function BroadcastPage() {
                 ? "Deselect All"
                 : "Select All"}
             </Button>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-2">
-              {customers.map((contact) => (
-                <div
-                  key={contact.id}
-                  className="flex items-center gap-2 p-3 rounded-xl bg-slate-100 dark:bg-zinc-800"
-                >
-                  <Checkbox
-                    className="bg-background"
-                    checked={selectedContacts.includes(
-                      Number(contact.whatsappNumber)
-                    )}
-                    onCheckedChange={() =>
-                      toggleContact(Number(contact.whatsappNumber))
-                    }
-                  />
+            <Input
+  placeholder="Search by name or address..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="mt-2 mb-3"
+/>
 
-                  <div>
-                    <p className="font-medium">{contact.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {contact.whatsappNumber}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
+  {filteredCustomers.map((contact) => (
+    <div
+      key={contact.id}
+      className="p-4 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm border flex gap-3"
+    >
+      {/* Checkbox */}
+      <Checkbox
+        className="mt-1"
+        checked={selectedContacts.includes(Number(contact.whatsappNumber))}
+        onCheckedChange={() =>
+          toggleContact(Number(contact.whatsappNumber))
+        }
+      />
+
+      {/* Info */}
+      <div className="flex flex-col">
+        <p className="font-semibold text-[15px]">{contact.name}</p>
+        <p className="text-sm text-muted-foreground">
+          {contact.whatsappNumber}
+        </p>
+
+        {contact.shippingAddress && (
+          <p className="text-xs mt-1 text-slate-500 dark:text-slate-400">
+            {contact.shippingAddress}
+          </p>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
           </div>
         </CardContent>
       </Card>
